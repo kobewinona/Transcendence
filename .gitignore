@@ -1,3 +1,15 @@
-# files to ignore
+# IDE settings
+.vscode
+.idea
+*.dSYM
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+logs/
+*.log
 srcs/.env
 secrets/
