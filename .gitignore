@@ -11,3 +11,5 @@ Desktop.ini
 # Logs and temporary files
 logs/
 *.log
+srcs/.env
+secrets/

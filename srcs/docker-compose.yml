@@ -1,0 +1,23 @@
+#version: '2.29.2'
+
+services:
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/frontend:/usr/share/nginx/html
+    secrets:
+      - ssl_certificate
+      - ssl_certificate_key
+    restart: always
+    ports:
+      - "443:443"
+
+secrets:
+  ssl_certificate:
+    file: ../secrets/ssl/certificate.crt
+  ssl_certificate_key:
+    file: ../secrets/ssl/certificate.key
