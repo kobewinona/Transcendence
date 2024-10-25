@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # IDE settings
 .vscode
 .idea
@@ -19,6 +20,9 @@ Desktop.ini
 # logs and temporary files
 logs/
 *.log
+=======
+# files to ignore
+>>>>>>> bfac968 ([ADD] secrets to ignore it in case)
 srcs/.env
 secrets/
 yarn-debug.log*
