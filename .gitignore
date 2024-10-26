@@ -8,8 +8,18 @@
 Thumbs.db
 Desktop.ini
 
-# Logs and temporary files
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# production
+/build
+
+# logs and temporary files
 logs/
 *.log
 srcs/.env
 secrets/
+yarn-debug.log*
+yarn-error.log*
