@@ -1,20 +1,30 @@
-#version: '2.29.2'
-
 services:
-
-  nginx:
-    container_name: nginx
+  backend:
+    container_name: backend
     build:
-      context: ./requirements/nginx
+      context: ./requirements/backend
       dockerfile: Dockerfile
     volumes:
-      - ./requirements/frontend:/usr/share/nginx/html
-    secrets:
-      - ssl_certificate
-      - ssl_certificate_key
-    restart: always
+      - ./requirements/backend:/app
+      - ./requirements/frontend/build:/app/frontend/build
     ports:
-      - "443:443"
+      - "3000:3000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=transcendence.settings
+    restart: always
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/frontend:/usr/src/app
+      - ./requirements/frontend/build:/usr/src/app/build
+    restart: "no"
+
+volumes:
+  frontend-build:
 
 secrets:
   ssl_certificate:
