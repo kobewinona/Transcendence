@@ -1,0 +1,33 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/backend:/app
+      - ./requirements/frontend/build:/app/frontend/build
+    ports:
+      - "3000:3000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=transcendence.settings
+    restart: always
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/frontend:/usr/src/app
+      - ./requirements/frontend/build:/usr/src/app/build
+    restart: "no"
+
+volumes:
+  frontend-build:
+
+secrets:
+  ssl_certificate:
+    file: ../secrets/ssl/certificate.crt
+  ssl_certificate_key:
+    file: ../secrets/ssl/certificate.key

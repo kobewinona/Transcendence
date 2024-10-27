@@ -1,0 +1,27 @@
+# IDE settings
+.vscode
+.idea
+*.dSYM
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# production
+/build
+
+# logs and temporary files
+logs/
+*.log
+yarn-debug.log*
+yarn-error.log*
+
+# secrets
+srcs/.env
+secrets/
