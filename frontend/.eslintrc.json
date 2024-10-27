@@ -60,12 +60,14 @@
     "react/jsx-no-useless-fragment": "warn",
     "react/display-name": "warn",
     "react/no-unstable-nested-components": "warn",
-    "react/prop-types": "warn",
+    "react/prop-types": "off",
     "no-promise-executor-return": "warn",
     "react/jsx-no-bind": "warn",
 
     "react-hooks/rules-of-hooks": "warn",
     "react-hooks/exhaustive-deps": "off",
+
+    "react/button-has-type": "off",
 
     "no-debugger": "warn",
     "no-bitwise": "off",

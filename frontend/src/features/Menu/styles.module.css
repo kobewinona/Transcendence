@@ -1,0 +1,15 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--smaller-space);
+  align-items: center;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.hidden {
+  display: none;
+}

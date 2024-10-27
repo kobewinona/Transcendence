@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
+    "classnames": "^2.5.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
@@ -18,8 +19,8 @@
     "eject": "react-scripts eject",
     "eslint": "eslint src --ext .jsx,.js",
     "eslint:fix": "eslint src --ext .jsx,.js --fix",
-    "stylelint": "stylelint src/**/*.css",
-    "stylelint:fix": "stylelint src/**/*.css --fix"
+    "stylelint": "stylelint 'src/**/*.{module.css,css}' --allow-empty-input",
+    "stylelint:fix": "stylelint 'src/**/*.{module.css,css}' --fix --allow-empty-input"
   },
   "eslintConfig": {
     "extends": [
@@ -56,8 +57,9 @@
     "globals": "^15.11.0",
     "prettier": "^3.3.3",
     "stylelint": "^16.10.0",
-    "stylelint-config-css-modules": "^4.4.0",
-    "stylelint-config-prettier": "^9.0.5",
-    "stylelint-config-standard": "^36.0.1"
+    "stylelint-config-clean-order": "^5.2.0",
+    "stylelint-config-css-modules": "^4.3.0",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-prettier": "^4.0.2"
   }
 }

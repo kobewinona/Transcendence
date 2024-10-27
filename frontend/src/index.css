@@ -1,26 +1,26 @@
+@import url("styles/animations.css");
+@import url("styles/variables.css");
+
 html {
   scroll-behavior: smooth;
 }
 
 #root {
-  min-height: 100vh;
-  
-  color: #fff;
-  font-family: 'Inter', Tahoma, sans-serif;
-  font-style: normal;
-  
-  background-color: #202020;
-  
   display: grid;
+  grid-auto-flow: row;
   grid-template-columns: 100%;
   grid-template-rows: max-content auto max-content;
-  grid-auto-flow: row;
-  
+
+  min-height: 100vh;
   margin: 0;
   padding: 0;
-  
+
+  font-family: Inter, Tahoma, sans-serif;
+  font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -ms-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
+  color: #ffffff;
+  text-size-adjust: 100%;
+
+  background-color: #202020;
 }
