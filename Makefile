@@ -40,6 +40,8 @@ clean:
 	@docker volume rm $(docker volume ls -q) 2>/dev/null || true
 	@docker network rm $(docker network ls -q) 2>/dev/null || true
 	@rm -rf ./secrets
+	@rm -rf ./srcs/requirements/frontend/build
+	@rm -rf ./srcs/requirements/frontend/package-lock.json
 
 prune:
 	@echo "Pruning the environment for ft_transcendence..."
