@@ -6,4 +6,4 @@ echo "✓ All database migrations are applied"
 
 # Start Django server
 echo "Starting Django server..."
-python3 manage.py runserver 0.0.0.0:3000
+python3 manage.py runserver 0.0.0.0:8000
