@@ -3,25 +3,25 @@
 ## Start the project:
 Here the list of command to use to start the project, from the Makefile.
 
-<!-- To compile the project use the command make it will build and execute every containers -->
+### To compile the project use the command make it will build and execute every containers
 - make
 
-<!-- To stop the containers use the command make stop -->
+### To stop the containers use the command make stop
 - make stop
 
-<!-- To clean every build files, secrets and more use the command make clean -->
+### To clean every build files, secrets and more use the command make clean
 - make clean
 
-<!-- To remove all image use commande make prune -->
+### To remove all image use commande make prune
 - make prune
 
-<!-- make restart for stop and run -->
+### make restart for stop and run
 - make restart
 
-<!-- make list will show the list of dockers -->
+### make list will show the list of dockers
 - make list
 
-<!-- make volume will show the list of volume -->
+### make volume will show the list of volume
 - make volume
 
 
