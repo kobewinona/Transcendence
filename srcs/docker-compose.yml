@@ -8,9 +8,6 @@ services:
       - DJANGO_SETTINGS_MODULE=transcendence.settings
     networks:
       - ft_transcendence
-    #volumes:
-    #  - ./requirements/backend:/app
-    #  - ./requirements/frontend/build:/app/frontend/build
     expose:
       - 8000
     restart: always
@@ -28,11 +25,8 @@ services:
     networks:
       - ft_transcendence
     volumes:
-      #- frontend-build:/usr/src/app/build
-      #- ./requirements/frontend:/usr/src/app
       - ./requirements/frontend/build:/usr/src/app/build
     restart: "no"
-    command: [ "yarn", "build" ]
 
   nginx:
     container_name: nginx
@@ -43,8 +37,6 @@ services:
       - "443:443"
     volumes:
       - ./requirements/frontend/build:/usr/share/nginx/html
-      #- ./requirements/nginx:/etc/nginx
-      #- frontend-build:/usr/share/nginx/html
     networks:
       - ft_transcendence
     secrets:
@@ -60,9 +52,6 @@ services:
 networks:
   ft_transcendence:
     driver: bridge
-
-#volumes:
-#  frontend-build:
 
 secrets:
   ssl_certificate:
