@@ -1,4 +1,6 @@
+import Game from './Game';
 import Menu from './Menu';
 import TitleScreen from './TitleScreen';
+import Transition from './Transition';
 
-export { Menu, TitleScreen };
+export { Game, Menu, TitleScreen, Transition };

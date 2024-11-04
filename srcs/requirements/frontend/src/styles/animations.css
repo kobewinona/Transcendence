@@ -10,6 +10,22 @@
   }
 }
 
+@keyframes shrink {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+
 .grow {
   animation: grow 0.3s ease-in-out forwards;
+}
+
+.shrink {
+  animation: shrink 0.3s ease-in-out forwards;
 }

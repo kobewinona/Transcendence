@@ -1,6 +1,7 @@
 import classNames from 'classnames/bind';
 import { Button } from 'components/shared';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import styles from './styles.module.css';
 
@@ -13,7 +14,9 @@ function Menu({ isMenuOpen }) {
         <Button text="Profile" />
       </li>
       <li>
-        <Button text="Play Offline" />
+        <Link className={cx('link')} to="pong-offline">
+          Play Offline
+        </Link>
       </li>
       <li>
         <Button text="Play Online" />
