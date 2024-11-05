@@ -15,7 +15,7 @@ function Menu({ isMenuOpen }) {
       </li>
       <li>
         <Link className={cx('link')} to="pong-offline">
-          Play Offline
+          2 player mode
         </Link>
       </li>
       <li>

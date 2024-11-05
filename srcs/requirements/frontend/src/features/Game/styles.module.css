@@ -12,6 +12,8 @@
 .game-container {
   position: relative;
 
+  overflow: hidden;
+
   width: calc(100% - (40px * 2));
   max-width: 1140px;
   height: calc(100% - (2 * 140px));
