@@ -1,4 +1,4 @@
-# Transcendence
+## Transcendence
 
 ## Start the project:
 Here the list of command to use to start the project, from the Makefile.
