@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM nginx:stable
 
 # Set the metadata for the image an author
 LABEL org.opencontainers.image.authors="Lera, Dima, Wolf, Jeremy"
