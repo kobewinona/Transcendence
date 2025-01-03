@@ -1,8 +1,0 @@
-.admin-controls {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-
-  width: calc(100% - 40px);
-  padding: 20px;
-}
