@@ -16,14 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from project.apps.pong.consumers import PongConsumer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('pong/', include('project.apps.pong.urls')),
     path('chat/', include('project.apps.chat.urls')),
-]
-
-websocket_urlpatterns = [
-    path('ws/pong/', PongConsumer.as_asgi()),
 ]

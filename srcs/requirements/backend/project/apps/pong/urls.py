@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
+from . import consumers
 
-urlpatterns = [
-    path('', views.index, name='pong-index'),
+websocket_urlpatterns = [
+    path('ws/pong/', consumers.PongConsumer.as_asgi()),
 ]

@@ -16,6 +16,7 @@ setup:
 	@echo "Setting up the environment for ft_transcendence..."
 	@mkdir -p ./secrets
 	@chmod 777 ./secrets
+	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
 
 run: setup
 	@echo "Running the services for ft_transcendence..."

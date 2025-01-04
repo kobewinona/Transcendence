@@ -20,7 +20,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter([
-            path("ws/pong/", PongConsumer.as_asgi())
+            path("ws/pong/", PongConsumer.as_asgi()),
         ])
     ),
 })
