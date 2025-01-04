@@ -5,7 +5,7 @@ services:
       context: ./requirements/backend
       dockerfile: Dockerfile
     environment:
-      - DJANGO_SETTINGS_MODULE=transcendence.settings
+      - DJANGO_SETTINGS_MODULE=project.settings
     networks:
       - ft_transcendence
     expose:
@@ -25,8 +25,14 @@ services:
     networks:
       - ft_transcendence
     volumes:
-      - ./requirements/frontend/build:/usr/src/app/build
+      - frontend_build:/usr/src/app/dist
     restart: "no"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/usr/src/app/build/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   nginx:
     container_name: nginx
@@ -37,15 +43,17 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./requirements/frontend/build:/usr/share/nginx/html
+      - frontend_build:/usr/share/nginx/html
     networks:
       - ft_transcendence
+    depends_on:
+      - frontend
     secrets:
       - ssl_certificate
       - ssl_certificate_key
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 1m30s
       timeout: 30s
       retries: 5
@@ -53,6 +61,9 @@ services:
 networks:
   ft_transcendence:
     driver: bridge
+
+volumes:
+  frontend_build:
 
 secrets:
   ssl_certificate:
