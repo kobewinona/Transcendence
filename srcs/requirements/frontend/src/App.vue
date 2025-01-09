@@ -3,18 +3,18 @@ import { Game } from 'features';
 </script>
 
 <template>
-  <div class="layout">
+  <main class="layout">
     <Game />
-  </div>
+  </main>
 </template>
 
 <style scoped>
 .layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 100%;
   height: 100%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>

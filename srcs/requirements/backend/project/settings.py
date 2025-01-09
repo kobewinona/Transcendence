@@ -31,14 +31,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Built-in Django Apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-Party Apps
     'corsheaders',
     'channels',
+
+    # Custom Project Apps
     'project.apps.pong',
     'project.apps.chat',
 ]
@@ -140,6 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
     "https://localhost",
+    "http://localhost:5173"  # dev
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -150,6 +156,16 @@ CSRF_TRUSTED_ORIGINS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'level': 'DEBUG',
@@ -172,5 +188,9 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',  # Global level
     },
 }

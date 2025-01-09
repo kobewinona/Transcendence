@@ -1,100 +1,112 @@
 import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
+from .services import (Paddle,
+                       Ball,
+                       GAME_STATE_UPDATE_INTERVAL,
+                       BALL_DEFAULT_WIDTH,
+                       BALL_DEFAULT_HEIGHT,
+                       PADDLE_DEFAULT_WIDTH,
+                       PADDLE_DEFAULT_HEIGHT)
 import logging
 
-# Set up a logger
-logger = logging.getLogger('daphne')
+logger = logging.getLogger('pong.consumer')
 
-class BallSimulator:
-    def __init__(self, width=2, height=2):
-        self.position = {"x": 50, "y": 50}
-        self.velocity = {"x": 1, "y": 1}
-        self.width = width
-        self.height = height
-        self.radius_x = self.width / 2
-        self.radius_y = self.height / 2
-
-    def update_ball(self):
-        # Update position based on velocity
-        self.position["x"] += self.velocity["x"]
-        self.position["y"] += self.velocity["y"]
-
-        logger.debug(f"self.radius_x {self.width}, self.radius_y {self.width}")
-        self.radius_x = self.width / 2
-        self.radius_y = self.height / 2
-        logger.debug(f"self.radius_x {self.radius_x}, self.radius_y {self.radius_y}")
-
-        # Right wall (considering the ball center and radius)
-        if self.position["x"] - self.radius_x <= 0 or self.position["x"] + self.radius_x >= 100:
-            logger.debug(f"self.position['x']: {self.position['x']}")
-            logger.debug(f"self.position[x] + self.radius_x = {self.position['x'] + self.radius_x}")
-            self.velocity["x"] *= -1  # Reverse the X velocity
-
-        # Bottom wall (considering the ball center and radius)
-        if self.position["y"] - self.radius_y <= 0 or self.position["y"] + self.radius_y >= 100:
-            logger.debug(f"self.position['y']: {self.position['y']}")
-            logger.debug(f"self.position[y] + self.radius_y = {self.position['y'] + self.radius_y}")
-            self.velocity["y"] *= -1  # Reverse the Y velocity
-
-        # Return updated position and velocity
-        return {"position": self.position, "velocity": self.velocity}
 
 class PongConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ball = None
+        self.paddle_left = None
+        self.paddle_right = None
+        self.dimensions_set = False
+        self.game_update_task = None
+        self.paddle_update_task = None
+
     async def connect(self):
         """
         Called when the WebSocket is handshaking as part of the connection process.
         """
-        self.ball_simulator = BallSimulator()
+        self.ball = Ball()
+        self.paddle_left = Paddle()
+        self.paddle_right = Paddle()
         await self.accept()
         logger.debug("> Pong WebSocket Connected")
-
-        # Start sending updates every 0.1 second in the background
-        asyncio.create_task(self.send_ball_updates())
 
     async def disconnect(self, close_code):
         """
         Called when the WebSocket closes.
         """
+        if self.game_update_task:
+            self.game_update_task.cancel()
         logger.debug("> Pong WebSocket Disconnected")
 
-    async def receive(self, text_data=None):
+    async def receive(self, text_data=None, bytes_data=None):
         """
         Called when the server receives data from the client.
         """
-        logger.debug("> Pong WebSocket Data Received")
-        logger.debug(f"text_data: {text_data}")
         try:
             data = json.loads(text_data)
 
-            # Extract ball width and height from the received data
-            width = data.get('width', 10)  # Default to 10 if not provided
-            height = data.get('height', 10)  # Default to 10 if not provided
-            logger.debug(f"Width: {width}, Height: {height}")
+            if data.get("type") == "init":
+                # Handle ball dimensions (when sent by the client)
+                ball_width = data.get('ballWidth', BALL_DEFAULT_WIDTH)
+                ball_height = data.get('ballHeight', BALL_DEFAULT_HEIGHT)
+                paddle_width = data.get('paddleWidth', PADDLE_DEFAULT_WIDTH)
+                paddle_height = data.get('paddleHeight', PADDLE_DEFAULT_HEIGHT)
+                self.ball.width = ball_width
+                self.ball.height = ball_height
+                self.paddle_left.width = paddle_width
+                self.paddle_left.height = paddle_height
+                self.paddle_right.width = paddle_width
+                self.paddle_right.height = paddle_height
+                self.ball.update_radius()
 
-            # Update ball simulator dimensions if they are provided
-            self.ball_simulator.width = width
-            self.ball_simulator.height = height
-            self.ball_simulator.radius_x = width / 2
-            self.ball_simulator.radius_y = height / 2
+                if not self.dimensions_set:
+                    self.dimensions_set = True
+                    try:
+                        self.game_update_task = asyncio.create_task(self.game_update_loop())
+                        logger.debug("✅ Game update loop started successfully")
+                    except Exception as e:
+                        logger.error(f"❌ Failed to start game_update_loop: {e}")
 
-            # Update the ball position and velocity
-            updated_ball_state = self.ball_simulator.update_ball()
+            if data.get("type") == "paddle":
+                direction = data.get("direction", 0)
+                side = data.get("side")
 
-            # Send the updated ball state back to the client
-            await self.send(text_data=json.dumps(updated_ball_state))
+                if side and side == "left":
+                    self.paddle_left.set_direction(direction)
+                    logger.debug(f"⬅️ Left paddle direction set: {direction}")
+                elif side and side == "right":
+                    self.paddle_right.set_direction(direction)
+                    logger.debug(f"➡️ Right paddle direction set: {direction}")
 
         except json.JSONDecodeError:
-            await self.send(text_data=json.dumps({
-                "error": "Invalid JSON"
-            }))
+            await self.send(text_data=json.dumps({"error": "Invalid JSON"}))
 
+    async def game_update_loop(self):
+        """
+        Main game loop for sending ball and paddle updates to the client.
+        """
+        try:
+            while True:
+                self.paddle_left.update_position()
+                self.paddle_right.update_position()
 
-    async def send_ball_updates(self):
-        """
-        Send updated ball position and velocity to the client every 0.1 seconds.
-        """
-        while True:
-            updated_ball_state = self.ball_simulator.update_ball()
-            await self.send(text_data=json.dumps(updated_ball_state))
-            await asyncio.sleep(0.04)
+                # Build payload with ball and paddle states
+                payload = {
+                    "ball": self.ball.update_ball(self.paddle_left, self.paddle_right),
+                    "paddles": {
+                        "left": {"y": self.paddle_left.position},
+                        "right": {"y": self.paddle_right.position}
+                    }
+                }
+
+                await self.send(text_data=json.dumps(payload))
+                await asyncio.sleep(GAME_STATE_UPDATE_INTERVAL)
+                # await asyncio.sleep(1 / 30)
+
+        except asyncio.CancelledError:
+            logger.info("🛑 Game update loop cancelled.")
+        except Exception as e:
+            logger.error(f"❌ Error in game update loop: {e}")
