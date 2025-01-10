@@ -4,27 +4,66 @@ services:
     build:
       context: ./requirements/backend
       dockerfile: Dockerfile
-    volumes:
-      - ./requirements/backend:/app
-      - ./requirements/frontend/build:/app/frontend/build
-    ports:
-      - "3000:3000"
     environment:
-      - DJANGO_SETTINGS_MODULE=transcendence.settings
+      - DJANGO_SETTINGS_MODULE=project.settings
+    networks:
+      - ft_transcendence
+    expose:
+      - 8000
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 1m
+      timeout: 10s
+      retries: 5
 
   frontend:
     container_name: frontend
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
+    networks:
+      - ft_transcendence
     volumes:
-      - ./requirements/frontend:/usr/src/app
-      - ./requirements/frontend/build:/usr/src/app/build
+      - frontend_build:/usr/src/app/dist
     restart: "no"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/usr/src/app/build/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+    networks:
+      - ft_transcendence
+    depends_on:
+      - frontend
+    secrets:
+      - ssl_certificate
+      - ssl_certificate_key
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+
+networks:
+  ft_transcendence:
+    driver: bridge
 
 volumes:
-  frontend-build:
+  frontend_build:
 
 secrets:
   ssl_certificate:
