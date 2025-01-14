@@ -1,51 +1,7 @@
-<template>
-  <div class="game">
-    <div ref="containerRef" class="game__container">
-      <div class="game__void-boundary">
-        <div class="game__void-boundary-shadow game__void-boundary-shadow_left" />
-        <div class="game__void-boundary-shadow game__void-boundary-shadow_top" />
-        <div class="game__void-boundary-shadow game__void-boundary-shadow_right" />
-        <div class="game__void-boundary-shadow game__void-boundary-shadow_bottom" />
-      </div>
-      <Ball :width="ballWidth" :height="ballHeight" :position="ballPosition" />
-      <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">
-        <Paddle :side="'left'" :position="leftPaddlePosition" />
-      </withPlayerControl>
-      <!--      <withPlayerControl-->
-      <!--        :socket="socket"-->
-      <!--        :side="'right'"-->
-      <!--        :controls="{ up: 'ArrowUp', down: 'ArrowDown' }"-->
-      <!--      >-->
-      <!--        <Paddle :side="'right'" :position="rightPaddlePosition" />-->
-      <!--      </withPlayerControl>-->
-      <!--      <withAiControl-->
-      <!--        :socket="socket"-->
-      <!--        :side="'left'"-->
-      <!--        :ball-position="ballPosition"-->
-      <!--        :ball-velocity="ballVelocity"-->
-      <!--        :paddle-position="leftPaddlePosition"-->
-      <!--        :paddle-width="paddleWidth"-->
-      <!--      >-->
-      <!--        <Paddle :side="'left'" :position="leftPaddlePosition" />-->
-      <!--      </withAiControl>-->
-      <withAiControl
-        :socket="socket"
-        :side="'right'"
-        :ball-position="ballPosition"
-        :ball-velocity="ballVelocity"
-        :paddle-position="rightPaddlePosition"
-        :paddle-width="paddleWidth"
-      >
-        <Paddle :side="'right'" :position="rightPaddlePosition" />
-      </withAiControl>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 
-import { Ball, Paddle, withAiControl, withPlayerControl } from './components';
+import { Ball, Paddle, withAiControl } from './components';
 import { BALL_HEIGHT, BALL_WIDTH } from './components/Ball/config/constants.js';
 import { PADDLE_HEIGHT, PADDLE_WIDTH } from './components/Paddle/config/constants.js';
 
@@ -65,9 +21,22 @@ let socket = null;
 // Game state
 const ballPosition = ref({ x: 50, y: 50 });
 const ballVelocity = ref({ x: 0, y: 0 });
-const ballUpdateDelay = ref(0);
-const leftPaddlePosition = ref({ y: 50 });
-const rightPaddlePosition = ref({ y: 50 });
+const isBallOutOfBounds = ref(false);
+const ballCurve = ref(0);
+const leftPaddle = ref({
+  width: 1.5,
+  height: 10,
+  position: { y: 50 },
+  speed: 0,
+  deacceleration: 0.1,
+});
+const rightPaddle = ref({
+  width: 1.5,
+  height: 10,
+  position: { y: 50 },
+  speed: 0,
+  deacceleration: 0.1,
+});
 
 const updateContainerDimensions = () => {
   // noinspection JSUnresolvedReference
@@ -98,8 +67,8 @@ const initializeWebSocketInPercentages = () => {
 
   socket.onopen = () => {
     console.log('✅ WebSocket connected');
-    console.log(`ballWidth: ${ballWidth.value}, ballHeight: ${ballHeight.value}`);
-    console.log(`paddleWidth: ${paddleWidth.value}, paddleHeight: ${paddleHeight.value}`);
+    // console.log(`ballWidth: ${ballWidth.value}, ballHeight: ${ballHeight.value}`);
+    // console.log(`paddleWidth: ${paddleWidth.value}, paddleHeight: ${paddleHeight.value}`);
 
     if (isNaN(ballWidth.value) || isNaN(ballHeight.value)) {
       console.error('Invalid width or height values:', ballWidth.value, ballHeight.value);
@@ -134,16 +103,26 @@ const initializeWebSocketInPercentages = () => {
     socketMessage.value = data;
 
     if (ball) {
-      const { position = 50, velocity = 5, delay = 1.6 } = ball || {};
+      const {
+        position = 50,
+        velocity = 5,
+        is_out_of_bounds: isOutOfBounds = false,
+        curve = 0,
+      } = ball || {};
       ballPosition.value = position;
       ballVelocity.value = velocity;
-      ballUpdateDelay.value = parseFloat(delay.toFixed(2));
+      isBallOutOfBounds.value = isOutOfBounds;
+      ballCurve.value = curve;
     }
 
     if (paddles) {
-      const { left = { y: 50 }, right = { y: 50 } } = paddles || {};
-      leftPaddlePosition.value = left;
-      rightPaddlePosition.value = right;
+      const { left, right } = paddles || {};
+      if (left) {
+        leftPaddle.value = left;
+      }
+      if (right) {
+        rightPaddle.value = right;
+      }
     }
   };
 
@@ -187,25 +166,79 @@ onUnmounted(() => {
 });
 </script>
 
+<template>
+  <div class="game">
+    <div class="game__void-boundary">
+      <div class="game__void-boundary-shadow game__void-boundary-shadow_left" />
+      <div class="game__void-boundary-shadow game__void-boundary-shadow_right" />
+    </div>
+    <div ref="containerRef" class="game__container">
+      <Ball
+        :width="ballWidth"
+        :height="ballHeight"
+        :position="ballPosition"
+        :velocity="ballVelocity"
+        :is-out-of-bounds="isBallOutOfBounds"
+        :curve="ballCurve"
+      />
+      <!--      <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">-->
+      <!--        <Paddle :side="'left'" :params="leftPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />-->
+      <!--      </withPlayerControl>-->
+      <!--      <withPlayerControl-->
+      <!--        :socket="socket"-->
+      <!--        :side="'right'"-->
+      <!--        :controls="{ up: 'ArrowUp', down: 'ArrowDown' }"-->
+      <!--      >-->
+      <!--        <Paddle :side="'right'" :params="rightPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />-->
+      <!--      </withPlayerControl>-->
+      <withAiControl
+        :socket="socket"
+        :side="'left'"
+        :ball-position="ballPosition"
+        :ball-velocity="ballVelocity"
+        :paddle-params="leftPaddle"
+      >
+        <Paddle :side="'left'" :params="leftPaddle" />
+      </withAiControl>
+      <withAiControl
+        :socket="socket"
+        :side="'right'"
+        :ball-position="ballPosition"
+        :ball-velocity="ballVelocity"
+        :paddle-params="rightPaddle"
+      >
+        <Paddle :side="'right'" :params="rightPaddle" />
+      </withAiControl>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .game {
+  position: relative;
+
   overflow: hidden;
 
   box-sizing: border-box;
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   height: 100%;
-  max-height: 600px;
+  max-height: 800px;
+  padding-right: 20px;
+  padding-left: 20px;
 
-  border-top: 2px solid white;
-  border-bottom: 2px solid white;
+  background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
+  border-radius: 12px;
 }
 
 .game__container {
   position: relative;
+
   width: 100%;
   height: 100%;
   padding: 20px;
+
+  background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
 }
 
 .game__void-boundary {
@@ -229,25 +262,11 @@ onUnmounted(() => {
 
 .game__void-boundary-shadow_left {
   left: 0;
-  background: linear-gradient(to right, black, transparent);
-}
-
-.game__void-boundary-shadow_top {
-  top: 0;
-  width: 100%;
-  height: 15%;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0.5), transparent);
+  background: linear-gradient(to right, var(--light-color), transparent);
 }
 
 .game__void-boundary-shadow_right {
   right: 0;
-  background: linear-gradient(to left, black, transparent);
-}
-
-.game__void-boundary-shadow_bottom {
-  bottom: 0;
-  width: 100%;
-  height: 15%;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.5), transparent);
+  background: linear-gradient(to left, var(--dark-color), transparent);
 }
 </style>

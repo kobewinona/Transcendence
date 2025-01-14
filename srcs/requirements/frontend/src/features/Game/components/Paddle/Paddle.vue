@@ -12,34 +12,39 @@
 <script setup>
 import { computed, defineProps, onMounted, onUnmounted, ref } from 'vue';
 
-import { PADDLE_HEIGHT, PADDLE_WIDTH } from './config/constants.js';
-
-const { side, position } = defineProps({
+const { side, params } = defineProps({
   side: {
     type: String,
     required: true,
     validator: (value) => ['left', 'right'].includes(value),
   },
-  position: {
+  params: {
     type: Object,
     required: true,
-    validator: (value) => typeof value.y === 'number',
+    validator: (value) => {
+      return (
+        typeof value.width === 'number' &&
+        typeof value.height === 'number' &&
+        value.position &&
+        typeof value.position.y === 'number' &&
+        typeof value.speed === 'number' &&
+        typeof value.deacceleration === 'number'
+      );
+    },
   },
 });
 
-const paddlePosition = ref({ x: position?.x, y: position?.y });
+const paddlePosition = ref(params?.y);
 let animationFrameId = null;
 
 const styles = computed(() => ({
-  width: `${PADDLE_WIDTH}px`,
-  height: `${PADDLE_HEIGHT}px`,
-  top: `${paddlePosition.value.y}%`,
-  left: `${paddlePosition.value.x}%`,
+  width: `${params?.width}%`,
+  height: `${params?.height}%`,
+  top: `${params?.y}%`,
 }));
 
 const update = () => {
-  paddlePosition.value.x = position?.x;
-  paddlePosition.value.y = position?.y;
+  paddlePosition.value = params?.position?.y;
   animationFrameId = requestAnimationFrame(update);
 };
 
@@ -60,15 +65,20 @@ onUnmounted(() => {
   z-index: 3;
   transform: translateY(-50%);
 
-  background-color: white;
-  border-radius: 2px;
+  border-radius: 10px;
+
+  transition:
+    top 25ms linear,
+    height 150ms linear;
 }
 
 .paddle_side_left {
   left: 0;
+  background-color: var(--dark-color);
 }
 
 .paddle_side_right {
   right: 0;
+  background-color: var(--light-color);
 }
 </style>

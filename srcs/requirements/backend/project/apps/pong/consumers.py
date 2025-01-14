@@ -3,6 +3,7 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .services import (Paddle,
                        Ball,
+                       PADDLE_DEACCELERATION,
                        GAME_STATE_UPDATE_INTERVAL,
                        BALL_DEFAULT_WIDTH,
                        BALL_DEFAULT_HEIGHT,
@@ -52,14 +53,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # Handle ball dimensions (when sent by the client)
                 ball_width = data.get('ballWidth', BALL_DEFAULT_WIDTH)
                 ball_height = data.get('ballHeight', BALL_DEFAULT_HEIGHT)
-                paddle_width = data.get('paddleWidth', PADDLE_DEFAULT_WIDTH)
-                paddle_height = data.get('paddleHeight', PADDLE_DEFAULT_HEIGHT)
                 self.ball.width = ball_width
                 self.ball.height = ball_height
-                self.paddle_left.width = paddle_width
-                self.paddle_left.height = paddle_height
-                self.paddle_right.width = paddle_width
-                self.paddle_right.height = paddle_height
                 self.ball.update_radius()
 
                 if not self.dimensions_set:
@@ -97,14 +92,25 @@ class PongConsumer(AsyncWebsocketConsumer):
                 payload = {
                     "ball": self.ball.update_ball(self.paddle_left, self.paddle_right),
                     "paddles": {
-                        "left": {"y": self.paddle_left.position},
-                        "right": {"y": self.paddle_right.position}
+                        "left": {
+                            "width": self.paddle_left.width,
+                            "height": self.paddle_left.height,
+                            "y": self.paddle_left.position,
+                            "speed": self.paddle_left.speed,
+                            "deacceleration": PADDLE_DEACCELERATION,
+                        },
+                        "right": {
+                            "width": self.paddle_right.width,
+                            "height": self.paddle_right.height,
+                            "y": self.paddle_right.position,
+                            "speed": self.paddle_right.speed,
+                            "deacceleration": PADDLE_DEACCELERATION,
+                        },
                     }
                 }
 
                 await self.send(text_data=json.dumps(payload))
                 await asyncio.sleep(GAME_STATE_UPDATE_INTERVAL)
-                # await asyncio.sleep(1 / 30)
 
         except asyncio.CancelledError:
             logger.info("🛑 Game update loop cancelled.")

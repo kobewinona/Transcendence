@@ -25,4 +25,5 @@ tornado==6.4.2
 Twisted==24.11.0
 txaio==23.1.1
 typing_extensions==4.12.2
+watchfiles==1.0.3
 zope.interface==7.2

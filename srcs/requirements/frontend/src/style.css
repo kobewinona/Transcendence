@@ -14,7 +14,7 @@
   text-rendering: optimizelegibility;
 
   color-scheme: light dark;
-  background-color: black;
+  background-color: var(--dark-color);
 
   font-synthesis: none;
 }

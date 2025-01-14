@@ -1,10 +1,12 @@
 <script setup>
 import { Game } from 'features';
+// import BallTest from 'features/Game/components/BallTest/BallTest.vue';
 </script>
 
 <template>
   <main class="layout">
     <Game />
+    <!--    <BallTest />-->
   </main>
 </template>
 
@@ -16,5 +18,7 @@ import { Game } from 'features';
 
   width: 100%;
   height: 100%;
+
+  background: linear-gradient(to right, var(--dark-color) 50%, var(--light-color) 50%);
 }
 </style>

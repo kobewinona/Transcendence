@@ -1,11 +1,15 @@
 import logging
+import math
 from .constants import (BALL_OFF_BOUNDS_OFFSET,
                         BALL_DEFAULT_WIDTH,
                         BALL_DEFAULT_HEIGHT,
                         BALL_DEFAULT_POSITION_X,
                         BALL_DEFAULT_POSITION_Y,
                         BALL_MIN_VELOCITY_X,
-                        BALL_MIN_VELOCITY_Y)
+                        BALL_VELOCITY_X_INCREMENT,
+                        BALL_MIN_VELOCITY_Y,
+                        BALL_MAX_VELOCITY_CHANGE_ON_HIT,
+                        MAX_CURVE_ANGLE)
 
 logger = logging.getLogger('pong.ball')
 
@@ -19,17 +23,46 @@ class Ball:
         self.radius_x = width / 2
         self.radius_y = height / 2
         self.is_out_of_bounds = False
+        self.curve = 0
 
     def reset(self):
         self.position = {"x": BALL_DEFAULT_POSITION_X, "y": BALL_DEFAULT_POSITION_Y}
         self.velocity = {"x": BALL_MIN_VELOCITY_X, "y": BALL_MIN_VELOCITY_Y}
         self.is_out_of_bounds = False
+        self.curve = 0
 
     def update_radius(self):
         self.radius_x = self.width / 2
         self.radius_y = self.height / 2
 
+    def calculate_velocity_adjustment(self, paddle_position, paddle_height):
+        """
+        Calculate the velocity adjustment based on where the ball hits the paddle.
+        The closer to the edge, the greater the adjustment to y velocity.
+        """
+        relative_hit_position = (self.position["y"] - paddle_position) / (paddle_height / 2)
+        return abs(BALL_MAX_VELOCITY_CHANGE_ON_HIT * max(-1, min(1, relative_hit_position)))
+
+    def apply_curve(self):
+        """
+        Gradually apply the curve to the ball's velocity.
+        """
+        if self.curve != 0:
+            self.curve = max(-MAX_CURVE_ANGLE, min(MAX_CURVE_ANGLE, self.curve))
+            curve_radians = math.radians(self.curve)
+            current_speed = math.sqrt(self.velocity["x"]**2 + self.velocity["y"]**2)
+            angle = math.atan2(self.velocity["y"], self.velocity["x"]) + curve_radians
+
+            self.velocity["x"] = current_speed * math.cos(angle)
+            self.velocity["y"] = current_speed * math.sin(angle)
+
+            # Gradually reduce curve effect
+            self.curve *= 0.98
+            if abs(self.curve) < 0.05:
+                self.curve = 0
+
     def update_ball(self, paddle_left, paddle_right):
+        self.apply_curve()
         self.position["x"] += self.velocity["x"]
         self.position["y"] += self.velocity["y"]
         self.update_radius()
@@ -52,15 +85,23 @@ class Ball:
             # Handle Left Paddle Collision
             if (ball_left <= paddle_left.width and
                     paddle_left_lower_boundary <= self.position["y"] <= paddle_left_upper_boundary):
+                speed_adjustment = paddle_left.speed / 10
+                self.velocity["x"] -= BALL_VELOCITY_X_INCREMENT + speed_adjustment
                 self.velocity["x"] *= -1
                 self.position["x"] = paddle_left.width + self.radius_x  # Prevent ball from clipping through
+                self.velocity["y"] += self.calculate_velocity_adjustment(paddle_right.position, paddle_right.height)
+                self.curve += paddle_left.speed * 3
                 logger.debug("✅ Ball collided with LEFT paddle")
 
             # Handle Right Paddle Collision
             if (ball_right >= 100 - paddle_right.width and
                     paddle_right_lower_boundary <= self.position["y"] <= paddle_right_upper_boundary):
+                speed_adjustment = paddle_left.speed / 10
+                self.velocity["x"] += BALL_VELOCITY_X_INCREMENT + speed_adjustment
                 self.velocity["x"] *= -1
                 self.position["x"] = 100 - paddle_right.width - self.radius_x  # Prevent ball from clipping through
+                self.velocity["y"] += self.calculate_velocity_adjustment(paddle_right.position, paddle_right.height)
+                self.curve -= paddle_right.speed * 3
                 logger.debug("✅ Ball collided with RIGHT paddle")
 
             if ball_left + self.width < paddle_left.width or ball_right + self.width >= 100 - paddle_right.width:
@@ -78,5 +119,6 @@ class Ball:
         return {
             "position": self.position,
             "velocity": self.velocity,
-            "is_out_of_bounds": self.is_out_of_bounds
+            "is_out_of_bounds": self.is_out_of_bounds,
+            "curve": self.curve
         }

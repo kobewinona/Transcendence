@@ -5,9 +5,14 @@
 <script setup>
 import { defineProps, onMounted, onUnmounted, watch } from 'vue';
 
-import { MOVEMENT_WINDOW, PREDICTION_INTERVAL } from './config/constants.js';
+import {
+  EARLY_STOP_BUFFER,
+  MAX_ERROR_FACTOR,
+  MOVEMENT_WINDOW,
+  PREDICTION_INTERVAL,
+} from './config/constants.js';
 
-const { socket, side, ballPosition, ballVelocity, paddlePosition, paddleWidth } = defineProps({
+const { socket, side, ballPosition, ballVelocity, paddleParams } = defineProps({
   socket: {
     type: WebSocket,
     required: true,
@@ -27,22 +32,25 @@ const { socket, side, ballPosition, ballVelocity, paddlePosition, paddleWidth } 
     required: true,
     validator: (value) => typeof value.x === 'number' && typeof value.y === 'number',
   },
-  paddlePosition: {
+  paddleParams: {
     type: Object,
     required: true,
-    validator: (value) => typeof value.y === 'number',
-  },
-  paddleWidth: {
-    type: Number,
-    required: true,
+    validator: (value) => {
+      return (
+        typeof value.width === 'number' &&
+        typeof value.height === 'number' &&
+        value.position &&
+        typeof value.position.y === 'number' &&
+        typeof value.speed === 'number' &&
+        typeof value.deacceleration === 'number'
+      );
+    },
   },
 });
 
-const EARLY_STOP_THRESHOLD = 3;
-
 let aiPredictionIntervalId = null;
 let aiMovementFrameId = null;
-let predictedY = paddlePosition.y;
+let predictedY = paddleParams?.position?.y;
 let lastDirection = 0;
 
 // Send direction to the server
@@ -71,7 +79,7 @@ const predictBallYAtPaddle = () => {
     (side === 'left' && ballDirectionX !== 'left') ||
     (side === 'right' && ballDirectionX !== 'right')
   ) {
-    return 50;
+    return;
   }
 
   // Calculate time until the ball reaches the paddle's x-axis
@@ -89,9 +97,16 @@ const predictBallYAtPaddle = () => {
   }
 
   // Adjust prediction with a paddle width
-  predictedY = Math.min(100 - paddleWidth / 2, Math.max(paddleWidth / 2, Math.round(predictedY)));
+  predictedY = Math.min(
+    100 - paddleParams?.width / 2,
+    Math.max(paddleParams?.width / 2, Math.round(predictedY))
+  );
 
-  console.log(`Predicted Y: ${predictedY}`);
+  // Add prediction error based on ball distance from the paddle
+  const errorFactor = Math.min(1, distanceToPaddleX / 100);
+  const error = (Math.random() * 2 - 1) * MAX_ERROR_FACTOR * errorFactor;
+  predictedY += error;
+
   return predictedY;
 };
 
@@ -103,28 +118,54 @@ const startPrediction = () => {
 };
 
 watch(
-  () => paddlePosition,
+  () => ballVelocity,
+  () => {
+    const ballDirectionX = ballVelocity?.x > 0 ? 'right' : 'left';
+
+    // Reset to center if ball is moving away
+    if (
+      (side === 'left' && ballDirectionX !== 'left') ||
+      (side === 'right' && ballDirectionX !== 'right')
+    ) {
+      const randomY =
+        paddleParams?.y > 50
+          ? (Math.random() * (65 - 50) + 50).toFixed(2)
+          : (Math.random() * (50 - 35) + 35).toFixed(2);
+      console.log(`Predicted Y when moving away: ${parseFloat(randomY)}`);
+      predictedY = parseFloat(randomY);
+    }
+  }
+);
+
+// Adjusted watch logic
+watch(
+  () => paddleParams,
   (newPosition) => {
     const paddleY = newPosition.y;
-    const lowerBound = predictedY - MOVEMENT_WINDOW - EARLY_STOP_THRESHOLD;
-    const upperBound = predictedY + MOVEMENT_WINDOW + EARLY_STOP_THRESHOLD;
 
-    console.log('PaddleY:', paddleY, 'PredictedY:', predictedY, 'Bounds:', lowerBound, upperBound);
+    // Calculate stopping distance based on current speed
+    const stoppingDistance = Math.pow(paddleParams?.speed, 2) / (2 * paddleParams?.deacceleration);
 
-    if (paddleY < lowerBound && lastDirection !== 1) {
-      console.log('⬆️ Moving Up');
-      lastDirection = 1;
-      sendDirection(1);
-    } else if (paddleY > upperBound && lastDirection !== -1) {
-      console.log('⬇️ Moving Down');
-      lastDirection = -1;
-      sendDirection(-1);
+    // Adjust bounds with stopping distance
+    const lowerBound = predictedY - MOVEMENT_WINDOW - stoppingDistance - EARLY_STOP_BUFFER;
+    const upperBound = predictedY + MOVEMENT_WINDOW + stoppingDistance + EARLY_STOP_BUFFER;
+
+    // Decide movement direction
+    if (paddleY < lowerBound) {
+      if (lastDirection !== 1) {
+        lastDirection = 1;
+        sendDirection(1);
+      }
+    } else if (paddleY > upperBound) {
+      if (lastDirection !== -1) {
+        lastDirection = -1;
+        sendDirection(-1);
+      }
     } else if (
-      paddleY >= predictedY - EARLY_STOP_THRESHOLD &&
-      paddleY <= predictedY + EARLY_STOP_THRESHOLD &&
+      paddleY >= predictedY - stoppingDistance &&
+      paddleY <= predictedY + stoppingDistance &&
       lastDirection !== 0
     ) {
-      console.log('🛑 Stopping');
       lastDirection = 0;
       sendDirection(0);
     }
