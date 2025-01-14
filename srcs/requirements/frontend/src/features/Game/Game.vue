@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 
-import { Ball, Paddle, withAiControl } from './components';
+import { Ball, Paddle, withAiControl, withPlayerControl } from './components';
 import { BALL_HEIGHT, BALL_WIDTH } from './components/Ball/config/constants.js';
 import { PADDLE_HEIGHT, PADDLE_WIDTH } from './components/Paddle/config/constants.js';
 
@@ -181,9 +181,9 @@ onUnmounted(() => {
         :is-out-of-bounds="isBallOutOfBounds"
         :curve="ballCurve"
       />
-      <!--      <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">-->
-      <!--        <Paddle :side="'left'" :params="leftPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />-->
-      <!--      </withPlayerControl>-->
+      <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">
+        <Paddle :side="'left'" :params="leftPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />
+      </withPlayerControl>
       <!--      <withPlayerControl-->
       <!--        :socket="socket"-->
       <!--        :side="'right'"-->
@@ -191,15 +191,15 @@ onUnmounted(() => {
       <!--      >-->
       <!--        <Paddle :side="'right'" :params="rightPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />-->
       <!--      </withPlayerControl>-->
-      <withAiControl
-        :socket="socket"
-        :side="'left'"
-        :ball-position="ballPosition"
-        :ball-velocity="ballVelocity"
-        :paddle-params="leftPaddle"
-      >
-        <Paddle :side="'left'" :params="leftPaddle" />
-      </withAiControl>
+      <!--      <withAiControl-->
+      <!--        :socket="socket"-->
+      <!--        :side="'left'"-->
+      <!--        :ball-position="ballPosition"-->
+      <!--        :ball-velocity="ballVelocity"-->
+      <!--        :paddle-params="leftPaddle"-->
+      <!--      >-->
+      <!--        <Paddle :side="'left'" :params="leftPaddle" />-->
+      <!--      </withAiControl>-->
       <withAiControl
         :socket="socket"
         :side="'right'"

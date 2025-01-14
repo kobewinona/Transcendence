@@ -63,7 +63,10 @@ const mapCurveToDuration = () => {
   const minDuration = 0.2;
   const maxDuration = 1.2;
 
-  return maxDuration - ((curve - minCurve) / (maxCurve - minCurve)) * (maxDuration - minDuration);
+  return (
+    maxDuration -
+    ((Math.abs(curve) - minCurve) / (maxCurve - minCurve)) * (maxDuration - minDuration)
+  );
 };
 
 watch(
