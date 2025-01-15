@@ -39,6 +39,8 @@ body {
 }
 
 #app {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100vh;
 }
@@ -71,10 +73,6 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-.card {
-  padding: 2em;
 }
 
 @media (prefers-color-scheme: light) {
