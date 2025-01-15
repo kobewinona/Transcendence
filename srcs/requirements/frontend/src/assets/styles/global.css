@@ -1,2 +1,10 @@
 @import url("../../vendor/normalize.css");
 @import url("../../vendor/fonts/inter.css");
+
+:root {
+  --primary-color: #fc3b3b;
+  --secondary-color: #36a2eb;
+  --light-color: #e0ded6;
+  --dark-color: #242428;
+  --darker-color: #323236;
+}

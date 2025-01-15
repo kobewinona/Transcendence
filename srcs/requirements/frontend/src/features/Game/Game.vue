@@ -23,6 +23,7 @@ const ballPosition = ref({ x: 50, y: 50 });
 const ballVelocity = ref({ x: 0, y: 0 });
 const isBallOutOfBounds = ref(false);
 const ballCurve = ref(0);
+const ballBouncedOffSurface = ref(0);
 const leftPaddle = ref({
   width: 1.5,
   height: 10,
@@ -108,11 +109,13 @@ const initializeWebSocketInPercentages = () => {
         velocity = 5,
         is_out_of_bounds: isOutOfBounds = false,
         curve = 0,
+        bouncedOffSurface,
       } = ball || {};
       ballPosition.value = position;
       ballVelocity.value = velocity;
       isBallOutOfBounds.value = isOutOfBounds;
       ballCurve.value = curve;
+      ballBouncedOffSurface.value = bouncedOffSurface;
     }
 
     if (paddles) {
@@ -180,6 +183,7 @@ onUnmounted(() => {
         :velocity="ballVelocity"
         :is-out-of-bounds="isBallOutOfBounds"
         :curve="ballCurve"
+        :ball-bounced-off-surface="ballBouncedOffSurface"
       />
       <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">
         <Paddle :side="'left'" :params="leftPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />

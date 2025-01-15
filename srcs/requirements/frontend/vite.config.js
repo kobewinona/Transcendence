@@ -19,6 +19,7 @@ export default defineConfig({
       features: '/src/features',
       entities: '/src/entities',
       components: '/src/components',
+      shared: '/src/shared',
       assets: '/src/assets',
     },
   },
