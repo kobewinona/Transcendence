@@ -10,38 +10,50 @@ import {
   MIN_ROTATE_DURATION,
 } from './config/constants.js';
 
-const { width, height, position, velocity, isOutOfBounds, curve, ballBouncedOffSurface } =
-  defineProps({
-    width: { type: Number, default: 100 },
-    height: { type: Number, default: 100 },
-    position: {
-      type: Object,
-      required: true,
-      validator: (value) => {
-        return typeof value.x === 'number' && typeof value.y === 'number';
-      },
+const {
+  width,
+  height,
+  position,
+  isPositionForced,
+  velocity,
+  isOutOfBounds,
+  curve,
+  ballBouncedOffSurface,
+} = defineProps({
+  width: { type: Number, default: 100 },
+  height: { type: Number, default: 100 },
+  position: {
+    type: Object,
+    required: true,
+    validator: (value) => {
+      return typeof value.x === 'number' && typeof value.y === 'number';
     },
-    velocity: {
-      type: Object,
-      required: true,
-      validator: (value) => {
-        return typeof value.x === 'number' && typeof value.y === 'number';
-      },
+  },
+  isPositionForced: {
+    type: Boolean,
+    default: false,
+  },
+  velocity: {
+    type: Object,
+    required: true,
+    validator: (value) => {
+      return typeof value.x === 'number' && typeof value.y === 'number';
     },
-    isOutOfBounds: {
-      type: Boolean,
-      required: true,
-    },
-    curve: {
-      type: Number,
-      required: true,
-    },
-    ballBouncedOffSurface: {
-      type: Number,
-      required: true,
-      validator: (value) => value >= 1 && value <= 4,
-    },
-  });
+  },
+  isOutOfBounds: {
+    type: Boolean,
+    required: true,
+  },
+  curve: {
+    type: Number,
+    required: true,
+  },
+  ballBouncedOffSurface: {
+    type: Number,
+    required: true,
+    validator: (value) => value >= 1 && value <= 4,
+  },
+});
 
 const ballPosition = ref({ x: position?.x || 50, y: position?.y || 50 });
 const previousXVelocitySign = ref(velocity?.x > 0 ? 1 : -1);
@@ -61,10 +73,11 @@ const styles = computed(() => {
   return {
     width: `${width}%`,
     height: `${height}%`,
-    top: `${ballPosition.value.y}%`,
-    left: `${ballPosition.value.x}%`,
-    transition: `top ${transitionTime}ms linear,
-      left ${transitionTime}ms linear,
+    top: `${isPositionForced ? ballPosition.value.y + height : ballPosition.value.y}%`,
+    left: `${isPositionForced ? ballPosition.value.x - width : ballPosition.value.x}%`,
+    zIndex: isPositionForced ? 100 : 1,
+    transition: `top ${isPositionForced ? 100 : transitionTime}ms linear,
+      left ${isPositionForced ? 100 : transitionTime}ms linear,
       transform 1s linear`,
   };
 });
@@ -138,22 +151,26 @@ onUnmounted(() => {
   <div
     class="wrapper"
     :class="{
-      wrapper_bubbling_vertical: hasBouncedOff === 2 || hasBouncedOff === 4,
-      wrapper_bubbling_horizontal: hasBouncedOff === 1 || hasBouncedOff === 3,
+      wrapper_bubbling_vertical: !isPositionForced && (hasBouncedOff === 2 || hasBouncedOff === 4),
+      wrapper_bubbling_horizontal:
+        !isPositionForced && (hasBouncedOff === 1 || hasBouncedOff === 3),
     }"
     :style="{
       ...styles,
-      '--bubbling-animation': `${hasBouncedOff === 1 || hasBouncedOff === 3 ? 'bubble-anim-horizontal' : 'bubble-anim-vertical'}`,
+      '--bubbling-animation': `${!isPositionForced && (hasBouncedOff === 1 || hasBouncedOff === 3) ? 'bubble-anim-horizontal' : 'bubble-anim-vertical'}`,
       '--squash-offset': squashOffset,
     }"
     @animationend="onBubbleAnimationEnd"
   >
     <div
       class="ball"
-      :class="{ 'curve-splash': isCurveApplied, 'curve-splash-max': isMaxCurveApplied }"
+      :class="{
+        'curve-splash': !isPositionForced && isCurveApplied,
+        'curve-splash-max': !isPositionForced && isMaxCurveApplied,
+      }"
       :style="{
-        '--rotate-direction': `${rotateDirection}deg`,
-        '--rotate-duration': `${rotateDuration}s`,
+        '--rotate-direction': `${isPositionForced ? 360 : rotateDirection}deg`,
+        '--rotate-duration': `${isPositionForced ? MAX_ROTATE_DURATION : rotateDuration}s`,
       }"
       @animationend="onCurveSplashAnimationEnd"
     >
@@ -161,7 +178,7 @@ onUnmounted(() => {
         <div
           class="ball__core"
           :style="{ backgroundImage: `url('${ballSkin}')` }"
-          :class="{ spinning: velocity !== 0 }"
+          :class="{ spinning: !isPositionForced && velocity !== 0 }"
         />
       </div>
     </div>

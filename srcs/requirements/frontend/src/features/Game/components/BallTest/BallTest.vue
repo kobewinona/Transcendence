@@ -12,7 +12,6 @@ const mapVelocityToDegrees = (velocityValue) => {
   const maxVelocity = 2;
   const minDegrees = 0;
   const maxDegrees = 360;
-  console.log('velocityValue', velocityValue);
 
   return (
     minDegrees +

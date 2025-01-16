@@ -1,9 +1,21 @@
 <script setup>
-import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
+import { computed, defineProps, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 
 import { Ball, Paddle, withAiControl, withPlayerControl } from './components';
-import { BALL_HEIGHT, BALL_WIDTH } from './components/Ball/config/constants.js';
+import { BALL_HEIGHT } from './components/Ball/config/constants.js';
 import { PADDLE_HEIGHT, PADDLE_WIDTH } from './components/Paddle/config/constants.js';
+import { DEFAULT_GAME_SETTINGS } from './config/constants.js';
+
+const props = defineProps({
+  forcedBallPosition: {
+    type: Object,
+    default: null,
+  },
+  settings: {
+    type: Object,
+    default: () => ({ ...DEFAULT_GAME_SETTINGS }),
+  },
+});
 
 // Dimensions
 const containerRef = ref(null);
@@ -39,6 +51,8 @@ const rightPaddle = ref({
   deacceleration: 0.1,
 });
 
+const isBallPositionForced = computed(() => Boolean(props.forcedBallPosition));
+
 const updateContainerDimensions = () => {
   // noinspection JSUnresolvedReference
   if (containerRef?.value) {
@@ -49,8 +63,9 @@ const updateContainerDimensions = () => {
 
 const calculateBallSize = () => {
   if (containerWidth.value && containerHeight.value) {
-    ballWidth.value = parseFloat(((BALL_WIDTH / containerWidth.value) * 100).toFixed(2));
-    ballHeight.value = parseFloat(((BALL_HEIGHT / containerHeight.value) * 100).toFixed(2));
+    const ballHeightPixels = (BALL_HEIGHT / 100) * containerHeight.value;
+    ballHeight.value = BALL_HEIGHT;
+    ballWidth.value = parseFloat(((ballHeightPixels / containerWidth.value) * 100).toFixed(2));
   }
 };
 
@@ -64,12 +79,9 @@ const calculatePaddleSizeInPercentages = () => {
 const initializeWebSocketInPercentages = () => {
   const socketUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/pong/';
   socket = new WebSocket(socketUrl);
-  console.log('socket', socket);
 
   socket.onopen = () => {
     console.log('✅ WebSocket connected');
-    // console.log(`ballWidth: ${ballWidth.value}, ballHeight: ${ballHeight.value}`);
-    // console.log(`paddleWidth: ${paddleWidth.value}, paddleHeight: ${paddleHeight.value}`);
 
     if (isNaN(ballWidth.value) || isNaN(ballHeight.value)) {
       console.error('Invalid width or height values:', ballWidth.value, ballHeight.value);
@@ -105,13 +117,14 @@ const initializeWebSocketInPercentages = () => {
 
     if (ball) {
       const {
-        position = 50,
-        velocity = 5,
+        position = { x: 50, y: 50 },
+        velocity = { x: 0, y: 0 },
         is_out_of_bounds: isOutOfBounds = false,
         curve = 0,
         bouncedOffSurface,
       } = ball || {};
-      ballPosition.value = position;
+      const { forcedBallPosition } = props;
+      ballPosition.value = forcedBallPosition?.x != null ? forcedBallPosition : position;
       ballVelocity.value = velocity;
       isBallOutOfBounds.value = isOutOfBounds;
       ballCurve.value = curve;
@@ -153,6 +166,22 @@ watch([containerWidth, containerHeight], calculatePaddleSizeInPercentages, {
   immediate: true,
 });
 
+watch(
+  () => props.settings,
+  (newSettings) => {
+    console.log('Game settings changed:', newSettings);
+
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(
+        JSON.stringify({
+          type: 'restart',
+        })
+      );
+    }
+  },
+  { immediate: true, deep: true }
+);
+
 onMounted(() => {
   updateContainerDimensions();
   initializeWebSocketInPercentages();
@@ -180,39 +209,25 @@ onUnmounted(() => {
         :width="ballWidth"
         :height="ballHeight"
         :position="ballPosition"
+        :is-position-forced="isBallPositionForced"
         :velocity="ballVelocity"
         :is-out-of-bounds="isBallOutOfBounds"
         :curve="ballCurve"
         :ball-bounced-off-surface="ballBouncedOffSurface"
       />
-      <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">
-        <Paddle :side="'left'" :params="leftPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />
-      </withPlayerControl>
-      <!--      <withPlayerControl-->
-      <!--        :socket="socket"-->
-      <!--        :side="'right'"-->
-      <!--        :controls="{ up: 'ArrowUp', down: 'ArrowDown' }"-->
-      <!--      >-->
-      <!--        <Paddle :side="'right'" :params="rightPaddle" is-ball-out-of-bounds="isBallOutOfBounds" />-->
-      <!--      </withPlayerControl>-->
-      <!--      <withAiControl-->
-      <!--        :socket="socket"-->
-      <!--        :side="'left'"-->
-      <!--        :ball-position="ballPosition"-->
-      <!--        :ball-velocity="ballVelocity"-->
-      <!--        :paddle-params="leftPaddle"-->
-      <!--      >-->
-      <!--        <Paddle :side="'left'" :params="leftPaddle" />-->
-      <!--      </withAiControl>-->
-      <withAiControl
+      <component
+        :is="side.controlledBy === 'player' ? withPlayerControl : withAiControl"
+        v-for="(side, index) in props.settings?.sides || []"
+        :key="index"
         :socket="socket"
-        :side="'right'"
+        :side="side.side"
+        :controls="side.controls"
         :ball-position="ballPosition"
         :ball-velocity="ballVelocity"
-        :paddle-params="rightPaddle"
+        :paddle-params="side.side === 'left' ? leftPaddle : rightPaddle"
       >
-        <Paddle :side="'right'" :params="rightPaddle" />
-      </withAiControl>
+        <Paddle :side="side.side" :params="side.side === 'left' ? leftPaddle : rightPaddle" />
+      </component>
     </div>
   </div>
 </template>
@@ -221,18 +236,13 @@ onUnmounted(() => {
 .game {
   position: relative;
 
-  overflow: hidden;
-
   box-sizing: border-box;
   width: 100%;
-  max-width: 1000px;
   height: 100%;
-  max-height: 800px;
   padding-right: 20px;
   padding-left: 20px;
 
   background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
-  border-radius: 12px;
 }
 
 .game__container {

@@ -22,6 +22,11 @@ class Paddle:
         self.base_height = height  # Minimum height of the paddle
         self.height = height  # Current height of the paddle
 
+    def reset(self):
+        self.position = 50
+        self.direction = 0
+        self.speed = 0
+
     def update_position(self):
         """
         Update paddle position based on direction, speed, and acceleration.

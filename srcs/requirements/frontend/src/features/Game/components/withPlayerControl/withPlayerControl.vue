@@ -25,16 +25,16 @@ const { socket, side, controls } = defineProps({
 let direction = 0;
 
 const handleKeyDown = (event) => {
-  if (event.key === controls?.up) {
+  if (event.code === controls?.up) {
     direction = -1;
-  } else if (event.key === controls?.down) {
+  } else if (event.code === controls?.down) {
     direction = 1;
   }
   sendDirection();
 };
 
 const handleKeyUp = (event) => {
-  if (event.key === controls?.up || event.key === controls?.down) {
+  if (event.code === controls?.up || event.code === controls?.down) {
     direction = 0;
   }
   sendDirection();
@@ -42,7 +42,6 @@ const handleKeyUp = (event) => {
 
 // Send paddle direction to backend
 const sendDirection = () => {
-  console.log('sending direction....');
   if (socket.readyState === WebSocket.OPEN) {
     try {
       socket.send(

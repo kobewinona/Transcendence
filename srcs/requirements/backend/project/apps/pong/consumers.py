@@ -65,6 +65,22 @@ class PongConsumer(AsyncWebsocketConsumer):
                     except Exception as e:
                         logger.error(f"❌ Failed to start game_update_loop: {e}")
 
+            if data.get("type") == "restart":
+                # Cancel the current game update task
+                if self.game_update_task:
+                    self.game_update_task.cancel()
+                await asyncio.sleep(0.2)
+
+                self.ball.reset()
+                self.paddle_left.reset()
+                self.paddle_right.reset()
+
+                try:
+                    self.game_update_task = asyncio.create_task(self.game_update_loop())
+                    logger.debug("✅ Game update loop restarted after reset")
+                except Exception as e:
+                    logger.error(f"❌ Failed to restart game_update_loop: {e}")
+
             if data.get("type") == "paddle":
                 direction = data.get("direction", 0)
                 side = data.get("side")

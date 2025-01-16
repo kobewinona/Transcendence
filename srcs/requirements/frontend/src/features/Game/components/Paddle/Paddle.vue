@@ -1,14 +1,3 @@
-<template>
-  <div
-    class="paddle"
-    :class="{
-      paddle_side_left: side === 'left',
-      paddle_side_right: side === 'right',
-    }"
-    :style="styles"
-  />
-</template>
-
 <script setup>
 import { computed, defineProps, onMounted, onUnmounted, ref } from 'vue';
 
@@ -58,6 +47,17 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<template>
+  <div
+    class="paddle"
+    :class="{
+      paddle_side_left: side === 'left',
+      paddle_side_right: side === 'right',
+    }"
+    :style="styles"
+  />
+</template>
 
 <style scoped>
 .paddle {

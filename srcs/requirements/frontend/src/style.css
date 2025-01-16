@@ -5,7 +5,7 @@
 }
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: LexendExa, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
@@ -43,6 +43,16 @@ body {
   z-index: 1;
   width: 100%;
   height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
 }
 
 h1 {

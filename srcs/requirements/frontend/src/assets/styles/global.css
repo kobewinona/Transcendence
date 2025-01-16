@@ -1,10 +1,21 @@
 @import url("../../vendor/normalize.css");
-@import url("../../vendor/fonts/inter.css");
+@import url("../../vendor/fonts/lexend_exa/lexend_exa.css");
 
 :root {
+  /* colors */
   --primary-color: #fc3b3b;
   --secondary-color: #36a2eb;
   --light-color: #e0ded6;
+  --light-color-opacity-50: rgb(224 222 214 / 0.5);
   --dark-color: #242428;
+  --dark-color-opacity-50: rgb(36 36 40 / 0.5);
   --darker-color: #323236;
+
+  /* dimensions */
+  --small-space: 6px;
+  --smaller-space: 10px;
+  --regular-space: 14px;
+  --bigger-space: 20px;
+  --big-space: 30px;
+  --large-space: 40;
 }

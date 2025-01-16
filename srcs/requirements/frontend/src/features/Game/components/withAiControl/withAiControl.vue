@@ -131,7 +131,6 @@ watch(
         paddleParams?.y > 50
           ? (Math.random() * (65 - 50) + 50).toFixed(2)
           : (Math.random() * (50 - 35) + 35).toFixed(2);
-      console.log(`Predicted Y when moving away: ${parseFloat(randomY)}`);
       predictedY = parseFloat(randomY);
     }
   }
