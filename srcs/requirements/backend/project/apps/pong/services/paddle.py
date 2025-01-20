@@ -11,9 +11,6 @@ logger = logging.getLogger('pong.paddle')
 
 class Paddle:
     def __init__(self, position=50, boundary=100, width=PADDLE_DEFAULT_WIDTH, height=PADDLE_DEFAULT_HEIGHT):
-        """
-        Paddle initialization with acceleration and deceleration.
-        """
         self.position = position
         self.direction = 0
         self.speed = 0
@@ -28,9 +25,6 @@ class Paddle:
         self.speed = 0
 
     def update_position(self):
-        """
-        Update paddle position based on direction, speed, and acceleration.
-        """
         # Update speed based on direction
         if self.direction != 0:
             self.speed += PADDLE_ACCELERATION * self.direction
@@ -66,8 +60,5 @@ class Paddle:
         return self.position
 
     def set_direction(self, direction):
-        """
-        Set paddle movement direction (-1 = up, 1 = down, 0 = stationary).
-        """
         if direction in [-1, 0, 1]:
             self.direction = direction

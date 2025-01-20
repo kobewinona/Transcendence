@@ -1,7 +1,7 @@
 import './style.css';
 import './assets/styles/global.css';
 
-import { svgComponents } from 'assets/svgComponents.js';
+import svgComponents from 'assets/svgComponents.js';
 import { createApp } from 'vue';
 
 import App from './App.vue';

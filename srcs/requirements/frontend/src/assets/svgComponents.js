@@ -1,11 +1,10 @@
 const svgFiles = import.meta.glob('./icons/**/*.svg', { eager: true });
 
-export const svgComponents = {};
+const svgComponents = {};
 
-const nameCounts = {}; // Keep track of how many times a name has been used
+const nameCounts = {};
 
 Object.entries(svgFiles).forEach(([filePath, component]) => {
-  // Extract the file name (e.g., `Game console.svg`)
   const rawName = filePath
     .split('/')
     .pop()
@@ -28,3 +27,5 @@ Object.entries(svgFiles).forEach(([filePath, component]) => {
 
   svgComponents[componentName] = component.default || component;
 });
+
+export default svgComponents;

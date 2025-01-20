@@ -11,6 +11,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
+  color: var(--light-color);
   text-rendering: optimizelegibility;
 
   color-scheme: light dark;

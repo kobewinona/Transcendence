@@ -25,8 +25,6 @@ const rotateDirection = computed(() => {
 
 const changeVelocity = (newVelocity) => {
   velocity.value = newVelocity;
-  // rotateDirection();
-  console.log('mapVelocityToDegrees', mapVelocityToDegrees(newVelocity));
 };
 
 const incrementCurve = () => {

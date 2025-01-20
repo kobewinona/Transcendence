@@ -1,6 +1,13 @@
 from .ball import Ball
 from .paddle import Paddle
+from .state import GameState
 from .constants import (GAME_STATE_UPDATE_INTERVAL,
+                        GAME_STATUS_IDLE,
+                        GAME_STATUS_INIT,
+                        GAME_STATUS_COUNTDOWN,
+                        GAME_STATUS_IN_PROGRESS,
+                        GAME_STATUS_ENDED,
+                        PADDLE_ACCELERATION,
                         PADDLE_DEACCELERATION,
                         PADDLE_DEFAULT_WIDTH,
                         PADDLE_DEFAULT_HEIGHT,

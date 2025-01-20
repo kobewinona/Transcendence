@@ -1,5 +1,6 @@
 import logging
 import math
+import asyncio
 from .constants import (PADDLE_BOUNDARY_GRACE_OFFSET,
                         BALL_OFF_BOUNDS_OFFSET,
                         BALL_DEFAULT_WIDTH,
@@ -38,17 +39,10 @@ class Ball:
         self.radius_y = self.height / 2
 
     def calculate_velocity_adjustment(self, paddle_position, paddle_height):
-        """
-        Calculate the velocity adjustment based on where the ball hits the paddle.
-        The closer to the edge, the greater the adjustment to y velocity.
-        """
         relative_hit_position = (self.position["y"] - paddle_position) / (paddle_height / 2)
         return abs(BALL_MAX_VELOCITY_CHANGE_ON_HIT * max(-1, min(1, relative_hit_position)))
 
     def apply_curve(self):
-        """
-        Gradually apply the curve to the ball's velocity.
-        """
         if self.curve != 0:
             self.curve = max(-MAX_CURVE_ANGLE, min(MAX_CURVE_ANGLE, self.curve))
             curve_radians = math.radians(self.curve)
@@ -63,7 +57,7 @@ class Ball:
             if abs(self.curve) < 0.05:
                 self.curve = 0
 
-    def update_ball(self, paddle_left, paddle_right):
+    async def update_ball(self, paddle_left, paddle_right):
         self.apply_curve()
         self.position["x"] += self.velocity["x"]
         self.position["y"] += self.velocity["y"]
@@ -93,6 +87,7 @@ class Ball:
                 self.position["x"] = paddle_left.width + self.radius_x  # Prevent ball from clipping through
                 self.velocity["y"] += self.calculate_velocity_adjustment(paddle_right.position, paddle_right.height)
                 self.bouncedOffSurface = 4
+                await asyncio.sleep(0.04)
                 self.curve += paddle_left.speed * 3
                 logger.debug("✅ Ball collided with LEFT paddle")
 
@@ -105,6 +100,7 @@ class Ball:
                 self.position["x"] = 100 - paddle_right.width - self.radius_x  # Prevent ball from clipping through
                 self.velocity["y"] += self.calculate_velocity_adjustment(paddle_right.position, paddle_right.height)
                 self.bouncedOffSurface = 2
+                await asyncio.sleep(0.04)
                 self.curve -= paddle_right.speed * 3
                 logger.debug("✅ Ball collided with RIGHT paddle")
 
@@ -112,7 +108,7 @@ class Ball:
                 self.is_out_of_bounds = True
 
         # Handle Top and Bottom Collisions
-        if ball_top <= 0 or ball_bottom >= 100:
+        if ball_top + 0.5 <= 0 or ball_bottom - 0.5 >= 100:
             self.bouncedOffSurface = 1 if ball_top <= 0 else 3
             self.velocity["y"] *= -1
 
@@ -126,5 +122,5 @@ class Ball:
             "velocity": self.velocity,
             "is_out_of_bounds": self.is_out_of_bounds,
             "curve": self.curve,
-            "bouncedOffSurface": self.bouncedOffSurface
+            "bounced_off_surface": self.bouncedOffSurface
         }

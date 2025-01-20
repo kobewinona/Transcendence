@@ -3,8 +3,10 @@
 </template>
 
 <script setup>
-import { defineProps, onMounted, onUnmounted, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
+import { useGameSocketInject } from '../../composables';
+import { PADDLE_DEFAULT_DEACCELERATION, PADDLE_DEFAULT_WIDTH } from '../Paddle/config/constants.js';
 import {
   EARLY_STOP_BUFFER,
   MAX_ERROR_FACTOR,
@@ -12,69 +14,40 @@ import {
   PREDICTION_INTERVAL,
 } from './config/constants.js';
 
-const { socket, side, ballPosition, ballVelocity, paddleParams } = defineProps({
-  socket: {
-    type: WebSocket,
-    required: true,
-  },
+const { side } = defineProps({
   side: {
     type: String,
     required: true,
     validator: (value) => ['left', 'right'].includes(value),
   },
-  ballPosition: {
-    type: Object,
-    required: true,
-    validator: (value) => typeof value.x === 'number' && typeof value.y === 'number',
-  },
-  ballVelocity: {
-    type: Object,
-    required: true,
-    validator: (value) => typeof value.x === 'number' && typeof value.y === 'number',
-  },
-  paddleParams: {
-    type: Object,
-    required: true,
-    validator: (value) => {
-      return (
-        typeof value.width === 'number' &&
-        typeof value.height === 'number' &&
-        value.position &&
-        typeof value.position.y === 'number' &&
-        typeof value.speed === 'number' &&
-        typeof value.deacceleration === 'number'
-      );
-    },
-  },
 });
+
+const gameSocket = useGameSocketInject();
+
+const ballPositionX = computed(() => gameSocket.ballPositionX.value);
+const ballPositionY = computed(() => gameSocket.ballPositionY.value);
+const ballVelocityX = computed(() => gameSocket.ballVelocityX.value);
+const ballVelocityY = computed(() => gameSocket.ballVelocityY.value);
+const paddleY = computed(() =>
+  side === 'left' ? gameSocket.leftPaddleY.value : gameSocket.rightPaddleY.value
+);
+const paddleSpeed = computed(() =>
+  side === 'left' ? gameSocket.leftPaddleSpeed.value : gameSocket.rightPaddleSpeed.value
+);
 
 let aiPredictionIntervalId = null;
 let aiMovementFrameId = null;
-let predictedY = paddleParams?.position?.y;
-let lastDirection = 0;
+const predictedY = ref(50);
+const lastDirection = ref(0);
 
-// Send direction to the server
 const sendDirection = (direction) => {
-  if (socket.readyState === WebSocket.OPEN) {
-    try {
-      socket.send(
-        JSON.stringify({
-          type: 'paddle',
-          side,
-          direction,
-        })
-      );
-    } catch (error) {
-      console.error('❌ Error sending paddle direction:', error);
-    }
-  }
+  gameSocket.actions.updatePaddlePosition({ side, direction });
 };
 
 const predictBallYAtPaddle = () => {
   const paddleX = side === 'left' ? 0 : 100;
-  const ballDirectionX = ballVelocity?.x > 0 ? 'right' : 'left';
+  const ballDirectionX = ballVelocityX.value > 0 ? 'right' : 'left';
 
-  // Reset to center if ball is moving away
   if (
     (side === 'left' && ballDirectionX !== 'left') ||
     (side === 'right' && ballDirectionX !== 'right')
@@ -82,90 +55,77 @@ const predictBallYAtPaddle = () => {
     return;
   }
 
-  // Calculate time until the ball reaches the paddle's x-axis
-  const distanceToPaddleX = Math.abs(ballPosition?.x - paddleX);
-  const timeToPaddle = distanceToPaddleX / Math.abs(ballVelocity?.x);
-  let predictedY = ballPosition?.y + ballVelocity?.y * timeToPaddle;
+  const distanceToPaddleX = Math.abs(ballPositionX.value - paddleX);
+  const timeToPaddle = distanceToPaddleX / Math.abs(ballVelocityX.value);
+  let predicted = ballPositionY.value + ballVelocityY.value * timeToPaddle;
 
   // Handle bouncing off top and bottom boundaries
-  while (predictedY < 0 || predictedY > 100) {
-    if (predictedY < 0) {
-      predictedY = -predictedY;
-    } else if (predictedY > 100) {
-      predictedY = 200 - predictedY;
-    }
+  while (predicted < 0 || predicted > 100) {
+    if (predicted < 0) predicted = -predicted;
+    if (predicted > 100) predicted = 200 - predicted;
   }
 
-  // Adjust prediction with a paddle width
-  predictedY = Math.min(
-    100 - paddleParams?.width / 2,
-    Math.max(paddleParams?.width / 2, Math.round(predictedY))
+  // Adjust prediction with paddle width
+  predicted = Math.min(
+    100 - PADDLE_DEFAULT_WIDTH / 2,
+    Math.max(PADDLE_DEFAULT_WIDTH / 2, Math.round(predicted))
   );
 
-  // Add prediction error based on ball distance from the paddle
+  // Add prediction error
   const errorFactor = Math.min(1, distanceToPaddleX / 100);
   const error = (Math.random() * 2 - 1) * MAX_ERROR_FACTOR * errorFactor;
-  predictedY += error;
+  predicted += error;
 
-  return predictedY;
+  predictedY.value = predicted;
 };
 
-// Start AI Prediction (Once per second)
-const startPrediction = () => {
-  aiPredictionIntervalId = setInterval(() => {
-    predictedY = predictBallYAtPaddle();
-  }, PREDICTION_INTERVAL);
-};
-
+// Return paddle closer to center
 watch(
-  () => ballVelocity,
+  () => ballVelocityX.value,
   () => {
-    const ballDirectionX = ballVelocity?.x > 0 ? 'right' : 'left';
+    const ballDirectionX = ballVelocityX.value > 0 ? 'right' : 'left';
 
-    // Reset to center if ball is moving away
     if (
       (side === 'left' && ballDirectionX !== 'left') ||
       (side === 'right' && ballDirectionX !== 'right')
     ) {
       const randomY =
-        paddleParams?.y > 50
+        paddleY.value > 50
           ? (Math.random() * (65 - 50) + 50).toFixed(2)
           : (Math.random() * (50 - 35) + 35).toFixed(2);
-      predictedY = parseFloat(randomY);
+      predictedY.value = parseFloat(randomY);
     }
   }
 );
 
-// Adjusted watch logic
+// Move paddle to target position
 watch(
-  () => paddleParams,
-  (newPosition) => {
-    const paddleY = newPosition.y;
-
+  () => [predictedY.value, paddleY.value],
+  ([, paddleY]) => {
     // Calculate stopping distance based on current speed
-    const stoppingDistance = Math.pow(paddleParams?.speed, 2) / (2 * paddleParams?.deacceleration);
+    const stoppingDistance = Math.pow(paddleSpeed.value, 2) / (2 * PADDLE_DEFAULT_DEACCELERATION);
 
     // Adjust bounds with stopping distance
-    const lowerBound = predictedY - MOVEMENT_WINDOW - stoppingDistance - EARLY_STOP_BUFFER;
-    const upperBound = predictedY + MOVEMENT_WINDOW + stoppingDistance + EARLY_STOP_BUFFER;
+    const lowerBound = predictedY.value - MOVEMENT_WINDOW - stoppingDistance - EARLY_STOP_BUFFER;
+    const upperBound = predictedY.value + MOVEMENT_WINDOW + stoppingDistance + EARLY_STOP_BUFFER;
 
     // Decide movement direction
     if (paddleY < lowerBound) {
-      if (lastDirection !== 1) {
-        lastDirection = 1;
+      if (lastDirection.value !== 1) {
+        lastDirection.value = 1;
         sendDirection(1);
       }
     } else if (paddleY > upperBound) {
-      if (lastDirection !== -1) {
-        lastDirection = -1;
+      if (lastDirection.value !== -1) {
+        lastDirection.value = -1;
         sendDirection(-1);
       }
     } else if (
-      paddleY >= predictedY - stoppingDistance &&
-      paddleY <= predictedY + stoppingDistance &&
-      lastDirection !== 0
+      paddleY >= predictedY.value - stoppingDistance &&
+      paddleY <= predictedY.value + stoppingDistance &&
+      lastDirection.value !== 0
     ) {
-      lastDirection = 0;
+      lastDirection.value = 0;
       sendDirection(0);
     }
   }
@@ -175,14 +135,16 @@ const stopAI = () => {
   if (aiPredictionIntervalId) {
     clearInterval(aiPredictionIntervalId);
   }
+
   if (aiMovementFrameId) {
     cancelAnimationFrame(aiMovementFrameId);
   }
+
   sendDirection(0);
 };
 
 onMounted(() => {
-  startPrediction();
+  aiPredictionIntervalId = setInterval(predictBallYAtPaddle, PREDICTION_INTERVAL);
 });
 
 onUnmounted(() => {

@@ -1,5 +1,7 @@
 // noinspection JSFileReferences
-import { svgComponents } from 'assets/svgComponents.js';
+import svgComponents from 'assets/svgComponents.js';
+
+import { QuickStart } from '../components';
 
 const QUICK_START = 'quick_start';
 const NEW_GAME = 'new_game';
@@ -23,6 +25,7 @@ export const MENU_ITEMS = [
         key: QUICK_START,
         title: 'Quick Start',
         description: 'Start a quick game against AI',
+        content: QuickStart,
         icon: svgComponents['GameIcon'],
         iconSlideTo: 'bottom',
         disabled: false,
@@ -31,9 +34,10 @@ export const MENU_ITEMS = [
         key: NEW_GAME,
         title: 'New Game',
         description: 'Set up and start a new game',
+        content: 'some content here',
         icon: svgComponents['GameConsoleIcon'],
         iconSlideTo: 'bottom',
-        disabled: true,
+        disabled: false,
       },
       {
         key: PLAY_ONLINE,
@@ -46,7 +50,6 @@ export const MENU_ITEMS = [
     ],
   },
   {
-    title: '',
     height: '30%',
     items: [
       {
@@ -55,15 +58,16 @@ export const MENU_ITEMS = [
         description: 'See and configure your profile settings',
         icon: svgComponents['DeveloperIcon'],
         iconSlideTo: 'right',
-        disabled: true,
+        disabled: false,
       },
       {
         key: SETTINGS,
         title: 'Settings',
         description: 'See and configure game settings',
+        content: 'settings here...',
         icon: svgComponents['GameDevelopmentIcon'],
         iconSlideTo: 'right',
-        disabled: true,
+        disabled: false,
       },
     ],
   },

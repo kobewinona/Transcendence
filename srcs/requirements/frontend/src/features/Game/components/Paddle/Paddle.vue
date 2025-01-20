@@ -1,53 +1,3 @@
-<script setup>
-import { computed, defineProps, onMounted, onUnmounted, ref } from 'vue';
-
-const { side, params } = defineProps({
-  side: {
-    type: String,
-    required: true,
-    validator: (value) => ['left', 'right'].includes(value),
-  },
-  params: {
-    type: Object,
-    required: true,
-    validator: (value) => {
-      return (
-        typeof value.width === 'number' &&
-        typeof value.height === 'number' &&
-        value.position &&
-        typeof value.position.y === 'number' &&
-        typeof value.speed === 'number' &&
-        typeof value.deacceleration === 'number'
-      );
-    },
-  },
-});
-
-const paddlePosition = ref(params?.y);
-let animationFrameId = null;
-
-const styles = computed(() => ({
-  width: `${params?.width}%`,
-  height: `${params?.height}%`,
-  top: `${params?.y}%`,
-}));
-
-const update = () => {
-  paddlePosition.value = params?.position?.y;
-  animationFrameId = requestAnimationFrame(update);
-};
-
-onMounted(() => {
-  animationFrameId = requestAnimationFrame(update);
-});
-
-onUnmounted(() => {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-  }
-});
-</script>
-
 <template>
   <div
     class="paddle"
@@ -58,6 +8,40 @@ onUnmounted(() => {
     :style="styles"
   />
 </template>
+
+<script setup>
+import { computed } from 'vue';
+
+import { useGameSocketInject } from '../../composables';
+
+const { side } = defineProps({
+  side: {
+    type: String,
+    required: true,
+    validator: (value) => ['left', 'right'].includes(value),
+  },
+});
+
+const gameSocket = useGameSocketInject();
+
+const paddleWidth = computed(() =>
+  side === 'left' ? gameSocket.leftPaddleWidth.value : gameSocket.rightPaddleWidth.value
+);
+const paddleHeight = computed(() =>
+  side === 'left' ? gameSocket.leftPaddleHeight.value : gameSocket.rightPaddleHeight.value
+);
+const paddleY = computed(() =>
+  side === 'left' ? gameSocket.leftPaddleY.value : gameSocket.rightPaddleY.value
+);
+
+const styles = computed(() => {
+  return {
+    width: `${paddleWidth.value}%`,
+    height: `${paddleHeight.value}%`,
+    top: `${paddleY.value}%`,
+  };
+});
+</script>
 
 <style scoped>
 .paddle {

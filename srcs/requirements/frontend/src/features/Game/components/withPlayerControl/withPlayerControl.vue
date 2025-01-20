@@ -3,13 +3,11 @@
 </template>
 
 <script setup>
-import { defineProps, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
-const { socket, side, controls } = defineProps({
-  socket: {
-    type: WebSocket,
-    required: true,
-  },
+import { useGameSocketInject } from '../../composables';
+
+const { side, controls } = defineProps({
   side: {
     type: String,
     required: true,
@@ -22,39 +20,28 @@ const { socket, side, controls } = defineProps({
   },
 });
 
-let direction = 0;
+const gameSocket = useGameSocketInject();
+
+const direction = ref(0);
 
 const handleKeyDown = (event) => {
   if (event.code === controls?.up) {
-    direction = -1;
+    direction.value = -1;
   } else if (event.code === controls?.down) {
-    direction = 1;
+    direction.value = 1;
   }
   sendDirection();
 };
 
 const handleKeyUp = (event) => {
   if (event.code === controls?.up || event.code === controls?.down) {
-    direction = 0;
+    direction.value = 0;
   }
   sendDirection();
 };
 
-// Send paddle direction to backend
 const sendDirection = () => {
-  if (socket.readyState === WebSocket.OPEN) {
-    try {
-      socket.send(
-        JSON.stringify({
-          type: 'paddle',
-          side,
-          direction: direction,
-        })
-      );
-    } catch (error) {
-      console.error('❌ Error sending paddle direction:', error);
-    }
-  }
+  gameSocket.actions.updatePaddlePosition({ side, direction: direction.value });
 };
 
 onMounted(() => {
