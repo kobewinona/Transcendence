@@ -1,6 +1,4 @@
-import Game from './Game';
-import Menu from './Menu';
-import TitleScreen from './TitleScreen';
-import Transition from './Transition';
+import Game from './Game/Game.vue';
+import Menu from './Menu/Menu.vue';
 
-export { Game, Menu, TitleScreen, Transition };
+export { Game, Menu };

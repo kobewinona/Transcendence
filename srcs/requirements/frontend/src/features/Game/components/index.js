@@ -1,7 +1,6 @@
-import AdminControls from './AdminControls';
-import Ball from './Ball';
-import GameContextProvider from './GameContextProvider';
-import Paddle from './Paddle';
-import ScoreBoard from './ScoreBoard';
+import Ball from './Ball/Ball.vue';
+import Paddle from './Paddle/Paddle.vue';
+import withAiControl from './withAiControl/withAiControl.vue';
+import withPlayerControl from './withPlayerControl/withPlayerControl.vue';
 
-export { AdminControls, Ball, GameContextProvider, Paddle, ScoreBoard };
+export { Ball, Paddle, withAiControl, withPlayerControl };

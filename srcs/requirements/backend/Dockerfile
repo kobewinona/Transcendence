@@ -1,22 +1,26 @@
-FROM python:3.10
+FROM python:3.12
 
-# Set the metadata for the image an author
 LABEL org.opencontainers.image.authors="Lera, Dima, Wolf, Jeremy"
 
-# Create app directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy requirements.txt and entrypoint.sh
+# Install dependencies
 COPY requirements.txt .
-COPY ./tools/entrypoint.sh .
-COPY . /app
-
-# Install app dependencies
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN chmod +x /app/tools/entrypoint.sh
 
-# Expose the port 8000 for information
-EXPOSE 8000
+# Copy project files
+COPY . .
 
-# execute the command to start the app
-ENTRYPOINT ["/app/tools/entrypoint.sh"]
+# Create STATIC_ROOT directory
+RUN mkdir -p /usr/src/app/staticfiles
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Apply migrations
+RUN python manage.py makemigrations --noinput
+RUN python manage.py migrate --noinput
+
+# Start Daphne server
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
