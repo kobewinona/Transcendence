@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 
     # Third-Party Apps
     'corsheaders',
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     # Custom Project Apps
     'project.apps.pong',
     'project.apps.chat',
+    'project.apps.custom_auth',
+    # 'project.apps.custom_auth.apps.CustomAuthConfig' //if more control needed
 ]
 
 MIDDLEWARE = [
