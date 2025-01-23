@@ -13,8 +13,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Create STATIC_ROOT directory
-RUN mkdir -p /usr/src/app/staticfiles
-
+RUN mkdir -p /usr/src/app/static/staticfiles
 # Collect static files
 RUN python manage.py collectstatic --noinput
 

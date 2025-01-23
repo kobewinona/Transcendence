@@ -2,6 +2,7 @@
 import { ref, computed, watchEffect } from 'vue';
 import LoginPage from './pages/LoginPage/LoginPage.vue';
 import Game from './features/Game/Game.vue';
+import RegisterPage from './pages/RegisterPage/RegisterPage.vue';
 import NotFound from './pages/NotFound.vue';
 
 // Reactive authentication state
@@ -11,6 +12,7 @@ const isAuthenticated = ref(localStorage.getItem('authToken') !== null);
 const routes = {
   '/': LoginPage,
   '/game': Game,
+  '/register': RegisterPage
 };
 
 // Reactive current path
@@ -52,6 +54,7 @@ const updateAuthStatus = (loggedIn) => {
 <template>
   <nav>
     <a href="#/">Login</a> |
+    <a href="#/register">Register</a> |
     <a href="#/game" v-if="isAuthenticated">Game</a>
     <a v-else style="color: #666; cursor: not-allowed">Game</a>
     <template v-if="isAuthenticated">
