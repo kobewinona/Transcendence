@@ -1,6 +1,8 @@
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 const useWebSocket = (url, options = {}) => {
+  const reconnectTimeoutId = ref(null);
+
   const {
     onOpen = () => console.log('✅ WebSocket connected'),
     onMessage = () => {},
@@ -69,7 +71,7 @@ const useWebSocket = (url, options = {}) => {
             `⚠️ WebSocket closed unexpectedly. Retrying in ${reconnectDelay / 1000} seconds...`
           );
           retryCount += 1;
-          setTimeout(connect, reconnectDelay);
+          reconnectTimeoutId.value = setTimeout(connect, reconnectDelay);
         } else if (retryCount >= maxRetries) {
           isError.value = true;
           console.error('❌ WebSocket reconnection failed. Max retries reached.');
@@ -102,6 +104,10 @@ const useWebSocket = (url, options = {}) => {
   };
 
   connect();
+
+  onUnmounted(() => {
+    clearTimeout(reconnectTimeoutId);
+  });
 
   return {
     socket: socketRef,

@@ -22,6 +22,7 @@ export default defineConfig({
       components: '/src/components',
       shared: '/src/shared',
       assets: '/src/assets',
+      config: '/src/config',
     },
   },
 });
