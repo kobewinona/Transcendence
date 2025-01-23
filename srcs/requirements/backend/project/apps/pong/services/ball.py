@@ -109,7 +109,10 @@ class Ball:
 
         # Handle Top and Bottom Collisions
         if ball_top + 0.5 <= 0 or ball_bottom - 0.5 >= 100:
-            self.bouncedOffSurface = 1 if ball_top <= 0 else 3
+            if ball_top + 0.5 <= 0:
+                self.bouncedOffSurface = 1
+            else:
+                self.bouncedOffSurface = 3
             self.velocity["y"] *= -1
 
         # Reset when ball goes out of boundaries

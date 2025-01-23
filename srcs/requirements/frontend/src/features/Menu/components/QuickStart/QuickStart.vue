@@ -21,13 +21,14 @@
 
 <script setup>
 // noinspection JSFileReferences
-import svgComponents from 'assets/svgComponents.js';
 import { AnimatedShapes } from 'shared/components';
+import { svgComponents } from 'shared/lib';
 import { isVueComponent } from 'shared/lib';
 
 const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = AnimatedShapes;
 </script>
 
+<!--suppress CssUnusedSymbol -->
 <style scoped>
 @keyframes wing {
   0% {

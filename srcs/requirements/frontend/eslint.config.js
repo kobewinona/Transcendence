@@ -23,25 +23,6 @@ export default [
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'comma-dangle': ['error', 'only-multiline'],
-      // 'import/order': [
-      //   'error',
-      //   {
-      //     groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      //     'newlines-between': 'always',
-      //     alphabetize: {
-      //       order: 'asc',
-      //       caseInsensitive: true,
-      //     },
-      //     pathGroups: [
-      //       {
-      //         pattern: '@/**',
-      //         group: 'internal',
-      //         position: 'after',
-      //       },
-      //     ],
-      //     pathGroupsExcludedImportTypes: ['builtin'],
-      //   },
-      // ],
       camelcase: 'warn',
       'vue/attributes-order': [
         'error',

@@ -80,6 +80,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def handle_start(self):
         if self.game_update_task:
+            self.ball.reset()
+            self.paddle_left.reset()
+            self.paddle_right.reset()
             self.game_update_task.cancel()
             await self.set_game_status(GAME_STATUS_ENDED)
 

@@ -1,0 +1,20 @@
+{
+  "english": "English",
+  "russian": "Русский",
+  "thai": "ภาษาไทย",
+
+  "menu.items.item.quick_start.title": "Быстрая Игра",
+  "menu.items.item.quick_start.description": "Быстрая игра против компьютера",
+  "menu.items.item.new_game.title": "Новая Игра",
+  "menu.items.item.new_game.description": "Настройка и начало новой игры",
+  "menu.items.item.online.title": "Онлайн",
+  "menu.items.item.online.description": "Игра онлайн с игроками по всему Миру",
+  "menu.items.item.profile.title": "Профиль",
+  "menu.items.item.profile.description": "Настройки профиля",
+  "menu.items.item.settings.title": "Настройки",
+  "menu.items.item.settings.description": "Общие настройки",
+
+  "menu.settings": "Настройки",
+  "menu.settings.game": "Игра",
+  "menu.settings.game.language": "Язык"
+}

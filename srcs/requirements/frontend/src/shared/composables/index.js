@@ -1,3 +1,4 @@
+import useLang, { provideLang, useLangInject } from './useLang.js';
 import useWebSocket from './useWebSocket.js';
 
-export { useWebSocket };
+export { provideLang, useLang, useLangInject, useWebSocket };
