@@ -35,7 +35,7 @@ services:
       start_period: 5s
 
   nginx:
-    container_name: nginx
+    container_name: nginx-modsecurity
     build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
