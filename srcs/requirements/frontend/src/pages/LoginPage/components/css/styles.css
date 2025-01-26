@@ -150,6 +150,7 @@ img {
   border-radius: 4rem;
   font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
  
 

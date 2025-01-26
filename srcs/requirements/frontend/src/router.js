@@ -1,29 +1,49 @@
-// import {createRouter, createWebHistory} from 'vue-router'
-// import Login from './pages/LoginPage.vue'
-// import Register from './pages/RegisterPage.vue'
-// import Game from "./features/Game.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import LoginPage from '@/pages/LoginPage/LoginPage.vue';
+import Game from '@/features/Game/Game.vue';
+import RegisterPage from '@/pages/RegisterPage/RegisterPage.vue';
+import NotFound from '@/pages/NotFound.vue';
+import { useAuthStore } from '@/store/auth';
 
-// const routes = [
-//     {
-//         path: '/',
-//         name: 'login',
-//         component: Login
-//     },
-//     {
-//         path: '/register',
-//         name: 'register',
-//         component: Register
-//     },
-//     {
-//         path: '/game',
-//         name: 'game',
-//         component: Game
-//     }
-// ]
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      name: 'Login',
+      component: LoginPage,
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: RegisterPage,
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/game',
+      name: 'Game',
+      component: Game,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: NotFound
+    }
+  ]
+});
 
-// const router = createRouter({
-//     history: createWebHistory(),
-//     routes
-// })
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next('/');
+  } else if (to.meta.requiresAuth === false && authStore.isAuthenticated) {
+    next('/game');
+  } else {
+    next();
+  }
+});
 
-// export default router
+export default router;

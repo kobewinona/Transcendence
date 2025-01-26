@@ -1,94 +1,97 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
-import LoginPage from './pages/LoginPage/LoginPage.vue';
-import Game from './features/Game/Game.vue';
-import RegisterPage from './pages/RegisterPage/RegisterPage.vue';
-import NotFound from './pages/NotFound.vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 // Reactive authentication state
-const isAuthenticated = ref(localStorage.getItem('authToken') !== null);
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
-// Define routes
-const routes = {
-  '/': LoginPage,
-  '/game': Game,
-  '/register': RegisterPage
+// Handle logout
+const handleLogout = () => {
+  authStore.logout();
+  router.push('/');
 };
-
-// Reactive current path
-const currentPath = ref(window.location.hash || '#/');
-
-// Route guard logic
-const checkAuth = (path) => {
-  if (path === '#/game' && !isAuthenticated.value) {
-    window.location.hash = '#/';
-    return false;
-  }
-  return true;
-};
-
-// Update the path when the hash changes
-window.addEventListener('hashchange', () => {
-  if (checkAuth(window.location.hash)) {
-    currentPath.value = window.location.hash;
-  }
-});
-
-// Determine the current component based on the path
-const currentView = computed(() => {
-  const path = currentPath.value.slice(1); // Remove `#`
-  return routes[path] || NotFound;
-});
-
-// Handle login/logout state changes
-const updateAuthStatus = (loggedIn) => {
-  isAuthenticated.value = loggedIn;
-  if (!loggedIn) {
-    localStorage.removeItem('authToken');
-    window.location.hash = '#/';
-  }
-};
-
 </script>
 
 <template>
   <nav>
-    <a href="#/">Login</a> |
-    <a href="#/register">Register</a> |
-    <a href="#/game" v-if="isAuthenticated">Game</a>
-    <a v-else style="color: #666; cursor: not-allowed">Game</a>
+    <router-link to="/">Login</router-link> |
+    <router-link to="/register">Register</router-link> |
+    <router-link 
+      v-if="isAuthenticated"
+      to="/game"
+    >
+      Game
+    </router-link>
+    <a 
+      v-else 
+      class="disabled-link"
+    >
+      Game
+    </a>
+    
     <template v-if="isAuthenticated">
-      | <button @click="updateAuthStatus(false)">Logout</button>
+      | <button @click="handleLogout">Logout</button>
     </template>
   </nav>
+  
   <main class="layout">
-    <!-- Pass auth methods to login component -->
-    <component 
-      :is="currentView" 
-      @login-success="updateAuthStatus(true)"
-    />
+    <router-view v-slot="{ Component }">
+      <component :is="Component" />
+    </router-view>
   </main>
 </template>
 
 <style scoped>
 .layout {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  padding: 20px;
 }
+
 nav {
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 a {
   text-decoration: none;
   color: #007bff;
+  margin: 0 0.5rem;
+  transition: color 0.3s ease;
 }
 
 a:hover {
+  color: #0056b3;
   text-decoration: underline;
+}
+
+.disabled-link {
+  color: #6c757d;
+  cursor: not-allowed;
+  margin: 0 0.5rem;
+}
+
+button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #bb2d3b;
 }
 </style>

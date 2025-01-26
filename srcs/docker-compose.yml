@@ -13,9 +13,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/:/usr/src/app/
-    # depends_on:
-    #   postgres:
+      - ./requirements/backend/:/usr/src/app/
+    depends_on: {"postgres": {"condition": "service_healthy"}}
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
@@ -24,49 +23,28 @@ services:
       retries: 5
     
 
-  # postgres:
-  #     image: postgres:16
-  #     container_name: POSTGRES
-  #     ports:
-  #         - "5432:5432"
-  #     environment:
-  #         POSTGRES_DB: "transcendence"
-  #         POSTGRES_USER: "transcendence"
-  #         POSTGRES_PASSWORD: "transcendence"
-  #     healthcheck:
-  #         test: ["CMD-SHELL", "pg_isready -U transcendence -d transcendence"]
-  #         interval: 10s
-  #         timeout: 5s
-  #         retries: 5
+  postgres:
+    container_name: postgres
+    build:
+      context: './requirements/postgresql'
+      dockerfile: Dockerfile
+    ports:
+      - '5432:5432'
+    networks:
+      - ft_transcendence
+    environment:
+      - POSTGRES_DB=postgres     
+      - POSTGRES_USER=postgres    
+      - POSTGRES_PASSWORD=admin123
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
 
-          
-  # backend:
-  #   container_name: backend
-  #   build:
-  #     context: ./requirements/backend
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - DJANGO_SETTINGS_MODULE=project.settings
-  #   networks:
-  #     - ft_transcendence
-  #   command: sh -c "python manage.py makemigrations && \
-  #                   python manage.py migrate && \
-  #                   python manage.py collectstatic --noinput && \
-  #                   python manage.py runserver 0.0.0.0:8000"
-  #   expose:
-  #     - 8000
-    # ports:
-    #       - "8000:8000"
-  #   volumes:
-  #       - ./django/:/usr/src/app/
-    # depends_on:
-    #   postgres:
-  #   restart: always
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8000"]
-  #     interval: 1m
-  #     timeout: 10s
-  #     retries: 5
+
+
   frontend:
     container_name: frontend
     build:
@@ -115,6 +93,7 @@ networks:
 
 volumes:
   frontend_build:
+  database-postgres:
 
 secrets:
   ssl_certificate:
