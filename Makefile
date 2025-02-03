@@ -31,6 +31,10 @@ stop:
 
 restart: stop run
 
+rebuild:
+	@$(COMPOSE_CMD) up -d --build
+
+
 list:
 	@echo "List of services running for ft_transcendence..."
 	@docker ps -a

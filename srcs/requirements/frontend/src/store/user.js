@@ -1,15 +1,15 @@
-import { defineStore } from 'pinia'
+import { defindeStore } from 'pinia'
 import axios from 'axios'
 
 
-export const useUserStore = defineStore('user',{
+export const useUserStore = defineStore({
     id: 'user',
     
     state: () => ({
         user: {
             isAuthenticated: false,
             id: null,
-            name: null, 
+            name: null,
             email: null,
             access: null,
             refresh: null,
@@ -77,19 +77,18 @@ export const useUserStore = defineStore('user',{
         },
 
         refreshToken() {
-            axios.post('/api/custom_auth/refresh', {
+            axios.post('/api/account/refresh', {
                 refresh: this.user.refresh
             })
                 .then((response) => {
                     this.user.access = response.data.access
 
-                    localStorage.setItem('user.access', response.data.access)
+                    localStorage.setItem('user.access', this.data.access)
 
                     axios.defaults.headers.common['Authorization'] = "Bearer " + response.data.access
         })
         .catch((error) => {
             console.log(error)
-            
             this.removeToken()
         })
         },

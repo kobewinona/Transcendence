@@ -49,7 +49,10 @@
             required 
             class="register__input"
           />
-          <i class="ri-lock-2-fill"></i>
+          <i 
+            class="ri-eye-fill password-toggle"
+            @click="togglePasswordVisibility"
+          ></i>
         </div>
       </div>
       
@@ -70,10 +73,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { useToastStore } from '@/store/toast';
 
 const router = useRouter();
-const toastStore = useToastStore();
 
 const form = ref({
   name: '',
@@ -85,60 +86,51 @@ const form = ref({
 const errors = ref([]);
 const showPassword = ref(false);
 
-const validateForm = () => {
-  errors.value = [];
-  
-  if (!form.value.name.trim()) {
-    errors.value.push('Name is required');
-  }
-  
-  if (!form.value.email.trim()) {
-    errors.value.push('Email is required');
-  } else if (!/^\S+@\S+\.\S+$/.test(form.value.email)) {
-    errors.value.push('Invalid email format');
-  }
-  
-  if (!form.value.password1) {
-    errors.value.push('Password is required');
-  } else if (form.value.password1.length < 8) {
-    errors.value.push('Password must be at least 8 characters');
-  }
-  
-  if (form.value.password1 !== form.value.password2) {
-    errors.value.push('Passwords do not match');
-  }
-
-  return errors.value.length === 0;
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
 };
 
 const handleSubmit = async () => {
-  if (!validateForm()) return;
+  errors.value = [];
+  
+  // Frontend validation
+  if (form.value.password1 !== form.value.password2) {
+    errors.value.push("Passwords do not match!");
+    return;
+  }
+
+  // Prepare data for backend
+  const registrationData = {
+    name: form.value.name,
+    email: form.value.email,
+    password: form.value.password1
+  };
 
   try {
-    const response = await axios.post('/api/signup/', form.value);
-    
-    if (response.data.message === 'success') {
-      toastStore.showToast(5000, 'Registration successful! Please login.', 'bg-emerald-500');
-      router.push('/');
-    }
+    // Send POST request to Django backend
+    const response = await axios.post(
+      '/api/signup/',registrationData
+    );
+    // Handle successful registration
+    router.push('/'); // Redirect to login page
   } catch (error) {
-    if (error.response) {
-      // Handle Django validation errors
-      const errorData = error.response.data;
-      errors.value = Object.values(errorData).flat();
+    // Handle errors
+    if (error.response?.data) {
+      // Convert Django error object to array
+      const backendErrors = error.response.data;
+      for (const key in backendErrors) {
+        backendErrors[key].forEach(err => {
+          errors.value.push(`${key}: ${err}`);
+        });
+      }
     } else {
-      errors.value = ['Network error. Please try again.'];
+      errors.value.push("Registration failed. Please try again.");
     }
   }
-};
-
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value;
 };
 </script>
 
 <style scoped>
-/* Import base styles from CSS file */
 @import "@/pages/RegisterPage/components/css/register-styles.css";
 
 .password-toggle {
@@ -150,3 +142,9 @@ const togglePasswordVisibility = () => {
   opacity: 0.8;
 }
 </style>
+
+
+
+
+
+

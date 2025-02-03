@@ -61,14 +61,12 @@
   </div>
 </template>
 
-<script setup>
+<!-- <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { useToastStore } from '@/store/toast';
 
 const router = useRouter();
-const toastStore = useToastStore();
 
 const email = ref('');
 const password = ref('');
@@ -76,44 +74,53 @@ const rememberMe = ref(false);
 const errors = ref([]);
 const loading = ref(false);
 
-const validateForm = () => {
-  errors.value = [];
-  
-  if (!email.value.trim()) {
-    errors.value.push('Email is required');
-  }
-  
-  if (!password.value) {
-    errors.value.push('Password is required');
-  }
+</script> -->
 
-  return errors.value.length === 0;
-};
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
+const router = useRouter();
+
+const email = ref('');
+const password = ref('');
+const rememberMe = ref(false);
+const errors = ref([]);
+const loading = ref(false);
+
+// This is the login logic that calls the backend API to validate user credentials.
 const handleSubmit = async () => {
-  if (!validateForm()) return;
-
   loading.value = true;
-  
+  errors.value = []; // Clear previous errors
+
   try {
+    // Replace the URL with your actual login endpoint.
     const response = await axios.post('/api/login/', {
       email: email.value,
-      password: password.value
+      password: password.value,
+      rememberMe: rememberMe.value, // if your backend expects this value
     });
 
-    if (response.data.success) {
-      // Store token based on remember me choice
-      const storage = rememberMe.value ? localStorage : sessionStorage;
-      storage.setItem('authToken', response.data.token);
-
-      toastStore.showToast(3000, 'Login successful!', 'bg-emerald-500');
+    // Check for a successful response. 
+    // Adjust this condition based on your API's response structure.
+    if (response.data && response.data.success) {
+      // Optionally, you might store a token here, e.g.:
+      // localStorage.setItem('token', response.data.token);
+      // Redirect to the game page
       router.push('/game');
+    } else {
+      // If the backend didn't return success, add an error message.
+      errors.value.push('Invalid email or password.');
     }
   } catch (error) {
-    if (error.response) {
-      errors.value = [error.response.data.message || 'Invalid credentials'];
+    // Handle errors returned from the server or network issues.
+    if (error.response && error.response.data) {
+      // The backend might return an object with error details.
+      // Adjust this as necessary for your backend.
+      errors.value.push(error.response.data.error || 'An error occurred during login.');
     } else {
-      errors.value = ['Network error. Please try again.'];
+      errors.value.push('Network error or server is not available.');
     }
   } finally {
     loading.value = false;

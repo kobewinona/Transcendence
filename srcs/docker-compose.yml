@@ -21,13 +21,14 @@ services:
       interval: 1m
       timeout: 10s
       retries: 5
-    
 
   postgres:
     container_name: postgres
     build:
       context: './requirements/postgresql'
       dockerfile: Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     networks:
@@ -42,8 +43,6 @@ services:
       timeout: 5s
       retries: 3
     restart: always
-
-
 
   frontend:
     container_name: frontend
@@ -94,6 +93,7 @@ networks:
 volumes:
   frontend_build:
   database-postgres:
+  postgres_data:
 
 secrets:
   ssl_certificate:
