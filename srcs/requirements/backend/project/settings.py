@@ -21,10 +21,33 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'custom_auth.User'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=30), #access token is valid for 30 days
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=180), #refresh token is valid for 180 days
-    'ROTATE_REFRESH_TOKENS': False, #refresh token is not going to be rotated
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True, #receive a new refresh token along with the new access token.
+    'AUTH_COOKIE': 'refresh_token',  # Custom cookie name for refresh token
+    'AUTH_COOKIE_HTTP_ONLY': True,   # Secure cookie
+    'AUTH_COOKIE_SECURE': False,     # Set True for HTTPS
+    'AUTH_COOKIE_SAMESITE': 'Lax',   # Restrict cross-site requests
 }
+    # "ALGORITHM": "HS256",
+    # "SIGNING_KEY": settings.SECRET_KEY,
+    # "VERIFYING_KEY": "",
+    # "AUDIENCE": None,
+    # "ISSUER": None,
+    # "JSON_ENCODER": None,
+    # "JWK_URL": None,
+    # "LEEWAY": 0,
+
+    # "AUTH_HEADER_TYPES": ("Bearer",),
+#     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+#     "USER_ID_FIELD": "id",
+#     "USER_ID_CLAIM": "user_id",
+#     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+#     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+#     "TOKEN_TYPE_CLAIM": "token_type",
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

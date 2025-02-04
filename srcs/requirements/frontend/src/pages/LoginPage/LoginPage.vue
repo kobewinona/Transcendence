@@ -61,21 +61,6 @@
   </div>
 </template>
 
-<!-- <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-
-const router = useRouter();
-
-const email = ref('');
-const password = ref('');
-const rememberMe = ref(false);
-const errors = ref([]);
-const loading = ref(false);
-
-</script> -->
-
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -85,7 +70,6 @@ const router = useRouter();
 
 const email = ref('');
 const password = ref('');
-const rememberMe = ref(false);
 const errors = ref([]);
 const loading = ref(false);
 
@@ -95,23 +79,22 @@ const handleSubmit = async () => {
   errors.value = []; // Clear previous errors
 
   try {
-    // Replace the URL with your actual login endpoint.
     const response = await axios.post('/api/login/', {
       email: email.value,
       password: password.value,
-      rememberMe: rememberMe.value, // if your backend expects this value
+
+      // rememberMe: rememberMe.value,
     });
 
     // Check for a successful response. 
     // Adjust this condition based on your API's response structure.
     if (response.data && response.data.success) {
-      // Optionally, you might store a token here, e.g.:
-      // localStorage.setItem('token', response.data.token);
-      // Redirect to the game page
+      console.log("Access token received:", response.data.access);
       router.push('/game');
     } else {
       // If the backend didn't return success, add an error message.
       errors.value.push('Invalid email or password.');
+      
     }
   } catch (error) {
     // Handle errors returned from the server or network issues.
