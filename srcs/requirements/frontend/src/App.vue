@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
+import axios from 'axios';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -10,9 +11,20 @@ const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // Handle logout
-const handleLogout = () => {
-  authStore.logout();
-  router.push('/');
+const handleLogout = async () => {
+  try {
+    const response = await axios.post('/api/logout/', {});
+    if (response.data && response.data.message === 'logged out') {
+      // Clear local storage access token
+      localStorage.removeItem('access_token');
+      // Redirect to login page
+      router.push('/');
+    } else {
+      console.error('Logout failed');
+    }
+  } catch (error) {
+    console.error('Error during logout:', error);
+  }
 };
 </script>
 

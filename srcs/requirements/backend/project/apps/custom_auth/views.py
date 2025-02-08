@@ -8,6 +8,8 @@ from rest_framework import status
 from .models import User
 from .serializer import UserSerializer
 from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
+
 
 #create endpounts 
 
@@ -41,7 +43,9 @@ class LoginView(APIView):
          
         if user:
             refresh = RefreshToken.for_user(user)
-            response = Response({'access': str(refresh.access_token)}) #Generates a new refresh token for the user.
+            response = Response({
+                'success': True,
+                'access': str(refresh.access_token)}) #Generates a new refresh token for the user.
             response.set_cookie(
                 key='refresh_token',
                 value=str(refresh),
@@ -54,6 +58,10 @@ class LoginView(APIView):
         print("Authentication failed")
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             
+class AuthStatusView(APIView):
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access this endpoint
+    def get(self, request):
+        return Response({'isAuthenticated': True})
     
 class LogoutView(APIView):
     def post(self, request):

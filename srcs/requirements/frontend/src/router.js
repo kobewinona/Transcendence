@@ -3,7 +3,7 @@ import LoginPage from '@/pages/LoginPage/LoginPage.vue';
 import Game from '@/features/Game/Game.vue';
 import RegisterPage from '@/pages/RegisterPage/RegisterPage.vue';
 import NotFound from '@/pages/NotFound.vue';
-import { useAuthStore } from '@/store/auth';
+import axios from 'axios';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -34,13 +34,20 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/');
-  } else if (to.meta.requiresAuth === false && authStore.isAuthenticated) {
-    next('/game');
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth) {
+    try {
+      const response = await axios.get('/api/auth-status/');
+      if (!response.data.isAuthenticated) {
+        next('/');
+        console.log('laize bastard');
+      } else {
+        next();
+      }
+    } catch (error) {
+      console.error('Error checking authentication status:', error);
+      next('/');
+    }
   } else {
     next();
   }
