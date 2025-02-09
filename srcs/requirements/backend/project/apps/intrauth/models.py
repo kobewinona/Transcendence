@@ -9,6 +9,7 @@ class IntraUser(models.Model):
     avatar = models.CharField(max_length=100)
     wallet = models.IntegerField(default=0)
     last_login = models.DateTimeField(blank=True, null=True)
+    email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
     is_anonymous = models.BooleanField(default=False)

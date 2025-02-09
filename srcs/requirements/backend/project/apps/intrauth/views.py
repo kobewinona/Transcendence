@@ -7,17 +7,12 @@ from rest_framework.decorators import api_view
 import requests
 import os
 
-# Create your views here.
-
-#put in an .env, maybe
-
-
 def home(request : HttpRequest) -> JsonResponse:
     return JsonResponse({"msg" : "success"})
 
 @login_required(login_url="/oauth/login/")
-
-def get_authenticated_user(request : HttpRequest) :
+# for future when will add field for the baseuser(only via email now           )
+def get_authenticated_user(request : HttpRequest) : 
     return JsonResponse({"msg": "Authenticated"})
 
 def intra_login(request : HttpRequest):
@@ -26,7 +21,7 @@ def intra_login(request : HttpRequest):
 def intra_logout(request):
     logout(request)
     return redirect('https://localhost/')
-
+# 
 @api_view(['GET'])
 def intra_login_redirect(request : HttpRequest):
     if "code" not in request.GET:
@@ -39,7 +34,7 @@ def intra_login_redirect(request : HttpRequest):
         return redirect('https://localhost/')
     else:
         return Response({"error": "Authentication failed"}, status=400)
-
+    
 def exchange_code(code: str):
     data = {
         "client_id": os.getenv("CLIENT_ID"),
@@ -66,3 +61,49 @@ def is_logged_in(request):
         return JsonResponse({"is_logged_in": True})
     else:
         return JsonResponse({"is_logged_in": False})
+    
+    
+    
+    # def oauth_42(req):
+    # if req.user.is_authenticated:
+    #     return JsonResponse({'message': 'User is already authenticated'})
+    # # try:
+    # client_id = os.environ["CLIENT_ID"]
+    # client_secret = os.environ["CLIENT_SECRET"]
+    # redirect_uri = "https://localhost:8443/oauth_42"
+    # code = req.GET.get("code")
+    # state = req.GET.get("state")
+    # csrf_token = get_token(req)
+    # oauth = OAuth2Session(
+    #     client_id,
+    #     redirect_uri=redirect_uri
+    # )
+    # if not code:
+    #     req.session['_next'] = req.GET.get("next", "/home")
+    #     authorization_url, state = oauth.authorization_url(
+    #         'https://api.intra.42.fr/oauth/authorize',
+    #         kwargs = {
+    #             'csrfToken': csrf_token
+    #         }
+    #     )
+    #     return redirect(authorization_url)
+    #     # return JsonResponse({'redirect_uri': authorization_url})
+    # elif state:
+    #     token = oauth.fetch_token(
+    #         'https://api.intra.42.fr/oauth/token',
+    #         client_secret=client_secret,
+    #         code=code,
+    #         kwargs = {
+    #             'csrfToken': csrf_token
+    #         }
+    #     )
+    #     user_data = oauth.get('https://api.intra.42.fr/v2/me').json()
+    #     if User.objects.filter(email=user_data.get('email')).exists():
+    #         return oauth_login(req, user_data)
+    #     else:
+    #         return oauth_register(req, oauth, user_data)
+    # # except Exception as error:
+    # #     return redirect("/")
+    #     # return JsonResponse({'message': type(error).__name__})
+    # return redirect("/")
+    # return JsonResponse({'message': 'Oauth fatal error'})
