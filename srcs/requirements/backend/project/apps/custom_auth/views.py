@@ -9,9 +9,22 @@ from .models import User
 from .serializer import UserSerializer
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 #create endpounts 
+
+# def get(self, request):
+#     content = {'message': 'Hello, World!'}
+#     return Response(content)
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
 
 class UserCreateView(APIView):
     authentication_classes = []  # disable authentication
@@ -31,9 +44,8 @@ class UserCreateView(APIView):
     
     
 class LoginView(APIView):
-    authentication_classes = []  # disable authentication
-    permission_classes = []  # disable permission
-    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         email = request.data.get('email') #DRF automatically parses the incoming JSON payload.
         print(f"Trying to authenticate: {email}")
@@ -62,6 +74,9 @@ class AuthStatusView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access this endpoint
     def get(self, request):
         return Response({'isAuthenticated': True})
+
+# class AuthGuard(APIView):
+#     is
     
 class LogoutView(APIView):
     def post(self, request):

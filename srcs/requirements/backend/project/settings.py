@@ -19,6 +19,9 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+AUTHENTICATION_BACKENDS = [
+    'project.apps.intrauth.auth.IntraAuthenticationBackend'
+]
 AUTH_USER_MODEL = 'custom_auth.User'
 
 SIMPLE_JWT = {
@@ -31,28 +34,12 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SECURE': False,     # Set True for HTTPS
     'AUTH_COOKIE_SAMESITE': 'Lax',   # Restrict cross-site requests
 }
-    # "ALGORITHM": "HS256",
-    # "SIGNING_KEY": settings.SECRET_KEY,
-    # "VERIFYING_KEY": "",
-    # "AUDIENCE": None,
-    # "ISSUER": None,
-    # "JSON_ENCODER": None,
-    # "JWK_URL": None,
-    # "LEEWAY": 0,
-
-    # "AUTH_HEADER_TYPES": ("Bearer",),
-#     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-#     "USER_ID_FIELD": "id",
-#     "USER_ID_CLAIM": "user_id",
-#     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
-
-#     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-#     "TOKEN_TYPE_CLAIM": "token_type",
-# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -80,6 +67,7 @@ INSTALLED_APPS = [
     # Custom Project Apps
     'project.apps.pong',
     'project.apps.chat',
+    # 'project.apps.intrauth',
     'project.apps.custom_auth',
     'project.apps.intrauth',
     # 'project.apps.custom_auth.apps.CustomAuthConfig' //if more control needed
@@ -128,15 +116,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
-DATABASES = { #ppppppppoooostrgre 
+DATABASES = { 
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',

@@ -1,19 +1,21 @@
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+const route = useRoute();
 
 export function useAuth() {
   const router = useRouter()
   const loading = ref(false)
   const errors = ref([])
 
-  const handleRegularLogin = async (email, password, rememberMe) => {
+
+  const handleRegularLogin = async (name, password, rememberMe) => {
     loading.value = true
     errors.value = []
 
     try {
       const response = await axios.post('/api/login/', {
-        email,
+        name,
         password,
         remember_me: rememberMe
       })
@@ -37,32 +39,44 @@ export function useAuth() {
   }
 
   const handleOAuthLogin = () => {
-    const OAUTH_CONFIG = {
-      clientId: import.meta.env.CLIENT_ID || `u-s4t2ud-c691b276ef7aa2660fa1d1be08026efd0282c75fdb314fb7307fdcfd7f61d6ce`,
-      redirectUri: encodeURIComponent(import.meta.env.REDIRECT_URI || 'http://localhost/game'),
-      apiUrl: 'https://api.intra.42.fr/oauth/authorize'
-    }
-
-    const queryParams = new URLSearchParams({
-      client_id: OAUTH_CONFIG.clientId,
-      redirect_uri: OAUTH_CONFIG.redirectUri,
-      response_type: 'code',
-      scope: 'public'
-    })
-
-    window.location.href = `${OAUTH_CONFIG.apiUrl}?${queryParams.toString()}`
+      console.log("OAuth login button clicked!"); 
+      const clientId = 'u-s4t2ud-c691b276ef7aa2660fa1d1be08026efd0282c75fdb314fb7307fdcfd7f61d6ce'; //should take from backend
+      const redirectUri = 'https://localhost/game';
+      const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public`;
+      console.log(authUrl);
+      window.location.href = authUrl;
+    // Once the the request approved, the OAuth provider will redirect usr back to specified 
+    // redirect_uri along with an authorization code.
   }
 
-  const handleOAuthCallback = async (code) => {
+  const handleOAuthCallback = async () => {
+    const code = route.query.code;
+  if (!code) {
+    console.error("No OAuth code found in URL!");
+    return;
+  }
+
+  console.log("OAuth code received:", code); // Debugging
+  const backendURL = `/api/oauth/oauth_42/?code=${code}`;
+  console.log("Sending request to backend:", backendURL); // Debugging
+
     try {
-      const response = await axios.get(`/oauth/callback?code=${code}`)
+      // when the user approves application
+      // oAuth will provide code
+
+      //The function makes an httpget request to backend endpoint
+      // including the received code as a query parameter.
+      //and exchanging the Code for an Access Token:
+      const response = await axios.get(`api/oauth/oauth_42/?code=${code}`)
+
       
-      if (response.data?.access) {
-        // Store token in localStorage
+      if (response.data?.access) {//if contains 
+        //should get rid of the localstorage
         localStorage.setItem('token', response.data.access)
         localStorage.setItem('isAuthenticated', 'true')
         
-        // Set axios default header
+        // configuring Axios to include the access token in the Authorization
+        //  header for all future HTTP requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`
         
         router.push('/game')
@@ -100,7 +114,7 @@ export function useAuth() {
     }
   }
 
-  // Initialize axios if token exists
+  // checking for the token in localStorage in case of refresh
   const initializeAuth = () => {
     const token = localStorage.getItem('token')
     if (token) {

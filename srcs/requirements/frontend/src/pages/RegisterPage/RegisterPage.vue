@@ -107,14 +107,14 @@ const handleSubmit = async () => {
   };
 
   try {
-    // Send POST request to Django backend
+    // Send post request to backend
     const response = await axios.post(
       '/api/signup/',registrationData
     );
     // Handle successful registration
     router.push('/'); // Redirect to login page
   } catch (error) {
-    // Handle errors
+    // errrors
     if (error.response?.data) {
       // Convert Django error object to array
       const backendErrors = error.response.data;

@@ -25,8 +25,12 @@ RUN mkdir -p /usr/src/app/static/staticfiles
 # RUN python manage.py migrate --noinput
 EXPOSE 8000
 # Start Daphne server
-CMD sh -c "python3 manage.py makemigrations && \
-           python3 manage.py migrate && \
+# CMD sh -c "python3 manage.py makemigrations && \
+#            python3 manage.py migrate && \
+#            python3 manage.py collectstatic --noinput && \
+#            python3 manage.py runserver 0.0.0.0:8000"
+# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"] 
+CMD sh -c "python3 manage.py makemigrations --noinput && \
+           python3 manage.py migrate --noinput && \
            python3 manage.py collectstatic --noinput && \
-           python3 manage.py runserver 0.0.0.0:8000"
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+           daphne -b 0.0.0.0 -p 8000 project.asgi:application"

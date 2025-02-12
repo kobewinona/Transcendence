@@ -17,8 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from project.apps.intrauth.views import home, intra_login, intra_logout, intra_login_redirect, get_authenticated_user, is_logged_in
-
+# from project.apps.intrauth.views import home, intra_login, intra_logout, intra_login_redirect, get_authenticated_user, is_logged_in
+from project.apps.intrauth.views import home, intra_login, intra_login_redirect, get_authenticated_user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,7 +29,8 @@ urlpatterns = [
     path('auth/user/', get_authenticated_user, name='get_authenticated_user'),
     path('oauth/', home, name='oauth'),
     path('oauth/login/', intra_login, name='oauth_login'),
-    path('oauth/logout/', intra_logout, name='oauth_logout'),
-    path('oauth/login/redirect/', intra_login_redirect, name='oauth_login_redirect'),
-    path('is_logged_in/', is_logged_in, name='is_logged_in')
+    path('oauth/redirect/', intra_login_redirect, name='oauth_login_redirect'),
+    # path('oauth/oauth_42/', oauth_42, name='oauth_logout'),
+    # path('oauth/login/redirect/', intra_login_redirect, name='oauth_login_redirect'),
+    # path('is_logged_in/', is_logged_in, name='is_logged_in')
 ]
