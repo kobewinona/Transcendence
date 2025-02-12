@@ -25,15 +25,23 @@ def intra_login(request : HttpRequest):
     return redirect(auth_url)
 
 def intra_login_redirect(request : HttpRequest):
+    print("Im coming from redirect")
+    if "code" not in request.GET:
+        return redirect("https://localhost/")
     code = request.GET.get("code")
     print("Received code:", code)
     user = exhange_code(code)
-    print(request)
+    print("the request",request)
     intra_user = authenticate(request, user=user)
     intra_user = list(intra_user).pop()
-    print(intra_user)
-    login(request, intra_user) #check session database
-    return redirect("/auth/user/")
+    print("intra_user",intra_user)
+    if intra_user is not None:
+        login(request, intra_user)
+        return redirect('https://localhost/')
+    else:
+        return Response({"error": "Authentication failed"}, status=400)
+    # login(request, intra_user) #check session database
+    # return redirect("/auth/user/")
 
 def exhange_code(code: str):
     data = {
@@ -41,12 +49,13 @@ def exhange_code(code: str):
         "client_secret": os.getenv("CLIENT_SECRET"),
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "http://localhost:8000/oauth/redirect",
+        "redirect_uri": "http://localhost:8000/oauth/redirect/",
         "scope": "identify"
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }
+    print (requests)
     response = requests.post('https://api.intra.42.fr/oauth/token', data=data, headers=headers)
     print("response will be")
     print(response)
@@ -59,3 +68,4 @@ def exhange_code(code: str):
     user = response.json()
     print(user)
     return user
+

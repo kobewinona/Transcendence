@@ -41,7 +41,7 @@ export function useAuth() {
   const handleOAuthLogin = () => {
       console.log("OAuth login button clicked!"); 
       const clientId = 'u-s4t2ud-c691b276ef7aa2660fa1d1be08026efd0282c75fdb314fb7307fdcfd7f61d6ce'; //should take from backend
-      const redirectUri = 'https://localhost/game';
+      const redirectUri = 'http://localhost:8000/oauth/redirect/';
       const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public`;
       console.log(authUrl);
       window.location.href = authUrl;
@@ -130,7 +130,7 @@ export function useAuth() {
     errors,
     handleRegularLogin,
     handleOAuthLogin,
-    handleOAuthCallback,
+    // handleOAuthCallback,
     logout
   }
 }
