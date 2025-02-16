@@ -1,6 +1,6 @@
 <template>
   <ul class="settings">
-    <Section :title="t('menu.settings.game')">
+    <MySection :title="t('menu.settings.game')">
       <div class="settings__item">
         <span>{{ t('menu.settings.game.language') }}</span>
         <CarouselSelect
@@ -11,17 +11,17 @@
           <template #renderOption="{ option }">
             <div class="settings__item-lang-option">
               <CountryFlag class="settings__item-lang-flag" :iso="iso" mode="rounded" />
-              <span class="settings__item-lang-option-text">{{ option.label }}</span>
+              <span class="settings__item-lang-option-text">{{ option?.label }}</span>
             </div>
           </template>
         </CarouselSelect>
       </div>
-    </Section>
+    </MySection>
   </ul>
 </template>
 
 <script setup>
-import { CarouselSelect, Section } from 'components';
+import { CarouselSelect, MySection } from 'components';
 import { LANG_OPTIONS } from 'config';
 import { useLangInject } from 'shared/composables';
 import { computed } from 'vue';

@@ -7,7 +7,11 @@ import { onMounted, onUnmounted, ref } from 'vue';
 
 import { useGameSocketInject } from '../../composables';
 
-const { side, controls } = defineProps({
+const { name, side, controls } = defineProps({
+  name: {
+    type: String,
+    required: true,
+  },
   side: {
     type: String,
     required: true,
@@ -24,6 +28,10 @@ const gameSocket = useGameSocketInject();
 
 const direction = ref(0);
 
+const sendDirection = () => {
+  gameSocket.actions.updatePaddlePosition({ name, side, direction: direction.value });
+};
+
 const handleKeyDown = (event) => {
   if (event.code === controls?.up) {
     direction.value = -1;
@@ -38,10 +46,6 @@ const handleKeyUp = (event) => {
     direction.value = 0;
   }
   sendDirection();
-};
-
-const sendDirection = () => {
-  gameSocket.actions.updatePaddlePosition({ side, direction: direction.value });
 };
 
 onMounted(() => {

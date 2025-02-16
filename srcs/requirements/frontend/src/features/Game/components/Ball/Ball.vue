@@ -1,9 +1,10 @@
 <template>
   <div
-    class="wrapper"
+    v-if="Boolean(positionX && positionY)"
+    class="ball"
     :class="{
-      wrapper_bubbling_vertical: hasBouncedOff === 2 || hasBouncedOff === 4,
-      wrapper_bubbling_horizontal: hasBouncedOff === 1 || hasBouncedOff === 3,
+      ball_bubbling_vertical: hasBouncedOff === 2 || hasBouncedOff === 4,
+      ball_bubbling_horizontal: hasBouncedOff === 1 || hasBouncedOff === 3,
     }"
     :style="{
       ...styles,
@@ -13,27 +14,23 @@
     @animationend="onBubbleAnimationEnd"
   >
     <div
-      class="ball"
+      class="ball__container"
       :class="{
         'curve-splash': isCurveApplied,
         'curve-splash-max': isMaxCurveApplied,
       }"
-      :style="{
-        '--rotate-direction': `${rotateDirection}deg`,
-        '--rotate-duration': `${rotateDuration}s`,
-      }"
+      :style="{ backgroundColor: `var(${color})` }"
       @animationend="onCurveSplashAnimationEnd"
     >
-      <div class="ball__container">
-        <div class="ball__core spinning" :style="{ backgroundImage: `url('${ballSkin}')` }" />
+      <div class="ball__wrapper">
+        <div class="ball__core spinning" :style="{ backgroundImage: `url('${skin}')` }" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// noinspection ES6UnusedImports
-import ballSkin from 'assets/ballSkins/skin2.png';
+import { BALL_REGULAR_TYPE_SKIN_KEY } from 'entities/BallSkin/config/constants.js';
 import { mapRange } from 'shared/lib';
 import { computed, ref, watch } from 'vue';
 
@@ -47,6 +44,17 @@ import {
 
 const { ballWidth, ballHeight } = useGameDimensionsInject();
 const gameSocket = useGameSocketInject();
+
+defineProps({
+  color: {
+    type: String,
+    default: '',
+  },
+  skin: {
+    type: String,
+    default: BALL_REGULAR_TYPE_SKIN_KEY,
+  },
+});
 
 const hasBouncedOff = ref(2);
 const isCurveApplied = ref(false);
@@ -67,7 +75,7 @@ const styles = computed(() => {
   if (positionX.value === undefined || positionY.value === undefined) return {};
 
   const isCenter = positionY.value === 50 && positionX.value === 50;
-  const transitionTime = !isOutOfBounds.value && !isCenter ? 25 : 0;
+  const transitionTime = !isOutOfBounds.value && !isCenter ? 15 : 0;
 
   return {
     width: `${ballWidth.value}%`,
@@ -75,6 +83,8 @@ const styles = computed(() => {
     top: `${positionY.value}%`,
     left: `${positionX.value}%`,
     transition: `top ${transitionTime}ms linear, left ${transitionTime}ms linear, transform 1s linear`,
+    '--rotate-direction': `${rotateDirection.value}deg`,
+    '--rotate-duration': `${rotateDuration.value}s`,
   };
 });
 
@@ -113,7 +123,6 @@ watch(
     hasBouncedOff.value = newValue;
 
     if (newValue === 2 || newValue === 4) {
-      // hasBouncedOff.value = newValue;
       updateBallProperties();
     }
   }
@@ -269,7 +278,7 @@ const onCurveSplashAnimationEnd = () => {
   }
 }
 
-.wrapper {
+.ball {
   --squash-offset: 0;
   --rotate-direction: 0;
   --rotate-duration: 0;
@@ -283,25 +292,22 @@ const onCurveSplashAnimationEnd = () => {
   height: 150px;
 }
 
-.wrapper_bubbling_vertical {
+.ball_bubbling_vertical {
   animation: bubble-anim-vertical 0.4s ease-in-out;
 }
 
-.wrapper_bubbling_horizontal {
+.ball_bubbling_horizontal {
   animation: bubble-anim-horizontal 0.4s ease-in-out;
 }
 
-.ball {
+.ball__container {
   width: 100%;
   height: 100%;
-
-  background-color: var(--primary-color);
   border-radius: 50%;
-
   animation: rotate 4s linear infinite;
 }
 
-.ball.curve-splash::before {
+.ball__container.curve-splash::before {
   content: '';
 
   position: absolute;
@@ -321,7 +327,7 @@ const onCurveSplashAnimationEnd = () => {
   animation: curve-splash-wiggle 1s linear;
 }
 
-.ball.curve-splash-max::after {
+.ball__container.curve-splash-max::after {
   pointer-events: none;
   content: '';
 
@@ -342,7 +348,7 @@ const onCurveSplashAnimationEnd = () => {
   animation: curve-rotate 1s linear;
 }
 
-.ball__container {
+.ball__wrapper {
   overflow: hidden;
   width: 100%;
   height: 100%;

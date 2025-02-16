@@ -4,6 +4,8 @@
   "thai": "ภาษาไทย",
   "french": "Français",
 
+  "player": "Player",
+
   "menu.items.item.quick_start.title": "เริ่มเกมส์",
   "menu.items.item.quick_start.description": "เล่นเกมส์กับ AI",
   "menu.items.item.new_game.title": "เริ่มต้นเกมส์ใหม่",
@@ -17,5 +19,7 @@
 
   "menu.settings": "ตั้งค่า",
   "menu.settings.game": "เกมส์",
-  "menu.settings.game.language": "ภาษา"
+  "menu.settings.game.language": "ภาษา",
+
+  "form.validation.required": "Field is required"
 }

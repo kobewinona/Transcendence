@@ -14,11 +14,19 @@ import {
   PREDICTION_INTERVAL,
 } from './config/constants.js';
 
-const { side } = defineProps({
+const { name, side, index } = defineProps({
+  name: {
+    type: String,
+    required: true,
+  },
   side: {
     type: String,
     required: true,
     validator: (value) => ['left', 'right'].includes(value),
+  },
+  index: {
+    type: Number,
+    required: true,
   },
 });
 
@@ -28,12 +36,8 @@ const ballPositionX = computed(() => gameSocket.ballPositionX.value);
 const ballPositionY = computed(() => gameSocket.ballPositionY.value);
 const ballVelocityX = computed(() => gameSocket.ballVelocityX.value);
 const ballVelocityY = computed(() => gameSocket.ballVelocityY.value);
-const paddleY = computed(() =>
-  side === 'left' ? gameSocket.leftPaddleY.value : gameSocket.rightPaddleY.value
-);
-const paddleSpeed = computed(() =>
-  side === 'left' ? gameSocket.leftPaddleSpeed.value : gameSocket.rightPaddleSpeed.value
-);
+const paddleY = computed(() => gameSocket.paddlePositions.value[index]);
+const paddleSpeed = computed(() => gameSocket.paddleSpeeds.value[index]);
 
 let aiPredictionIntervalId = null;
 let aiMovementFrameId = null;
@@ -41,7 +45,7 @@ const predictedY = ref(50);
 const lastDirection = ref(0);
 
 const sendDirection = (direction) => {
-  gameSocket.actions.updatePaddlePosition({ side, direction });
+  gameSocket.actions.updatePaddlePosition({ name, side, direction });
 };
 
 const predictBallYAtPaddle = () => {
@@ -59,13 +63,11 @@ const predictBallYAtPaddle = () => {
   const timeToPaddle = distanceToPaddleX / Math.abs(ballVelocityX.value);
   let predicted = ballPositionY.value + ballVelocityY.value * timeToPaddle;
 
-  // Handle bouncing off top and bottom boundaries
   while (predicted < 0 || predicted > 100) {
     if (predicted < 0) predicted = -predicted;
     if (predicted > 100) predicted = 200 - predicted;
   }
 
-  // Adjust prediction with paddle width
   predicted = Math.min(
     100 - PADDLE_DEFAULT_WIDTH / 2,
     Math.max(PADDLE_DEFAULT_WIDTH / 2, Math.round(predicted))
@@ -102,14 +104,10 @@ watch(
 watch(
   () => [predictedY.value, paddleY.value],
   ([, paddleY]) => {
-    // Calculate stopping distance based on current speed
     const stoppingDistance = Math.pow(paddleSpeed.value, 2) / (2 * PADDLE_DEFAULT_DEACCELERATION);
-
-    // Adjust bounds with stopping distance
     const lowerBound = predictedY.value - MOVEMENT_WINDOW - stoppingDistance - EARLY_STOP_BUFFER;
     const upperBound = predictedY.value + MOVEMENT_WINDOW + stoppingDistance + EARLY_STOP_BUFFER;
 
-    // Decide movement direction
     if (paddleY < lowerBound) {
       if (lastDirection.value !== 1) {
         lastDirection.value = 1;

@@ -42,6 +42,9 @@ const useWebSocket = (url, options = {}) => {
           if (typeof event.data === 'string') {
             data = JSON.parse(event.data);
           } else if (event.data instanceof ArrayBuffer) {
+            // console.log('📩 Binary data received:', event.data.byteLength, 'bytes');
+            // console.log('🔍 Raw Binary Data:', new Uint8Array(event.data));
+
             data = new DataView(event.data);
           } else if (event.data instanceof Blob) {
             const arrayBuffer = await event.data.arrayBuffer();

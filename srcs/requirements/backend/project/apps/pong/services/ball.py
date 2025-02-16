@@ -13,7 +13,7 @@ from .constants import (PADDLE_BOUNDARY_GRACE_OFFSET,
                         BALL_MAX_VELOCITY_CHANGE_ON_HIT,
                         MAX_CURVE_ANGLE)
 
-logger = logging.getLogger('pong.ball')
+logger = logging.getLogger('game_logs')
 
 
 class Ball:
@@ -22,8 +22,8 @@ class Ball:
         self.velocity = {"x": BALL_MIN_VELOCITY_X, "y": BALL_MIN_VELOCITY_Y}
         self.width = width
         self.height = height
-        self.radius_x = width / 2
-        self.radius_y = height / 2
+        self.radius_x = width / 4
+        self.radius_y = height / 4
         self.is_out_of_bounds = False
         self.curve = 0
         self.bouncedOffSurface = 0
@@ -34,9 +34,16 @@ class Ball:
         self.is_out_of_bounds = False
         self.curve = 0
 
-    def update_radius(self):
-        self.radius_x = self.width / 2
-        self.radius_y = self.height / 2
+    def set_ball_dimensions(self, width, height):
+        self.width = width
+        self.height = height
+        self.radius_x = width / 4
+        self.radius_y = height / 4
+        logger.debug(
+            f"✓ Ball dimensions set successfully: "
+            f"width {self.width}, height {self.height}, "
+            f"radius_x {self.radius_x}, radius_y {self.radius_y}"
+        )
 
     def calculate_velocity_adjustment(self, paddle_position, paddle_height):
         relative_hit_position = (self.position["y"] - paddle_position) / (paddle_height / 2)
@@ -57,63 +64,96 @@ class Ball:
             if abs(self.curve) < 0.05:
                 self.curve = 0
 
-    async def update_ball(self, paddle_left, paddle_right):
+    async def update_ball(self, paddles):
         self.apply_curve()
         self.position["x"] += self.velocity["x"]
         self.position["y"] += self.velocity["y"]
-        self.update_radius()
 
         # Ball boundaries
         ball_left = self.position["x"] - self.radius_x
         ball_right = self.position["x"] + self.radius_x
         ball_top = self.position["y"] - self.radius_y
         ball_bottom = self.position["y"] + self.radius_y
-        paddle_left_lower_boundary = paddle_left.position - (paddle_left.height / 2) - PADDLE_BOUNDARY_GRACE_OFFSET
-        paddle_left_upper_boundary = paddle_left.position + (paddle_left.height / 2) + PADDLE_BOUNDARY_GRACE_OFFSET
-        paddle_right_lower_boundary = paddle_right.position - (paddle_right.height / 2) - PADDLE_BOUNDARY_GRACE_OFFSET
-        paddle_right_upper_boundary = paddle_right.position + (paddle_right.height / 2) + PADDLE_BOUNDARY_GRACE_OFFSET
 
-        if self.is_out_of_bounds and 0 <= self.position["x"] <= 100:
-            self.is_out_of_bounds = False
+        for paddle in paddles:
+            paddle_lower_boundary = paddle.position - (paddle.height / 2) - PADDLE_BOUNDARY_GRACE_OFFSET
+            paddle_upper_boundary = paddle.position + (paddle.height / 2) + PADDLE_BOUNDARY_GRACE_OFFSET
 
-        # Handle Paddles Collisions
-        if not self.is_out_of_bounds:
-            # Handle Left Paddle Collision
-            if (ball_left + 2 <= paddle_left.width and
-                    paddle_left_lower_boundary <= self.position["y"] <= paddle_left_upper_boundary):
-                speed_adjustment = paddle_left.speed / 10
-                self.velocity["x"] -= BALL_VELOCITY_X_INCREMENT + speed_adjustment
-                self.velocity["x"] *= -1
-                self.position["x"] = paddle_left.width + self.radius_x  # Prevent ball from clipping through
-                self.velocity["y"] += self.calculate_velocity_adjustment(paddle_right.position, paddle_right.height)
-                self.bouncedOffSurface = 4
-                await asyncio.sleep(0.04)
-                self.curve += paddle_left.speed * 3
-                logger.debug("✅ Ball collided with LEFT paddle")
+            if self.is_out_of_bounds and ball_left > 0 and ball_right < 100:
+                self.is_out_of_bounds = False
+                logger.debug(
+                    f"ⓘ Ball is set to be in bounds: "
+                    f"ball_left { ball_left }, ball_left + width { ball_left + self.width }, "
+                    f"ball_right { ball_right }, ball_right + width { ball_right + self.width }, "
+                )
 
-            # Handle Right Paddle Collision
-            if (ball_right - 2 >= 100 - paddle_right.width and
-                    paddle_right_lower_boundary <= self.position["y"] <= paddle_right_upper_boundary):
-                speed_adjustment = paddle_left.speed / 10
-                self.velocity["x"] += BALL_VELOCITY_X_INCREMENT + speed_adjustment
-                self.velocity["x"] *= -1
-                self.position["x"] = 100 - paddle_right.width - self.radius_x  # Prevent ball from clipping through
-                self.velocity["y"] += self.calculate_velocity_adjustment(paddle_right.position, paddle_right.height)
-                self.bouncedOffSurface = 2
-                await asyncio.sleep(0.04)
-                self.curve -= paddle_right.speed * 3
-                logger.debug("✅ Ball collided with RIGHT paddle")
+            # Handle Paddles Collisions
+            if not self.is_out_of_bounds:
+                # Handle Left Paddle Collision
+                if paddle.side == "left":
+                    if (self.position["x"] <= paddle.width and
+                            paddle_lower_boundary <= self.position["y"] <= paddle_upper_boundary):
+                        logger.debug(f"paddle.width { paddle.width }")
+                        logger.debug(f"ⓘ Ball collided with LEFT paddle: ball_left { ball_left } position_x { self.position['x'] }")
 
-            if ball_left + self.width < paddle_left.width or ball_right + self.width >= 100 - paddle_right.width:
-                self.is_out_of_bounds = True
+                        self.velocity["x"] -= BALL_VELOCITY_X_INCREMENT + paddle.speed / 10
+                        self.velocity["x"] *= -1
+                        self.position["x"] = paddle.width + self.radius_x  # Prevent ball from clipping through
+                        logger.debug(f"position_x after clipping handler { self.position['x']}")
+                        self.velocity["y"] += self.calculate_velocity_adjustment(paddle.position, paddle.height)
+                        self.bouncedOffSurface = 4
+                        await asyncio.sleep(0.04)
+                        self.curve += paddle.speed * 3
+                        return {
+                            "position": self.position,
+                            "velocity": self.velocity,
+                            "is_out_of_bounds": self.is_out_of_bounds,
+                            "curve": self.curve,
+                            "bounced_off_surface": self.bouncedOffSurface
+                        }
+
+                # Handle Right Paddle Collision
+                if paddle.side == "right":
+                    if (self.position["x"] >= 100 - paddle.width and
+                            paddle_lower_boundary <= self.position["y"] <= paddle_upper_boundary):
+                        logger.debug(f"ⓘ Ball collided with RIGHT paddle: ball_right { ball_right } position_x { self.position['x'] }")
+
+                        self.velocity["x"] += BALL_VELOCITY_X_INCREMENT + paddle.speed / 10
+                        self.velocity["x"] *= -1
+                        self.position["x"] = 100 - paddle.width - self.radius_x  # Prevent ball from clipping through
+                        logger.debug(f"position_x after clipping handler { self.position['x']}")
+                        self.velocity["y"] += self.calculate_velocity_adjustment(paddle.position, paddle.height)
+                        self.bouncedOffSurface = 2
+                        await asyncio.sleep(0.04)
+                        self.curve -= paddle.speed * 3
+                        return {
+                            "position": self.position,
+                            "velocity": self.velocity,
+                            "is_out_of_bounds": self.is_out_of_bounds,
+                            "curve": self.curve,
+                            "bounced_off_surface": self.bouncedOffSurface
+                        }
+
+                if ball_left <= 0 or ball_right >= 100:
+                    logger.debug(
+                        f"ⓘ Ball is set to be out of bounds: "
+                        f"ball_left { ball_left }, ball_left + width { ball_left + self.width }, "
+                        f"ball_right { ball_right }, ball_right + width { ball_right + self.width }, "
+                    )
+                    self.is_out_of_bounds = True
 
         # Handle Top and Bottom Collisions
-        if ball_top + 0.5 <= 0 or ball_bottom - 0.5 >= 100:
-            if ball_top + 0.5 <= 0:
+        if ball_top <= 0 or ball_bottom >= 100:
+            self.velocity["y"] *= -1
+
+            if ball_top <= 0:
+                logger.debug(f"ball_top: { ball_top }")
+                self.position["y"] = 0 + self.radius_y
                 self.bouncedOffSurface = 1
             else:
+                logger.debug(f"ball_bottom: { ball_bottom }")
+                self.position["y"] = 100 - self.radius_y
                 self.bouncedOffSurface = 3
-            self.velocity["y"] *= -1
 
         # Reset when ball goes out of boundaries
         if ((ball_left + self.width + BALL_OFF_BOUNDS_OFFSET) < 0 or

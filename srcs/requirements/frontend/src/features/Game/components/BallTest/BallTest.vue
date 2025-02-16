@@ -1,3 +1,40 @@
+<template>
+  <div class="container">
+    <div class="params">
+      <h1>Params</h1>
+      <p>Velocity: {{ velocity }}</p>
+      <p>Curve: {{ curve }}</p>
+    </div>
+    <div class="controls__containers">
+      <div class="controls">
+        <button @click="() => changeVelocity(-1)">velocity -</button>
+        <button @click="() => changeVelocity(0)">velocity 0</button>
+        <button @click="() => changeVelocity(1)">velocity +</button>
+      </div>
+      <div class="controls">
+        <button @click="() => decrementCurve()">curve -</button>
+        <button @click="() => resetCurve()">curve 0</button>
+        <button @click="() => incrementCurve()">curve +</button>
+      </div>
+    </div>
+    <div
+      class="ball"
+      :style="{
+        '--rotate-direction': `${rotateDirection}deg`,
+      }"
+    >
+      <div
+        class="ball__core"
+        :style="{
+          backgroundImage: `url('${ballSkin}')`,
+          '--rotate-duration': `${rotateDuration}s`,
+        }"
+        :class="{ spinning: velocity !== 0 }"
+      />
+    </div>
+  </div>
+</template>
+
 <script setup>
 import ballSkin from 'assets/ballSkins/skin1.png';
 import { computed, ref } from 'vue';
@@ -43,43 +80,6 @@ const decrementCurve = () => {
   rotateDuration.value = Math.abs(1 - curve.value);
 };
 </script>
-
-<template>
-  <div class="container">
-    <div class="params">
-      <h1>Params</h1>
-      <p>Velocity: {{ velocity }}</p>
-      <p>Curve: {{ curve }}</p>
-    </div>
-    <div class="controls__containers">
-      <div class="controls">
-        <button @click="() => changeVelocity(-1)">velocity -</button>
-        <button @click="() => changeVelocity(0)">velocity 0</button>
-        <button @click="() => changeVelocity(1)">velocity +</button>
-      </div>
-      <div class="controls">
-        <button @click="() => decrementCurve()">curve -</button>
-        <button @click="() => resetCurve()">curve 0</button>
-        <button @click="() => incrementCurve()">curve +</button>
-      </div>
-    </div>
-    <div
-      class="ball"
-      :style="{
-        '--rotate-direction': `${rotateDirection}deg`,
-      }"
-    >
-      <div
-        class="ball__core"
-        :style="{
-          backgroundImage: `url('${ballSkin}')`,
-          '--rotate-duration': `${rotateDuration}s`,
-        }"
-        :class="{ spinning: velocity !== 0 }"
-      />
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .container {

@@ -10,7 +10,9 @@ logger = logging.getLogger('pong.paddle')
 
 
 class Paddle:
-    def __init__(self, position=50, boundary=100, width=PADDLE_DEFAULT_WIDTH, height=PADDLE_DEFAULT_HEIGHT):
+    def __init__(self, name, side, position=50, boundary=100, width=PADDLE_DEFAULT_WIDTH, height=PADDLE_DEFAULT_HEIGHT):
+        self.name = name
+        self.side = side
         self.position = position
         self.direction = 0
         self.speed = 0

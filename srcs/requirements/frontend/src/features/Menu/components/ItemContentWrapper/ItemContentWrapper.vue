@@ -1,7 +1,7 @@
 <template>
   <div :class="[className, 'item-content', { 'item-content_opened': isOpen }]">
     <h1 class="item-content__title">{{ title }}</h1>
-    <button class="item-content__close-btn" type="button" @click="onClose">
+    <button class="item-content__close-btn" type="button" @click="handleClose">
       <component
         :is="svgComponents['DeclineIcon']"
         v-if="isVueComponent(svgComponents['DeclineIcon'])"
@@ -18,9 +18,8 @@
 <script setup>
 import { svgComponents } from 'shared/lib';
 import { isVueComponent } from 'shared/lib';
-import { defineProps } from 'vue';
 
-const { className, title, isOpen, onClose } = defineProps({
+const { className, title, isOpen } = defineProps({
   className: {
     type: String,
     default: '',
@@ -33,11 +32,13 @@ const { className, title, isOpen, onClose } = defineProps({
     type: Boolean,
     default: false,
   },
-  onClose: {
-    type: Function,
-    default: () => {},
-  },
 });
+
+const emit = defineEmits(['on-close']);
+
+const handleClose = () => {
+  emit('on-close');
+};
 </script>
 
 <style scoped>
@@ -56,7 +57,7 @@ const { className, title, isOpen, onClose } = defineProps({
 
   opacity: 0;
 
-  transition: all 0.4s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 /* noinspection CssUnusedSymbol */
@@ -73,7 +74,7 @@ const { className, title, isOpen, onClose } = defineProps({
   background-color: var(--dark-color-opacity-95);
   border-radius: 12px;
 
-  transition: all 0.4s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 .item-content__close-btn {
@@ -90,7 +91,7 @@ const { className, title, isOpen, onClose } = defineProps({
 }
 
 .item-content__close-btn:hover {
-  opacity: 0.5;
+  opacity: 0.7;
   transition: opacity 0.2s ease-in-out;
 }
 

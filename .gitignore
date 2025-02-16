@@ -12,6 +12,8 @@ Desktop.ini
 /node_modules
 /.pnp
 .pnp.js
+venv/
+**/venv/
 
 # production
 /build

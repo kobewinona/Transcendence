@@ -14,7 +14,7 @@
         v-for="(row, rowIndex) in MENU_ITEMS(t)"
         :key="rowIndex"
         class="menu__row"
-        :style="{ height: row.height || '50%' }"
+        :style="{ height: row?.height || '50%' }"
       >
         <ul class="menu__list">
           <li
@@ -35,10 +35,15 @@
             <ItemContentWrapper
               :title="item.title"
               :is-open="menuItemOpenedKey === item.key"
-              :on-close="closeMenuItem"
+              @on-close="closeMenuItem"
             >
-              <template v-if="item.content">
-                <component :is="item.content" v-if="isVueComponent(item.content)" />
+              <template v-if="menuItemOpenedKey === item.key">
+                <component
+                  :is="item.content"
+                  v-if="isVueComponent(item.content)"
+                  :is-open="menuItemOpenedKey === item.key"
+                  @on-game-settings-change="onGameSettingsChange"
+                />
                 <span v-else>{{ item.content }}</span>
               </template>
             </ItemContentWrapper>
@@ -46,8 +51,11 @@
               <button
                 class="menu__item-button"
                 :class="{ 'menu__item-button_clicked': menuItemClickedKey === item.key }"
-                :disabled="item.disabled"
-                @click="() => handleMenuOptionSelect(item.key)"
+                :disabled="
+                  item.disabled ||
+                  (MODES_WITH_SOCKET_REQUIRED.includes(item.key) && gameSocket.isError.value)
+                "
+                @click="() => handleMenuOptionSelect(item)"
                 @animationend="onMenuAnimationEnd"
               >
                 <span class="menu__item-title">{{ item.title }}</span>
@@ -81,22 +89,20 @@ import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
+import { useGameSocketInject } from '../Game/composables/index.js';
 import { ItemContentWrapper } from './components';
-import { MENU_ITEMS } from './config/constants.js';
+import { MENU_ITEMS, MODES_WITH_SOCKET_REQUIRED } from './config/constants.js';
 
-const props = defineProps({
+const gameSocket = useGameSocketInject();
+
+const { isOpen } = defineProps({
   isOpen: {
     type: Boolean,
     default: true,
   },
 });
 
-const emit = defineEmits([
-  'on-disable-cursor',
-  'on-enable-cursor',
-  'on-force-ball-position',
-  'on-menu-option-select',
-]);
+const emit = defineEmits(['on-menu-option-select', 'on-game-settings-change']);
 
 const menuContainerRef = ref(null);
 const menuItemRefs = ref(Array.from({ length: MENU_ITEMS(t).length }, () => []));
@@ -175,10 +181,18 @@ const handleMouseLeave = () => {
 };
 
 // Add timout id clearance
-const handleMenuOptionSelect = (optionKey) => {
-  emit('on-menu-option-select', optionKey);
+const handleMenuOptionSelect = ({ key: optionKey, content }) => {
+  if (!content) {
+    emit('on-menu-option-select', optionKey);
+    return;
+  }
+
   menuItemClickedKey.value = optionKey;
   menuItemOpenedKey.value = optionKey;
+};
+
+const onGameSettingsChange = (newGameSettings) => {
+  emit('on-game-settings-change', newGameSettings);
 };
 
 const onMenuAnimationEnd = () => {
@@ -187,7 +201,7 @@ const onMenuAnimationEnd = () => {
 
 const onTransitionEnd = (event) => {
   if (event.target.classList.contains('menu')) {
-    if (!props.isOpen) {
+    if (!isOpen) {
       isMenuHidden.value = true;
     }
   }
@@ -195,7 +209,7 @@ const onTransitionEnd = (event) => {
 
 // Handle keyboard navigation
 const handleKeydown = (event) => {
-  if (isMenuHidden.value || !props.isOpen) return;
+  if (isMenuHidden.value || !isOpen) return;
 
   if (navigationMethod.value !== 'keyboard') {
     navigationMethod.value = 'keyboard';
@@ -230,7 +244,7 @@ const handleKeydown = (event) => {
     case 'Enter': {
       const activeItem = MENU_ITEMS(t)[activeRowIndex.value]?.items[activeItemIndex.value];
       if (activeItem && !activeItem.disabled) {
-        handleMenuOptionSelect(activeItem.key);
+        handleMenuOptionSelect(activeItem);
       }
       return;
     }
@@ -242,7 +256,7 @@ const handleKeydown = (event) => {
 
 // Save menu item id
 watch(
-  () => props.isOpen,
+  () => isOpen,
   (newValue) => {
     if (newValue) {
       updateMenuContainerDimensions();
@@ -322,7 +336,6 @@ onUnmounted(() => {
   z-index: 90;
   top: 0;
   left: 0;
-  transform: scale(1.5);
 
   width: 100%;
   height: 100%;
@@ -335,7 +348,6 @@ onUnmounted(() => {
 }
 
 .menu_opened {
-  transform: scale(1);
   opacity: 1;
   transition: all 0.2s ease-in-out;
 }

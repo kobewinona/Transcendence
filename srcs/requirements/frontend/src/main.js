@@ -3,8 +3,10 @@ import './vendor/normalize.css';
 import './vendor/fonts/lexend_exa/lexend_exa.css';
 import './styles.css';
 import './assets/styles/global.css';
+import 'ant-design-vue/dist/reset.css';
 
 import CountryFlag from '@dzangolab/vue-country-flag-icon';
+import Antd, { ConfigProvider } from 'ant-design-vue';
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 
@@ -33,6 +35,8 @@ Object.entries(svgComponents).forEach(([name, component]) => {
 });
 
 app.component('CountryFlag', CountryFlag);
+app.component('ConfigProvider', ConfigProvider);
 
 app.use(i18n);
+app.use(Antd);
 app.mount('#app');

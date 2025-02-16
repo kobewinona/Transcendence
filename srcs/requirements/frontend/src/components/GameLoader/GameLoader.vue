@@ -26,6 +26,8 @@ import { svgComponents } from 'shared/lib';
 import { isVueComponent } from 'shared/lib';
 
 const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = AnimatedShapes;
+
+// TODO add prop for icon
 </script>
 
 <!--suppress CssUnusedSymbol -->
@@ -51,7 +53,7 @@ const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = Anim
 @keyframes fade-in-out {
   0%,
   100% {
-    opacity: 0.5;
+    opacity: 0.7;
   }
 
   50% {
@@ -60,7 +62,8 @@ const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = Anim
 }
 
 .layout {
-  position: relative;
+  position: absolute;
+  z-index: 400;
 
   overflow: hidden;
   display: flex;
@@ -69,6 +72,11 @@ const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = Anim
 
   width: 100%;
   height: 100%;
+
+  opacity: 1;
+  background-color: var(--dark-color);
+  border: 2px solid var(--light-color-opacity-50);
+  border-radius: 12px;
 }
 
 .carousel {

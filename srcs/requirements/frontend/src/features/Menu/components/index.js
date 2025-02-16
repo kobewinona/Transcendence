@@ -1,5 +1,5 @@
 import ItemContentWrapper from './ItemContentWrapper/ItemContentWrapper.vue';
-import QuickStart from './QuickStart/QuickStart.vue';
+import NewGame from './NewGame/NewGame.vue';
 import Settings from './Settings/Settings.vue';
 
-export { ItemContentWrapper, QuickStart, Settings };
+export { ItemContentWrapper, NewGame, Settings };

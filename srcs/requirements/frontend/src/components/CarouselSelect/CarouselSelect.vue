@@ -31,7 +31,7 @@
 // noinspection JSFileReferences
 import { svgComponents } from 'shared/lib';
 import { isVueComponent } from 'shared/lib';
-import { computed, defineEmits, defineProps, ref, useSlots, watch } from 'vue';
+import { computed, ref, useSlots, watch } from 'vue';
 
 const slots = useSlots();
 
@@ -106,7 +106,7 @@ watch(
 }
 
 .carousel-select__button:hover {
-  opacity: 0.5;
+  opacity: 0.7;
   transition: opacity 0.2s ease-in-out;
 }
 
