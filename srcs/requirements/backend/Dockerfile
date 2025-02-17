@@ -15,6 +15,10 @@ COPY . .
 # Create STATIC_ROOT directory
 RUN mkdir -p /usr/src/app/staticfiles
 
+# Create logs directory and log file
+RUN mkdir -p /usr/src/app/project/logs
+RUN touch /usr/src/app/project/logs/game_logs.log
+
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
