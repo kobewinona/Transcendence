@@ -92,7 +92,7 @@ networks:
 
 volumes:
   frontend_build:
-  database-postgres:
+  database-postgres: 
   postgres_data:
 
 secrets:

@@ -13,6 +13,7 @@ daphne==4.1.2
 Django==5.1.4
 django-cors-headers==4.6.0
 django-environ==0.12.0
+django-otp==1.5.4
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
 hyperlink==21.0.0
@@ -26,9 +27,11 @@ pyasn1_modules==0.4.1
 pycparser==2.22
 PyJWT==2.10.1
 pyOpenSSL==24.3.0
+pyotp==2.9.0
 python-dotenv==1.0.1
 requests==2.32.3
 requests-oauthlib==2.0.0
+resend==2.6.0
 rest-framework-simplejwt==0.0.2
 service-identity==24.2.0
 setuptools==75.6.0
@@ -40,4 +43,5 @@ txaio==23.1.1
 typing_extensions==4.12.2
 urllib3==2.3.0
 watchfiles==1.0.4
+whitenoise==6.9.0
 zope.interface==7.2

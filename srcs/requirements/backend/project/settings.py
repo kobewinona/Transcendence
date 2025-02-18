@@ -13,26 +13,42 @@ load_dotenv()
 SECRET_KEY = 'django-insecure-k1!svx5pna71t3&y#w!9iie&5p2)7)0acb9%@k788a@2y=9r54'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
+AUTH_USER_MODEL = 'intrauth.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    'project.apps.intrauth.auth.IntraAuthenticationBackend'
+    # 'project.apps.intrauth.auth.IntraAuthenticationBackend'
+    'django.contrib.auth.backends.ModelBackend',
 ]
-AUTH_USER_MODEL = 'custom_auth.User'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True, #receive a new refresh token along with the new access token.
+    
+    #more
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False, #receive a new refresh token along with the new access token.
+    'UPDATE_LAST_LOGIN': False,
     'AUTH_COOKIE': 'refresh_token',  # Custom cookie name for refresh token
     'AUTH_COOKIE_HTTP_ONLY': True,   # Secure cookie
     'AUTH_COOKIE_SECURE': False,     # Set True for HTTPS
     'AUTH_COOKIE_SAMESITE': 'Lax',   # Restrict cross-site requests
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
 REST_FRAMEWORK = {
@@ -67,10 +83,8 @@ INSTALLED_APPS = [
     # Custom Project Apps
     'project.apps.pong',
     'project.apps.chat',
-    # 'project.apps.intrauth',
     'project.apps.custom_auth',
     'project.apps.intrauth',
-    # 'project.apps.custom_auth.apps.CustomAuthConfig' //if more control needed
 ]
 
 MIDDLEWARE = [
@@ -82,6 +96,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',#compresses and caches static files, reducing load times.
 
 
 ]
@@ -169,11 +184,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = 'static/staticfiles/' #writes ti system directory
-# STATIC_ROOT = BASE_DIR / 'staticfiles' #writes to project directory
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
+# STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = '/media/'
+STATIC_URL = '/static/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -190,12 +211,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost",
-    "https://localhost",
-     "http://localhost:5173"
-     "http://127.0.0.1"
-     
-]
+    "http://*",
+	"https://*",
+] 
 
 LOGGING = {
     'version': 1,

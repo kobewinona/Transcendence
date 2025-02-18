@@ -1,12 +1,14 @@
 from django.contrib.auth.backends import BaseBackend
-from .models import IntraUser
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class IntraAuthenticationBackend(BaseBackend):
-    def authenticate(self, request, user) -> IntraUser:
-        user_found = IntraUser.objects.filter(id=user['id'])
+    def authenticate(self, request, user) -> User:
+        user_found = User.objects.filter(id=user['id'])
         if len(user_found) == 0:
-            print("Creating new IntraUser")
-            new_user = IntraUser.objects.create_new_intra_user(user)
+            print("Creating new User")
+            new_user = User.objects.create_new_intra_user(user)
             print(new_user)
             return new_user
         return user_found
@@ -14,6 +16,6 @@ class IntraAuthenticationBackend(BaseBackend):
 
     def get_user(self, user_id):
         try:
-            return IntraUser.objects.get(pk=user_id)
-        except IntraUser.DoesNotExist:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
             return None

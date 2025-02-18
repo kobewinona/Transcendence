@@ -10,7 +10,10 @@ DATA_PATH := /home/$(USER)/data/
 ENV_PATH = ./srcs/.env
 COMPOSE_FILE := ./srcs/docker-compose.yml
 
+.PHONY: setup run restart list volume clean Stopbackend
+
 all: setup run
+
 
 setup:
 	@echo "Setting up the environment for ft_transcendence..."
@@ -28,6 +31,10 @@ run: setup
 stop:
 	@echo "Stopping the services for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
+Stopbackend:
+	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
+	docker rmi srcs-backend 
+
 
 restart: stop run
 
@@ -69,4 +76,3 @@ prune:
 	@echo "Pruning the environment for ft_transcendence..."
 	@docker system prune -a
 
-.PHONY: setup run restart list volume clean

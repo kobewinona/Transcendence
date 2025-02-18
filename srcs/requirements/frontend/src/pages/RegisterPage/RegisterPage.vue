@@ -93,28 +93,23 @@ const togglePasswordVisibility = () => {
 const handleSubmit = async () => {
   errors.value = [];
   
-  // Frontend validation
+  // to sens one pas
   if (form.value.password1 !== form.value.password2) {
     errors.value.push("Passwords do not match!");
     return;
   }
-
   // Prepare data for backend
   const registrationData = {
     name: form.value.name,
     email: form.value.email,
     password: form.value.password1
   };
-
   try {
-    // Send post request to backend
     const response = await axios.post(
       '/api/signup/',registrationData
     );
-    // Handle successful registration
-    router.push('/'); // Redirect to login page
+    router.push('/');
   } catch (error) {
-    // errrors
     if (error.response?.data) {
       // Convert Django error object to array
       const backendErrors = error.response.data;

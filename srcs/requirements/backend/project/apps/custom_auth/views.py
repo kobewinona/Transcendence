@@ -5,27 +5,21 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework import status
-from .models import User
-from .serializer import UserSerializer
+from .serializer import UserSerializer,  OTPRequestSerializer, OTPVerifySerializer
 from django.contrib.auth import authenticate
+import os
+#otp verification
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
-#create endpounts 
-
-# def get(self, request):
-#     content = {'message': 'Hello, World!'}
-#     return Response(content)
-
-def get_tokens_for_user(user):
-    refresh = RefreshToken.for_user(user)
-
-    return {
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
-    }
+import pyotp
+import resend
+import requests
+# from datetime import datetime, timedelta #
 
 
+User = get_user_model()
+###registration
 class UserCreateView(APIView):
     authentication_classes = []  # disable authentication
     permission_classes = []  
@@ -43,32 +37,95 @@ class UserCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
-class LoginView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    def post(self, request):
-        email = request.data.get('email') #DRF automatically parses the incoming JSON payload.
-        print(f"Trying to authenticate: {email}")
-        password = request.data.get('password') 
-        user = authenticate(request, username=email, password=password) #returns a user object
-        print (f"Authenticated user: {user}")
+###OTP creation    
+    
+resend = os.environ.get('RESEND') 
+
+def generate_otp():
+    totp = pyotp.TOTP(pyotp.random_base32(), interval=300)  # 5 minutes validity
+    return totp.now()
+def send_email(email, otp):
+	url = 'https://api.resend.com/emails'
+	headers = {
+		'Authorization': f'Bearer {resend}',
+		'Content-Type': 'application/json'
+	}
+	data = {
+		"from": "onboarding<noreply@blabla.bg>",
+		"to": [email],
+		"subject": "Use it smartly",
+		"html": f"<p>Dont loose it {otp}. We will never send it again</p>"
+	}
+	try:
+		response = requests.post(url, headers=headers, json=data)
+		if response.status_code == 200:
+			print('Email sent successfully')
+		else:
+			print(f'Failed to send email: {response.status_code}')
+			print(response.text)
+	except Exception as e:
+		print(f'Error sending email: {str(e)}')
+        
+class GetOTPView(APIView):
+	# permission_classes = [AllowAny]  # Разрешить доступ без аутентификации
+
+	def post(self, request):
+		serializer = OTPRequestSerializer(data=request.data)
+		if serializer.is_valid():
+			username = serializer.validated_data['username']
+			try:
+				user = User.objects.get(username=username)
+				otp = generate_otp()
+				cache.set(f'otp_{username}', otp, timeout=300)  # save for 5 min in cashe
+				print(f"Wow OTP is sent and is: {otp}")
+				send_email(user.email, otp)
+				return Response({'otp': otp}, status=status.HTTP_200_OK)
+			except User.DoesNotExist:
+				return Response({'error': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyOTPView(APIView):
+	def post(self, request):
+		serializer = OTPVerifySerializer(data=request.data)
+		if serializer.is_valid():
+			username = serializer.validated_data['username']
+			received_otp = serializer.validated_data['otp']
+			stored_otp = cache.get(f'otp_{username}')
+			if stored_otp and received_otp == stored_otp:
+				cache.delete(f'otp_{username}')
+				return Response({'message': 'OTP verified successfully'}, status=status.HTTP_200_OK)
+			return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+###login
+    
+# class LoginView(APIView):
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request):
+#         email = request.data.get('email') #DRF automatically parses the incoming JSON payload.
+#         print(f"Trying to authenticate: {email}")
+#         password = request.data.get('password') 
+#         user = authenticate(request, userusername=email, password=password) #returns a user object
+#         print (f"Authenticated user: {user}")
          
-        if user:
-            refresh = RefreshToken.for_user(user)
-            response = Response({
-                'success': True,
-                'access': str(refresh.access_token)}) #Generates a new refresh token for the user.
-            response.set_cookie(
-                key='refresh_token',
-                value=str(refresh),
-                httponly=True,
-                secure=True,
-                samesite='Lax',
-                path='api/token/refresh/'
-            )
-            return response
-        print("Authentication failed")
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+#         if user:
+#             refresh = RefreshToken.for_user(user)
+#             response = Response({
+#                 'success': True,
+#                 'access': str(refresh.access_token)}) #Generates a new refresh token for the user.
+#             response.set_cookie(
+#                 key='refresh_token',
+#                 value=str(refresh),
+#                 httponly=True,
+#                 secure=True,
+#                 samesite='Lax',
+#                 path='api/token/refresh/'
+#             )
+#             return response
+#         print("Authentication failed")
+#         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             
 class AuthStatusView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access this endpoint

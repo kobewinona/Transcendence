@@ -7,35 +7,86 @@ export function useAuth() {
   const router = useRouter()
   const loading = ref(false)
   const errors = ref([])
+  
 
 
-  const handleRegularLogin = async (name, password, rememberMe) => {
+  const RegularLoginSendOTP = async (email, password, rememberMe) => {
     loading.value = true
     errors.value = []
 
     try {
-      const response = await axios.post('/api/login/', {
-        name,
+      const otpData = { email };
+      const tokenResponse = await axios.post('/api/token/', otpData, {
+        email,
         password,
         remember_me: rememberMe
       })
+      if (tokenResponse.status >= 200 && tokenResponse.status < 300){
+        const tokenData = tokenResponse.data;
 
-      if (response.data?.access) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.data.access)
-        localStorage.setItem('isAuthenticated', 'true')
-        
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`
-        
-        router.push('/game')
+      const responseOTP = await axios.post('api/get-otp/', otpData,
+      {
+          headers: {
+            'Authorization' : `Bearer ${tokenData.access}`,
+          },
+          withCredentials: true,// Include cookies if needed
+      });
+        if (responseOTP.status >= 200 && responseOTP.status < 300) {
+          console.log('OTP Response:', responseOTP.data);
+        } else {
+          console.error('Failed to send OTP:', responseOTP.statusText);
+        }
       } else {
-        errors.value.push('Authentication failed. Please try again.')
+        console.error('Failed to get token:', tokenResponse.statusText);
       }
     } catch (error) {
-      handleError(error)
-    } finally {
-      loading.value = false
+      //for both requests
+      if (error.response) {
+        console.error('Error Response:', error.response.data);
+      } else if (error.request) {
+        // No response from the server
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
     }
+  }
+
+  const checkOTP = async(email, password, otp) => {
+      try{
+        const respone =  await axios.post('/api/token/', {
+            email,
+            password,
+            otp
+        })
+        if (respone.status >= 200 && respone.status < 300 ){
+            const otpData = { email, otp };
+            const tokenData = tokenResponse.data;
+
+            const responseOtp = await axios.post('/api/verify-otp/', otpData, 
+              {
+                headers: {
+                  'Authorization' : `Bearer ${tokenData.access}`,
+                },
+                withCredentials: true,// Include cookies if needed
+            });
+            if (responseOtp.status >= 200 && responseOtp.status < 300 ) {
+              const errorText = await responseOtp.text();
+              setError("wrong otp. try again");
+              console.log(errorText)
+            } else {
+              setError('')
+              setToken(tokenData)
+              console.log('JWT is set');
+              router.push('/game')
+            }
+          } else {
+          setError("wrong credentials (checking otp)");
+        }
+      }
+      catch (error) {
+        console.error('wrong credentials (checking otp):', error);
+      }
   }
 
   const handleOAuthLogin = () => {
@@ -49,45 +100,7 @@ export function useAuth() {
     // redirect_uri along with an authorization code.
   }
 
-  const handleOAuthCallback = async () => {
-    const code = route.query.code;
-  if (!code) {
-    console.error("No OAuth code found in URL!");
-    return;
-  }
-
-  console.log("OAuth code received:", code); // Debugging
-  const backendURL = `/api/oauth/oauth_42/?code=${code}`;
-  console.log("Sending request to backend:", backendURL); // Debugging
-
-    try {
-      // when the user approves application
-      // oAuth will provide code
-
-      //The function makes an httpget request to backend endpoint
-      // including the received code as a query parameter.
-      //and exchanging the Code for an Access Token:
-      const response = await axios.get(`api/oauth/oauth_42/?code=${code}`)
-
-      
-      if (response.data?.access) {//if contains 
-        //should get rid of the localstorage
-        localStorage.setItem('token', response.data.access)
-        localStorage.setItem('isAuthenticated', 'true')
-        
-        // configuring Axios to include the access token in the Authorization
-        //  header for all future HTTP requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`
-        
-        router.push('/game')
-      } else {
-        errors.value.push('OAuth authentication failed. Please try again.')
-      }
-    } catch (error) {
-      handleError(error)
-    }
-  }
-
+  
   const logout = async () => {
     try {
       await axios.post('/api/logout/')
@@ -128,9 +141,9 @@ export function useAuth() {
   return {
     loading,
     errors,
-    handleRegularLogin,
+    RegularLoginSendOTP,
+    checkOTP,
     handleOAuthLogin,
-    // handleOAuthCallback,
     logout
   }
 }
