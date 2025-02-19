@@ -11,11 +11,22 @@ from project.apps.custom_auth.views import UserCreateView, GetOTPView, VerifyOTP
 from django.conf import settings
 from django.conf.urls.static import static
 
+""" 
+    don’t need to define each URL pattern manually.
+    Only register views with the router, which 
+    then automatically generates the necessary CRUD routes.
+    for profile
+
+"""
+# from rest_framework.routers import DefaultRouter
+
+# router = DefaultRouter()
+# router.register(r'profile', ProfileViewSet)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
-    # Redirect root URL to /login/
-    path('', RedirectView.as_view(url='login/')),
+    # path('', RedirectView.as_view(url='login/')),
+    #intra oauth
     path('auth/user/', get_authenticated_user, name='get_authenticated_user'),
     path('oauth/', home, name='oauth'),
     path('oauth/login/', intra_login, name='oauth_login'),
