@@ -6,35 +6,17 @@
 
       <div class="register__inputs">
         <div class="register__box">
-          <input 
-            type="text" 
-            v-model="form.name" 
-            placeholder="Full Name" 
-            required 
-            class="register__input" 
-          />
+          <input type="text"  v-model="form.username" placeholder="Full username" required class="register__input"/>
           <i class="ri-user-fill"></i>
         </div>
 
         <div class="register__box">
-          <input 
-            type="email" 
-            v-model="form.email" 
-            placeholder="Email ID" 
-            required 
-            class="register__input" 
-          />
+          <input type="email" v-model="form.email" placeholder="Email ID" required class="register__input" />
           <i class="ri-mail-fill"></i>
         </div>
 
         <div class="register__box">
-          <input 
-            :type="showPassword ? 'text' : 'password'"
-            v-model="form.password1" 
-            placeholder="Password" 
-            required 
-            class="register__input"
-          />
+          <input :type="showPassword ? 'text' : 'password'" v-model="form.password1" placeholder="Password" required class="register__input"/>
           <i 
             class="ri-eye-fill password-toggle"
             @click="togglePasswordVisibility"
@@ -77,7 +59,7 @@ import axios from 'axios';
 const router = useRouter();
 
 const form = ref({
-  name: '',
+  username: '',
   email: '',
   password1: '',
   password2: ''
@@ -100,7 +82,7 @@ const handleSubmit = async () => {
   }
   // Prepare data for backend
   const registrationData = {
-    name: form.value.name,
+    username: form.value.username,
     email: form.value.email,
     password: form.value.password1
   };

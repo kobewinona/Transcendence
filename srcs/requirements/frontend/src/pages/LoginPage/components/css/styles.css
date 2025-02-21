@@ -150,7 +150,7 @@ img {
   border-radius: 4rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.9s;
+  transition: background-color 0.4s;
 }
  
 
@@ -186,7 +186,7 @@ img {
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  transition: background-color 1s;
+  transition: background-color 0.4s;
   margin-top: 20px;
   margin-bottom: 0.8rem;
   margin-top: 0.2rem;
@@ -195,5 +195,32 @@ img {
 
 .login__oauth-button:hover {
   background-color: #b3005a;
-  transition: background-color 1s;
+  transition: background-color 0.4s;
+}
+
+.login__otp-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login__otp-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 150px;
+}
+
+.login__verify-otp-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login__verify-otp-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }

@@ -7,23 +7,18 @@ export function useAuth() {
   const router = useRouter()
   const loading = ref(false)
   const errors = ref([])
-  
 
-
-  const RegularLoginSendOTP = async (email, password, rememberMe) => {
+  const sendOTP = async (username, password) =>{
     loading.value = true
     errors.value = []
-
     try {
-      const otpData = { email };
+      const otpData = { username, password };
       const tokenResponse = await axios.post('/api/token/', otpData, {
-        email,
+        username,
         password,
-        remember_me: rememberMe
       })
       if (tokenResponse.status >= 200 && tokenResponse.status < 300){
         const tokenData = tokenResponse.data;
-
       const responseOTP = await axios.post('api/get-otp/', otpData,
       {
           headers: {
@@ -36,15 +31,15 @@ export function useAuth() {
         } else {
           console.error('Failed to send OTP:', responseOTP.statusText);
         }
+        return true;
       } else {
         console.error('Failed to get token:', tokenResponse.statusText);
+        return false;
       }
     } catch (error) {
-      //for both requests
       if (error.response) {
         console.error('Error Response:', error.response.data);
       } else if (error.request) {
-        // No response from the server
         console.error('No response received:', error.request);
       } else {
         console.error('Error:', error.message);
@@ -52,15 +47,15 @@ export function useAuth() {
     }
   }
 
-  const checkOTP = async(email, password, otp) => {
+  const checkOTP = async(username, password, otp) => {
       try{
         const respone =  await axios.post('/api/token/', {
-            email,
+            username,
             password,
             otp
         })
         if (respone.status >= 200 && respone.status < 300 ){
-            const otpData = { email, otp };
+            const otpData = { username, otp };
             const tokenData = tokenResponse.data;
 
             const responseOtp = await axios.post('/api/verify-otp/', otpData, 
@@ -141,7 +136,8 @@ export function useAuth() {
   return {
     loading,
     errors,
-    RegularLoginSendOTP,
+    // tokenData,
+    sendOTP,
     checkOTP,
     handleOAuthLogin,
     logout

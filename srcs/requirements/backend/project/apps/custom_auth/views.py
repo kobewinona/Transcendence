@@ -15,6 +15,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 import pyotp
 import resend
 import requests
+from django.core.cache import cache
 # from datetime import datetime, timedelta #
 
 
@@ -51,7 +52,7 @@ def send_email(email, otp):
 		'Content-Type': 'application/json'
 	}
 	data = {
-		"from": "onboarding<noreply@blabla.bg>",
+		"from": "onboarding <noreply@birgabon.me>",
 		"to": [email],
 		"subject": "Use it smartly",
 		"html": f"<p>Dont loose it {otp}. We will never send it again</p>"
@@ -67,9 +68,9 @@ def send_email(email, otp):
 		print(f'Error sending email: {str(e)}')
         
 class GetOTPView(APIView):
-	# permission_classes = [AllowAny]  # Разрешить доступ без аутентификации
 
 	def post(self, request):
+     	# print('in api great')
 		serializer = OTPRequestSerializer(data=request.data)
 		if serializer.is_valid():
 			username = serializer.validated_data['username']

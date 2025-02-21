@@ -31,16 +31,19 @@ run: setup
 stop:
 	@echo "Stopping the services for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
-Stopbackend:
+stopbackend:
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
-	docker rmi srcs-backend 
+	docker rmi srcs-backend
+stopfront:
+	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
+	docker rmi srcs-nginx
+	docker rmi srcs-frontend
 
 
 restart: stop run
 
 rebuild:
 	@$(COMPOSE_CMD) up -d --build
-
 
 list:
 	@echo "List of services running for ft_transcendence..."
@@ -51,19 +54,8 @@ volume:
 	@docker volume ls
 
 clean:
-#	docker system prune -f -a --volumes || true
-#	docker stop $$(docker ps -qa) || true
-#	docker rm $$(docker ps -qa) || true
-#	docker rmi $$(docker images -qa) || true
-#	docker volume rm $$(docker volume ls -q) || true
-#	docker network rm $$(docker network ls -q) 2> /dev/null || true
-#	@rm -rf ./secrets
-#	@rm -rf ./srcs/requirements/frontend/build
-#	@rm -rf ./srcs/requirements/frontend/package-lock.json
-	
-
 	@echo "Cleaning up the environment for ft_transcendence..."
-	docker system prune -f -a --volumes || true
+	docker system prune -f -a --volumes
 	@docker compose -f $(COMPOSE_FILE) down
 	@docker stop $(docker ps -qa) 2>/dev/null || true
 	@docker rm $(docker ps -qa) 2>/dev/null || true
