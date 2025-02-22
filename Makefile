@@ -20,7 +20,6 @@ setup:
 
 run: setup
 	@echo "Running the services for ft_transcendence..."
-	@bash ./srcs/requirements/tools/create_ssl_cert.sh
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) up --build -d && \
 	echo "Services are up and running." || \
 	echo "Error: Unable to run the services."
@@ -54,7 +53,6 @@ clean:
 	@docker rmi -f $(docker images -qa) 2>/dev/null || true
 	@docker volume rm $(docker volume ls -q) 2>/dev/null || true
 	@docker network rm $(docker network ls -q) 2>/dev/null || true
-	@rm -rf ./secrets
 	@rm -rf ./srcs/requirements/frontend/build
 	@rm -rf ./srcs/requirements/frontend/package-lock.json
 

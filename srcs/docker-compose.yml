@@ -6,8 +6,14 @@ services:
       dockerfile: Dockerfile
     environment:
       - DJANGO_SETTINGS_MODULE=project.settings
+      - VAULT_ADDR=http://vault:8200
     networks:
       - ft_transcendence
+    depends_on:
+      vault:
+        condition: service_healthy
+    volumes:
+      - vault_token:/vault/token/backend
     expose:
       - 8000
     restart: always
@@ -44,13 +50,12 @@ services:
       - "443:443"
     volumes:
       - frontend_build:/usr/share/nginx/html
+      - vault_cert:/vault/certs
     networks:
       - ft_transcendence
     depends_on:
-      - frontend
-    secrets:
-      - ssl_certificate
-      - ssl_certificate_key
+      vault:
+        condition: service_healthy
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
@@ -58,15 +63,47 @@ services:
       timeout: 30s
       retries: 5
 
+  vault:
+    container_name: vault
+    build:
+      context: ./requirements/vault
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "127.0.0.1:8200:8200"
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+      VAULT_API_ADDR: "http://vault:8200"
+    volumes:
+      - ./requirements/vault/conf/vault.hcl:/vault/config/vault.hcl
+      - ./requirements/vault/tools:/vault/scripts
+      - vault_build:/vault/data
+      - vault_token:/vault/token
+    networks:
+      - ft_transcendence
+    secrets:
+      - vault_secrets_json
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 networks:
   ft_transcendence:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
 
 volumes:
   frontend_build:
+  vault_build:
+  vault_token:
+  vault_cert:
 
 secrets:
-  ssl_certificate:
-    file: ../secrets/ssl/certificate.crt
-  ssl_certificate_key:
-    file: ../secrets/ssl/certificate.key
+  vault_secrets_json:
+    file: ../secrets/secrets.json
