@@ -66,7 +66,6 @@
 <script setup>
   
   import { ref } from 'vue'
-  // import OtpInput from '.@/pages/LoginPage/components/composables/otp.vue'
   import { useAuth} from '@/pages/LoginPage/components/composables/useAuth'
 
   const username = ref('');
@@ -88,11 +87,10 @@
       loading.value = true;
       const otpSentSuccessfully = await sendOTP(username.value, password.value);
       if (otpSentSuccessfully) {
-      // Set isOTPSent to true only if sendOTP succeeds
+      //true only if sendOTP succeeds
         isOTPSent.value = true;
         console.log(isOTPSent.value, "isOTPSent");
     } else {
-      // Handle the case where sendOTP fails but doesn't throw an error
         errors.value.push('Failed to send OTP. Please try again.');
        }
       console.log(isOTPSent.value, "isOTPSent");
@@ -114,7 +112,7 @@
       const isVerified = await checkOTP(username.value, password.value, otp);
       if (isVerified){
         console.log("boooomba");
-        router.push('/game');
+        router.push({ name: 'MainPage' });
       } else{
         errors.value.push('Invalid OTP. Please try again.');
       }
@@ -134,7 +132,6 @@
     } else {
       otpArray.value[index] = value;
     }
-
     //next input field
     if (value && index < otpLength.value - 1) {
       document.querySelectorAll('.input')[index + 1].focus();
@@ -144,18 +141,18 @@
     event.preventDefault();
     const pastedData = event.clipboardData.getData('text').trim();
 
-    // Populate the OTP fields with the pasted data
+    //populate the OTP fields with the pasted data
     for (let i = 0; i < pastedData.length && i < otpLength.value; i++) {
       otpArray.value[index + i] = pastedData[i];
     }
 
-    // Focus on the last populated field
+    //focus on the last populated field
     const lastPopulatedIndex = Math.min(index + pastedData.length, otpLength.value - 1);
     document.querySelectorAll('.input')[lastPopulatedIndex].focus();
   };
   const handleEnter = (index, event) => {
     if (event.key === 'Backspace' && !otpArray.value[index] && index > 0) {
-      // Move focus to the previous field if Backspace is pressed on an empty field
+      //move focus to the previous field if Backspace is pressed on an empty field
       otpArray.value[index - 1] = '';
       document.querySelectorAll('.input')[index - 1].focus();
     }
@@ -164,35 +161,5 @@
 
 <style scoped>
   @import "@/pages/LoginPage/components/css/styles.css";
-  .otp {
-  display: flex;
-  gap: 1rem;
-  margin: 1rem auto;
-  width: 80%;
-  justify-content: center;
-}
-
-.input {
-  outline: none;
-  width: 2rem;
-  display: flex;
-  justify-content: center;
-  padding: 0px;
-  margin-right: 1rem;
-  color: inherit;
-  border: 1px solid #222222;
-  border-radius: 8px;
-  padding: 0.85rem;
-  padding-right: 0;
-  font-family: inherit;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 20px;
-  appearance: none;
-  letter-spacing: normal;
-}
-.input:focus {
-  border: 2px solid #222222;
-}
 
 </style>

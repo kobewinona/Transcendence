@@ -107,7 +107,7 @@ export function useAuth() {
             } else {
               setToken(tokenData) // in components 
               console.log('JWT is set');
-              router.push('/game')
+              router.push('/mainpage')
             }
           } else {
             errors.value.push('Invalid OTP. Please try again.');

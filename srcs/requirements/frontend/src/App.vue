@@ -1,19 +1,27 @@
 <template>
   <ConfigProvider :theme="ANTD_THEME_CONFIG">
     <!--  <div class="no-cursor-overlay" :class="{ 'no-cursor-overlay_active': isCursorDisabled }" />-->
-    <div class="grain-overlay" />
-    <MainPage />
+    <!-- <div class="grain-overlay" /> -->
+    <!-- <LoginPage /> -->
+    <main class="layout">
+      <router-view />
+  </main>
   </ConfigProvider>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
 import { provideGameSocket } from 'features/Game/composables/useGameSocket.js';
 import { MainPage } from 'pages';
+import { RegisterPage } from 'pages';
+import { LoginPage } from 'pages';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 import { ANTD_THEME_CONFIG } from './config/constants.js';
 import { i18n } from './main.js';
 import { provideLang } from './shared/composables';
+
+const router = useRouter();
 
 provideLang(i18n);
 provideGameSocket(import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/pong/');
