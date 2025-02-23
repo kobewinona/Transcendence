@@ -148,6 +148,17 @@ CSRF_TRUSTED_ORIGINS = [
     "https://localhost",
 ]
 
+# Ensure logs directory and log file exist
+LOGS_DIR = os.path.join(os.path.dirname(__file__), 'logs')
+LOG_FILE = os.path.join(LOGS_DIR, 'game_logs.log')
+
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+
+if not os.path.exists(LOG_FILE):
+    with open(LOG_FILE, 'w'):
+        pass
+
 LOGGING = {
     "version": 1,
     'disable_existing_loggers': False,
