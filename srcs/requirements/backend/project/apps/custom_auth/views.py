@@ -97,44 +97,13 @@ class VerifyOTPView(APIView):
 				return Response({'message': 'OTP verified successfully'}, status=status.HTTP_200_OK)
 			return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-###login
-    
-# class LoginView(APIView):
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-#     def post(self, request):
-#         email = request.data.get('email') #DRF automatically parses the incoming JSON payload.
-#         print(f"Trying to authenticate: {email}")
-#         password = request.data.get('password') 
-#         user = authenticate(request, userusername=email, password=password) #returns a user object
-#         print (f"Authenticated user: {user}")
-         
-#         if user:
-#             refresh = RefreshToken.for_user(user)
-#             response = Response({
-#                 'success': True,
-#                 'access': str(refresh.access_token)}) #Generates a new refresh token for the user.
-#             response.set_cookie(
-#                 key='refresh_token',
-#                 value=str(refresh),
-#                 httponly=True,
-#                 secure=True,
-#                 samesite='Lax',
-#                 path='api/token/refresh/'
-#             )
-#             return response
-#         print("Authentication failed")
-#         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+            
             
 class AuthStatusView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access this endpoint
     def get(self, request):
         return Response({'isAuthenticated': True})
-
-# class AuthGuard(APIView):
-#     is
+    
     
 class LogoutView(APIView):
     def post(self, request):

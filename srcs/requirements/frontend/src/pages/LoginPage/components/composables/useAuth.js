@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+import { setToken, unsetToken, getToken, getTokenPayload } from '@/components/tokenUtils';
 const route = useRoute();
 
 export function useAuth() {
@@ -11,6 +12,11 @@ export function useAuth() {
   const sendOTP = async (username, password) =>{
     loading.value = true
     errors.value = []
+    if (!username || !password) {
+      errors.value.push('Both username and password fields must be filled.');
+      loading.value = false;
+      return false;
+    }
     try {
       const otpData = { username, password };
       const tokenResponse = await axios.post('/api/token/', otpData, {
@@ -19,6 +25,7 @@ export function useAuth() {
       })
       if (tokenResponse.status >= 200 && tokenResponse.status < 300){
         const tokenData = tokenResponse.data;
+        
       const responseOTP = await axios.post('api/get-otp/', otpData,
       {
           headers: {
@@ -30,34 +37,63 @@ export function useAuth() {
           console.log('OTP Response:', responseOTP.data);
         } else {
           console.error('Failed to send OTP:', responseOTP.statusText);
+          errors.value.push('Failed to send OTP');
         }
         return true;
       } else {
         console.error('Failed to get token:', tokenResponse.statusText);
+        errors.value.push('Failed to get token');
         return false;
       }
     } catch (error) {
-      if (error.response) {
-        console.error('Error Response:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error:', error.message);
-      }
+      handleError(error)
     }
   }
-
+  const handleError = (error) => {
+    if (error.response) {
+      // Handle specific status codes
+      if (error.response.status === 401) {
+        // Unauthorized access
+        errors.value.push('No such user or invalid credentials.')
+        loading.value = false;
+        return false;
+      } else if (error.response.data?.error) {
+        errors.value.push(error.response.data.error)
+        loading.value = false;
+      } else if (error.response.data?.message) {
+        errors.value.push(error.response.data.message)
+        loading.value = false;
+      } else {
+        errors.value.push('An unexpected error occurred. Please try again.')
+        loading.value = false;
+      }
+    } else if (error.request) {
+      // No response received
+      errors.value.push('No response received from the server.')
+      loading.value = false;
+      return false;
+    } else {
+      // Other errors
+      errors.value.push('An unexpected error occurred. Please try again.')
+      loading.value = false;
+      return false;
+    }
+  }
   const checkOTP = async(username, password, otp) => {
+    console.log('check OTP');
       try{
-        const respone =  await axios.post('/api/token/', {
+          const tokenResponse =  await axios.post('/api/token/', {
             username,
             password,
             otp
         })
-        if (respone.status >= 200 && respone.status < 300 ){
-            const otpData = { username, otp };
-            const tokenData = tokenResponse.data;
+        console.log('before cheing status', tokenResponse.status);
+        if (tokenResponse.status >= 200 && tokenResponse.status < 300 ){
 
+            const otpData = { username, otp };
+            console.log(otpData);
+            const tokenData = tokenResponse.data;
+            console.log('JWT is set');
             const responseOtp = await axios.post('/api/verify-otp/', otpData, 
               {
                 headers: {
@@ -65,22 +101,21 @@ export function useAuth() {
                 },
                 withCredentials: true,// Include cookies if needed
             });
-            if (responseOtp.status >= 200 && responseOtp.status < 300 ) {
-              const errorText = await responseOtp.text();
-              setError("wrong otp. try again");
+            if (responseOtp.status < 200 && responseOtp.status > 300 ) {
+              const errorText = await responseOtp.text(); //wait for code error with promise
               console.log(errorText)
             } else {
-              setError('')
-              setToken(tokenData)
+              setToken(tokenData) // in components 
               console.log('JWT is set');
               router.push('/game')
             }
           } else {
-          setError("wrong credentials (checking otp)");
+            errors.value.push('Invalid OTP. Please try again.');
         }
       }
       catch (error) {
         console.error('wrong credentials (checking otp):', error);
+        errors.value.push('Invalid OTP. Please try again.');
       }
   }
 
@@ -98,45 +133,16 @@ export function useAuth() {
   
   const logout = async () => {
     try {
-      await axios.post('/api/logout/')
-      // Clear localStorage
-      localStorage.removeItem('token')
-      localStorage.removeItem('isAuthenticated')
-      // Clear axios header
-      delete axios.defaults.headers.common['Authorization']
-      router.push('/login')
+      unsetToken();
+      router.push('/login');
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
-  }
-
-  const handleError = (error) => {
-    if (error.response?.data?.error) {
-      errors.value.push(error.response.data.error)
-    } else if (error.response?.data?.message) {
-      errors.value.push(error.response.data.message)
-    } else if (!navigator.onLine) {
-      errors.value.push('Please check your internet connection.')
-    } else {
-      errors.value.push('An unexpected error occurred. Please try again.')
-    }
-  }
-
-  // checking for the token in localStorage in case of refresh
-  const initializeAuth = () => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-    }
-  }
-
-  // Call if composable created
-  initializeAuth()
+  };
 
   return {
     loading,
     errors,
-    // tokenData,
     sendOTP,
     checkOTP,
     handleOAuthLogin,

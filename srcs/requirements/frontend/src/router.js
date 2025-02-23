@@ -3,6 +3,7 @@ import LoginPage from '@/pages/LoginPage/LoginPage.vue';
 import Game from '@/features/Game/Game.vue';
 import RegisterPage from '@/pages/RegisterPage/RegisterPage.vue';
 import NotFound from '@/pages/NotFound.vue';
+import { getToken, isAuthenticated } from '@/components/tokenUtils';
 import axios from 'axios';
 
 const router = createRouter({
@@ -35,22 +36,21 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+  // if the route requires authentication
   if (to.meta.requiresAuth) {
     try {
-      const response = await axios.get('/api/auth-status/');
-      if (!response.data.isAuthenticated) {
-        next('/');
-        console.log('laize bastard');
-      } else {
-        next();
+      //cookies
+      const token = await getToken();
+      if (!token || !isAuthenticated()) {
+        return next({ name: 'Login' });
       }
+      return next();
     } catch (error) {
-      console.error('Error checking authentication status:', error);
-      next('/');
+      console.error('Error during authentication check:', error);
+      return next({ name: 'Login' });
     }
-  } else {
-    next();
   }
+  return next();
 });
 
 export default router;

@@ -205,6 +205,8 @@ img {
 }
 
 .login__otp-input {
+  display: flex;
+  align-items: center;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
