@@ -115,7 +115,6 @@ TEMPLATES = [
 ASGI_APPLICATION = 'project.asgi.application'
 WSGI_APPLICATION = 'project.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -137,7 +136,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -156,7 +154,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -167,7 +164,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -215,8 +211,19 @@ CSRF_TRUSTED_ORIGINS = [
 	"https://*",
 ] 
 
+# Ensure logs directory and log file exist
+LOGS_DIR = os.path.join(os.path.dirname(__file__), 'logs')
+LOG_FILE = os.path.join(LOGS_DIR, 'game_logs.log')
+
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+
+if not os.path.exists(LOG_FILE):
+    with open(LOG_FILE, 'w'):
+        pass
+
 LOGGING = {
-    'version': 1,
+    "version": 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
@@ -233,26 +240,32 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
+        'game_logs': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(os.path.dirname(__file__), 'logs/game_logs.log'),
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'daphne': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
+            'level': 'INFO',
+            'propagate': False,
         },
         'channels': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
+        },
+        'game_logs': {
+            'handlers': ['console', 'game_logs'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',  # Global level
+        'level': 'WARNING',
     },
 }

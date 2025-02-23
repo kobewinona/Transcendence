@@ -28,6 +28,13 @@ run: setup
 	echo "Services are up and running." || \
 	echo "Error: Unable to run the services."
 
+dev: setup
+	cd ./srcs/requirements/backend && source venv/bin/activate && watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application" &
+	cd ./srcs/requirements/frontend && yarn run dev &
+
+backend-dev: setup
+	cd ./srcs/requirements/backend && source venv/bin/activate && watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application"
+
 stop:
 	@echo "Stopping the services for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down

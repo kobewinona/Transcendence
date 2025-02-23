@@ -1,189 +1,137 @@
 <template>
   <div class="game">
-    <div ref="containerRef" class="game__container">
+    <div class="game__background-container">
       <div class="game__void-boundary">
         <div class="game__void-boundary-shadow game__void-boundary-shadow_left" />
-        <div class="game__void-boundary-shadow game__void-boundary-shadow_top" />
         <div class="game__void-boundary-shadow game__void-boundary-shadow_right" />
-        <div class="game__void-boundary-shadow game__void-boundary-shadow_bottom" />
       </div>
-      <Ball :width="ballWidth" :height="ballHeight" :position="ballPosition" />
-      <withPlayerControl :socket="socket" :side="'left'" :controls="{ up: 'w', down: 's' }">
-        <Paddle :side="'left'" :position="leftPaddlePosition" />
-      </withPlayerControl>
-      <!--      <withPlayerControl-->
-      <!--        :socket="socket"-->
-      <!--        :side="'right'"-->
-      <!--        :controls="{ up: 'ArrowUp', down: 'ArrowDown' }"-->
-      <!--      >-->
-      <!--        <Paddle :side="'right'" :position="rightPaddlePosition" />-->
-      <!--      </withPlayerControl>-->
-      <!--      <withAiControl-->
-      <!--        :socket="socket"-->
-      <!--        :side="'left'"-->
-      <!--        :ball-position="ballPosition"-->
-      <!--        :ball-velocity="ballVelocity"-->
-      <!--        :paddle-position="leftPaddlePosition"-->
-      <!--        :paddle-width="paddleWidth"-->
-      <!--      >-->
-      <!--        <Paddle :side="'left'" :position="leftPaddlePosition" />-->
-      <!--      </withAiControl>-->
-      <withAiControl
-        :socket="socket"
-        :side="'right'"
-        :ball-position="ballPosition"
-        :ball-velocity="ballVelocity"
-        :paddle-position="rightPaddlePosition"
-        :paddle-width="paddleWidth"
+      <div class="game__background" :style="{ transform: backgroundTransform }" />
+      <div
+        class="game__background-line game__background-line_left"
+        :style="{ transform: lineTransform }"
+      />
+      <div class="game__background-center" :style="{ transform: centerTransform }" />
+      <div
+        class="game__background-line game__background-line_right"
+        :style="{ transform: lineTransform }"
+      />
+    </div>
+    <div ref="gameContainerRef" class="game__container">
+      <Ball
+        :color="settings[BALL_DESIGN_INPUT_NAME][BALL_COLOR_INPUT_NAME]"
+        :skin="settings[BALL_DESIGN_INPUT_NAME][BALL_SKIN_INPUT_NAME]"
+      />
+      <component
+        :is="
+          controller[CONTROLLED_BY_INPUT_NAME]?.key === CONTROLLED_BY_PLAYER.key
+            ? withPlayerControl
+            : controller[CONTROLLED_BY_INPUT_NAME]?.key === CONTROLLED_BY_AI.key && withAiControl
+        "
+        v-for="(controller, index) in controllers || []"
+        :key="index"
+        :name="controller.name"
+        :index="index"
+        :side="controller.side"
+        :controls="controller[CONTROLS_INPUT_NAME]"
       >
-        <Paddle :side="'right'" :position="rightPaddlePosition" />
-      </withAiControl>
+        <Paddle
+          v-if="controller.side === 'left'"
+          :name="controller.name"
+          :side="controller.side"
+          :paddle-index="index"
+          :has-more-than-two-players="controllers.length > 2"
+        />
+      </component>
+      <component
+        :is="
+          controller[CONTROLLED_BY_INPUT_NAME]?.key === CONTROLLED_BY_PLAYER.key
+            ? withPlayerControl
+            : controller[CONTROLLED_BY_INPUT_NAME]?.key === CONTROLLED_BY_AI.key && withAiControl
+        "
+        v-for="(controller, index) in controllers || []"
+        :key="index"
+        :name="controller.name"
+        :index="index"
+        :side="controller.side"
+        :controls="controller[CONTROLS_INPUT_NAME]"
+      >
+        <Paddle
+          v-if="controller.side === 'right'"
+          :name="controller.name"
+          :side="controller.side"
+          :paddle-index="index"
+          :has-more-than-two-players="controllers.length > 2"
+        />
+      </component>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
+import {
+  BALL_COLOR_INPUT_NAME,
+  BALL_DESIGN_INPUT_NAME,
+  BALL_SKIN_INPUT_NAME,
+  CONTROLLED_BY_AI,
+  CONTROLLED_BY_INPUT_NAME,
+  CONTROLLED_BY_PLAYER,
+  CONTROLLERS_INPUT_NAME,
+  CONTROLS_INPUT_NAME,
+  DEMO_DEFAULT_GAME_SETTINGS,
+} from 'entities/Game/config/constants.js';
+import { computed, onUnmounted, ref } from 'vue';
 
 import { Ball, Paddle, withAiControl, withPlayerControl } from './components';
-import { BALL_HEIGHT, BALL_WIDTH } from './components/Ball/config/constants.js';
-import { PADDLE_HEIGHT, PADDLE_WIDTH } from './components/Paddle/config/constants.js';
+import { provideGameDimensions, useGameSocketInject } from './composables';
 
-// Dimensions
-const containerRef = ref(null);
-const containerWidth = ref(0);
-const containerHeight = ref(0);
-const ballWidth = ref(0);
-const ballHeight = ref(0);
-const paddleWidth = ref(0);
-const paddleHeight = ref(0);
+const gameContainerRef = ref(null);
+const gameSocket = useGameSocketInject();
 
-// Socket connection
-const socketMessage = ref('');
-let socket = null;
-
-// Game state
-const ballPosition = ref({ x: 50, y: 50 });
-const ballVelocity = ref({ x: 0, y: 0 });
-const ballUpdateDelay = ref(0);
-const leftPaddlePosition = ref({ y: 50 });
-const rightPaddlePosition = ref({ y: 50 });
-
-const updateContainerDimensions = () => {
-  // noinspection JSUnresolvedReference
-  if (containerRef?.value) {
-    containerWidth.value = containerRef.value.offsetWidth;
-    containerHeight.value = containerRef.value.offsetHeight;
-  }
-};
-
-const calculateBallSize = () => {
-  if (containerWidth.value && containerHeight.value) {
-    ballWidth.value = parseFloat(((BALL_WIDTH / containerWidth.value) * 100).toFixed(2));
-    ballHeight.value = parseFloat(((BALL_HEIGHT / containerHeight.value) * 100).toFixed(2));
-  }
-};
-
-const calculatePaddleSizeInPercentages = () => {
-  if (containerWidth.value && containerHeight.value) {
-    paddleWidth.value = parseFloat(((PADDLE_WIDTH / containerWidth.value) * 100).toFixed(2));
-    paddleHeight.value = parseFloat(((PADDLE_HEIGHT / containerHeight.value) * 100).toFixed(2));
-  }
-};
-
-const initializeWebSocketInPercentages = () => {
-  const socketUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/pong/';
-  socket = new WebSocket(socketUrl);
-  console.log('socket', socket);
-
-  socket.onopen = () => {
-    console.log('✅ WebSocket connected');
-    console.log(`ballWidth: ${ballWidth.value}, ballHeight: ${ballHeight.value}`);
-    console.log(`paddleWidth: ${paddleWidth.value}, paddleHeight: ${paddleHeight.value}`);
-
-    if (isNaN(ballWidth.value) || isNaN(ballHeight.value)) {
-      console.error('Invalid width or height values:', ballWidth.value, ballHeight.value);
-      return;
-    }
-
-    // Check if the WebSocket is open (readyState === 1)
-    if (socket.readyState === WebSocket.OPEN) {
-      try {
-        socket.send(
-          JSON.stringify({
-            type: 'init',
-            ballWidth: ballWidth.value,
-            ballHeight: ballHeight.value,
-            paddleWidth: paddleWidth.value,
-            paddleHeight: paddleHeight.value,
-          })
-        );
-      } catch (error) {
-        console.error('Error sending data:', error);
-      }
-    } else {
-      console.error('WebSocket is not open yet');
-    }
-  };
-
-  socket.onmessage = (event) => {
-    // console.log('📨 Message from server:', event.data);
-    const data = JSON.parse(event.data);
-    const { ball, paddles } = data || {};
-
-    socketMessage.value = data;
-
-    if (ball) {
-      const { position = 50, velocity = 5, delay = 1.6 } = ball || {};
-      ballPosition.value = position;
-      ballVelocity.value = velocity;
-      ballUpdateDelay.value = parseFloat(delay.toFixed(2));
-    }
-
-    if (paddles) {
-      const { left = { y: 50 }, right = { y: 50 } } = paddles || {};
-      leftPaddlePosition.value = left;
-      rightPaddlePosition.value = right;
-    }
-  };
-
-  socket.onerror = (error) => {
-    console.error('❌ WebSocket error:', error);
-  };
-
-  socket.onclose = (event) => {
-    console.info('🔌 WebSocket disconnected:', event.reason);
-  };
-};
-
-const closeWebSocket = () => {
-  if (socket) {
-    socket.close();
-    console.info('🔌 WebSocket connection closed');
-  }
-};
-
-watch([containerWidth, containerHeight], calculateBallSize, {
-  immediate: true,
+const { settings } = defineProps({
+  settings: {
+    type: Object,
+    default: () => ({ ...DEMO_DEFAULT_GAME_SETTINGS }),
+  },
 });
 
-watch([containerWidth, containerHeight], calculatePaddleSizeInPercentages, {
-  immediate: true,
+provideGameDimensions(gameContainerRef, gameSocket.actions.updateGameDimensions);
+
+const positionX = computed(() => gameSocket.ballPositionX.value);
+const positionY = computed(() => gameSocket.ballPositionY.value);
+const controllers = computed(() => settings[CONTROLLERS_INPUT_NAME]);
+
+const backgroundTransform = computed(() => {
+  const minTranslate = -150;
+  const maxTranslate = 150;
+
+  const translateX = minTranslate + (positionX.value / 100) * (maxTranslate - minTranslate);
+  const translateY = minTranslate + (positionY.value / 100) * (maxTranslate - minTranslate);
+
+  return `translate(${translateX * -1}px, ${translateY * -1}px) scale(4)`;
 });
 
-onMounted(() => {
-  updateContainerDimensions();
-  initializeWebSocketInPercentages();
-  window.addEventListener('resize', updateContainerDimensions);
+const centerTransform = computed(() => {
+  const minTranslate = -100;
+  const maxTranslate = 100;
+
+  let translateX = minTranslate + (positionX.value / 100) * (maxTranslate - minTranslate);
+  const translateY = minTranslate + (positionY.value / 100) * (maxTranslate - minTranslate);
+
+  return `translate(${(translateX + 60) * -1}px, ${(translateY + 60) * -1}px)`;
 });
 
-onUpdated(() => {
-  updateContainerDimensions();
+const lineTransform = computed(() => {
+  const minTranslate = -100;
+  const maxTranslate = 100;
+
+  let translateX = minTranslate + (positionX.value / 100) * (maxTranslate - minTranslate);
+  const translateY = minTranslate + (positionY.value / 100) * (maxTranslate - minTranslate);
+
+  return `translate(${translateX * -1}px, ${translateY * -1}px) scaleY(4)`;
 });
 
 onUnmounted(() => {
-  closeWebSocket();
-  window.removeEventListener('resize', updateContainerDimensions);
+  gameSocket.actions.closeGameSocket();
 });
 </script>
 
@@ -193,19 +141,105 @@ onUnmounted(() => {
 
   box-sizing: border-box;
   width: 100%;
-  max-width: 800px;
   height: 100%;
-  max-height: 600px;
+  padding-right: 20px;
+  padding-left: 20px;
 
-  border-top: 2px solid white;
-  border-bottom: 2px solid white;
+  border-radius: 12px;
+}
+
+.game__background-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  width: 100%;
+  height: 100%;
+
+  background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
+  border-radius: 12px;
+}
+
+.game__background-container::after {
+  content: '';
+
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  box-shadow: inset 40px 40px 90px var(--dark-color-opacity-50);
+}
+
+.game__background {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
+
+  transition: all 0.1s linear;
+}
+
+.game__background-center {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 120px;
+  height: 120px;
+
+  /* noinspection CssNonIntegerLengthInPixels */
+  border: 0.5px solid var(--light-color-opacity-50);
+  border-radius: 50%;
+  mix-blend-mode: difference;
+
+  transition: all 0.1s linear;
+}
+
+.game__background-line {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  transform: translate(-50%, -50%) scale(4);
+
+  /* noinspection CssNonIntegerLengthInPixels */
+  width: 0.5px;
+  height: 100%;
+
+  background-color: var(--light-color-opacity-50);
+  mix-blend-mode: difference;
+
+  transition: all 0.1s linear;
+}
+
+.game__background-line_left {
+  left: 10%;
+}
+
+.game__background-line_right {
+  left: 90%;
 }
 
 .game__container {
   position: relative;
+
   width: 100%;
   height: 100%;
   padding: 20px;
+
+  background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
 }
 
 .game__void-boundary {
@@ -229,25 +263,11 @@ onUnmounted(() => {
 
 .game__void-boundary-shadow_left {
   left: 0;
-  background: linear-gradient(to right, black, transparent);
-}
-
-.game__void-boundary-shadow_top {
-  top: 0;
-  width: 100%;
-  height: 15%;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0.5), transparent);
+  background: linear-gradient(to right, var(--light-color), transparent);
 }
 
 .game__void-boundary-shadow_right {
   right: 0;
-  background: linear-gradient(to left, black, transparent);
-}
-
-.game__void-boundary-shadow_bottom {
-  bottom: 0;
-  width: 100%;
-  height: 15%;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.5), transparent);
+  background: linear-gradient(to left, var(--dark-color), transparent);
 }
 </style>
