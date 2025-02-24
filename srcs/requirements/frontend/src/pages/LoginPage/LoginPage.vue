@@ -1,64 +1,120 @@
 <template>
-    <div class="login"></div>
-      <img src="@/pages/LoginPage/components/img/login-bg.png" alt="background" class="login__bg" />
-      <!-- collect user input and prevent the page from reloading v-on:submit-->
+  <div class="login">
+    <!-- Background Image -->
+    <img 
+      src="@/pages/LoginPage/components/img/login-bg.png" 
+      alt="background" 
+      class="login__bg" 
+    />
 
-      <form class="login__form" @submit.prevent="handleSubmit">
-        <h1 class="login__title">Login</h1>
+    <!-- Login Form -->
+    <form class="login__form" @submit.prevent="handleSubmit">
+      <h1 class="login__title">Login</h1>
+
+      <!-- Input Fields -->
       <div class="login__inputs">
         <div class="login__box">
-          <input type="username"  v-model="username" placeholder="username" required class="login__input" />
+          <input 
+            type="username" 
+            v-model="username" 
+            placeholder="username" 
+            required 
+            class="login__input" 
+          />
           <i class="ri-mail-fill"></i>
         </div>
 
         <div class="login__box">
-          <input type="password"  v-model="password" placeholder="Password" required class="login__input" />
+          <input 
+            type="password" 
+            v-model="password" 
+            placeholder="Password" 
+            required 
+            class="login__input" 
+          />
           <i class="ri-lock-2-fill"></i>
         </div>
       </div>
 
-      <div v-if="errors.length" class="bg-red-300 text-white rounded-lg p-6 mb-4">
+      <!-- Error Messages -->
+      <div 
+        v-if="errors.length" 
+        class="bg-red-300 text-white rounded-lg p-6 mb-4"
+      >
         <p v-for="(error, index) in errors" :key="index">{{ error }}</p>
       </div>
 
+      <!-- Remember Me & Forgot Password -->
       <div class="login__check">
         <div class="login__check-box">
-          <input type="checkbox" id="remember-me" v-model="rememberMe" class="login__check-input" />
+          <input 
+            type="checkbox" 
+            id="remember-me" 
+            v-model="rememberMe" 
+            class="login__check-input" 
+          />
           <label for="remember-me" class="login__check-label">Remember me</label>
         </div>
-        <router-link to="/forgot-password" class="login__forgot">Forgot Password?</router-link>
+        <router-link to="/forgot-password" class="login__forgot">
+          Forgot Password?
+        </router-link>
       </div>
 
+      <!-- Buttons -->
       <div class="login__buttons" id="login__buttons">
-        <button type="submit" class="login__button" @click="handleSubmit" :disabled="loading">
-          {{ loading   ? 'Sending...' : 'Send Otp' }}
+        <button 
+          type="submit" 
+          class="login__button" 
+          @click="handleSubmit" 
+          :disabled="loading"
+        >
+          {{ loading ? 'Sending...' : 'Send Otp' }}
         </button>
-          <div class="otp">
-            <input
-              v-for="(digitInput, index) in otpLength"
-              :key="index"
-              v-model="otpArray[index]"
-              @keydown="handleEnter(index, $event)"
-              @input="handleInput(index, $event)"
-              @paste="handlePaste(index, $event)"
-              type="text"
-              step="1"
-              maxlength="1"
-              class="input"
-            />
-          </div>
-        </div>
-      <button v-if="isOTPSent" type="button" class="login__verify-otp-button" @click="verifyOTP" :disabled="loading" >
-          Verify OTP
-        </button>
-    <button type="button" class="login__oauth-button" @click="handleOAuthLogin" :disabled="loading" >
-      Login with 42
-    </button>
 
-      <div class="login__register">
-        Don't have an account? <router-link to="/register">Register</router-link>
+        <!-- OTP Inputs -->
+        <div class="otp">
+          <input
+            v-for="(digitInput, index) in otpLength"
+            :key="index"
+            v-model="otpArray[index]"
+            @keydown="handleEnter(index, $event)"
+            @input="handleInput(index, $event)"
+            @paste="handlePaste(index, $event)"
+            type="text"
+            maxlength="1"
+            class="input"
+          />
+        </div>
       </div>
-  </form>
+
+      <!-- Verify OTP Button -->
+      <button 
+        v-if="isOTPSent" 
+        type="button" 
+        class="login__verify-otp-button" 
+        @click="verifyOTP" 
+        :disabled="loading"
+      >
+        Verify OTP
+      </button>
+
+      <!-- OAuth Login Button -->
+      <button 
+        type="button" 
+        class="login__oauth-button" 
+        @click="handleOAuthLogin" 
+        :disabled="loading"
+      >
+        Login with 42
+      </button>
+
+      <!-- Register Link -->
+      <div class="login__register">
+        Don't have an account? 
+        <router-link to="/register">Register</router-link>
+      </div>
+    </form>
+  </div>
 </template>
 
 <!-- <script src="./components/composables/useAuth.js"></script> -->

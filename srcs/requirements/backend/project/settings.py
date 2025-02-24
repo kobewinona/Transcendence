@@ -21,8 +21,8 @@ ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'intrauth.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    # 'project.apps.intrauth.auth.IntraAuthenticationBackend'
     'django.contrib.auth.backends.ModelBackend',
+    'project.apps.intrauth.auth.IntraAuthenticationBackend'
 ]
 
 SIMPLE_JWT = {

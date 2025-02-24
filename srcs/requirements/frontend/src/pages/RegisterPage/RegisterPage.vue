@@ -1,51 +1,90 @@
 <template>
   <div class="register">
-    <img src="@/pages/RegisterPage/components/img/register-bg.png" alt="background" class="register__bg" />
+    <!-- Background Image -->
+    <img 
+      src="@/pages/RegisterPage/components/img/register-bg.png" 
+      alt="background" 
+      class="register__bg" 
+    />
+
+    <!-- Registration Form -->
     <form class="register__form" @submit.prevent="handleSubmit">
       <h1 class="register__title">Register</h1>
 
+      <!-- Input Fields -->
       <div class="register__inputs">
+        <!-- Username Field -->
         <div class="register__box">
-          <input type="text"  v-model="form.username" placeholder="Full username" required class="register__input"/>
+          <input 
+            type="text" 
+            v-model="form.username" 
+            placeholder="Full username" 
+            required 
+            class="register__input"
+          />
           <i class="ri-user-fill"></i>
         </div>
 
+        <!-- Email Field -->
         <div class="register__box">
-          <input type="email" v-model="form.email" placeholder="Email ID" required class="register__input" />
+          <input 
+            type="email" 
+            v-model="form.email" 
+            placeholder="Email ID" 
+            required 
+            class="register__input"
+          />
           <i class="ri-mail-fill"></i>
         </div>
 
+        <!-- Password Field -->
         <div class="register__box">
-          <input :type="showPassword ? 'text' : 'password'" v-model="form.password1" placeholder="Password" required class="register__input"/>
+          <input 
+            :type="showPassword ? 'text' : 'password'" 
+            v-model="form.password1" 
+            placeholder="Password" 
+            required 
+            class="register__input"
+          />
           <i 
-            class="ri-eye-fill password-toggle"
+            class="ri-eye-fill password-toggle" 
             @click="togglePasswordVisibility"
           ></i>
         </div>
 
+        <!-- Confirm Password Field -->
         <div class="register__box">
           <input 
-            :type="showPassword ? 'text' : 'password'"
+            :type="showPassword ? 'text' : 'password'" 
             v-model="form.password2" 
             placeholder="Confirm Password" 
             required 
             class="register__input"
           />
           <i 
-            class="ri-eye-fill password-toggle"
+            class="ri-eye-fill password-toggle" 
             @click="togglePasswordVisibility"
           ></i>
         </div>
       </div>
-      
-      <div v-if="errors.length" class="bg-red-300 text-white rounded-lg p-6 mb-4">
+
+      <!-- Error Messages -->
+      <div 
+        v-if="errors.length" 
+        class="bg-red-300 text-white rounded-lg p-6 mb-4"
+      >
         <p v-for="(error, index) in errors" :key="index">{{ error }}</p>
       </div>
 
-      <button type="submit" class="register__button">Create Account</button>
+      <!-- Submit Button -->
+      <button type="submit" class="register__button">
+        Create Account
+      </button>
 
+      <!-- Login Link -->
       <div class="register__login">
-        Already have an account? <router-link to="/">Login</router-link>
+        Already have an account? 
+        <router-link to="/">Login</router-link>
       </div>
     </form>
   </div>

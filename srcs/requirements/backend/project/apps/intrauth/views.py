@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout #database
 from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.http import HttpResponseBadRequest
 import requests
 import os
 
@@ -24,26 +25,33 @@ def intra_login(request : HttpRequest):
     print("Redirecting to:", auth_url)
     return redirect(auth_url)
 
-def intra_login_redirect(request : HttpRequest):
-    print("Im coming from redirect")
-    if "code" not in request.GET:
-        return redirect("https://localhost/")
+
+
+def intra_login_redirect(request):
     code = request.GET.get("code")
+    if not code:
+        print("Code is missing in the request")
+        return redirect("https://localhost/")
     print("Received code:", code)
-    user = exhange_code(code)
-    print("the request",request)
-    intra_user = authenticate(request, user=user)
-    intra_user = list(intra_user).pop()
-    print("intra_user",intra_user)
-    if intra_user is not None:
-        login(request, intra_user)
-        return redirect('https://localhost/')
-    else:
-        return Response({"error": "Authentication failed"}, status=400)
-    # login(request, intra_user) #check session database
-    # return redirect("/auth/user/")
+    try:
+        user_data = exhange_code(code)
+        if not user_data:
+            raise ValueError("Failed to exchange code for user")
+        print("Exchanged user:", user_data)
+        intra_user = authenticate(request, user=user_data)
+        if intra_user is None:
+            print("Authentication failed")
+        login(request, intra_user, backend='project.apps.intrauth.auth.IntraAuthenticationBackend')
+        # print(f"User logged in successfully: {intra_user}")
+        return redirect("https://localhost/mainpage")
+    except Exception as e:
+        print(f"Error during OAuth redirect: {e}")
+        return HttpResponseBadRequest(f"An error occurred: {str(e)}")
 
 def exhange_code(code: str):
+    token_url = "https://api.intra.42.fr/oauth/token"
+    user_info_url = "https://api.intra.42.fr/v2/me"
+    #token request data
     data = {
         "client_id": os.getenv("CLIENT_ID"),
         "client_secret": os.getenv("CLIENT_SECRET"),
@@ -55,17 +63,39 @@ def exhange_code(code: str):
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }
-    print (requests)
-    response = requests.post('https://api.intra.42.fr/oauth/token', data=data, headers=headers)
-    print("response will be")
-    print(response)
-    credentials = response.json()
-    access_token = credentials['access_token']
-    response = requests.get("https://api.intra.42.fr/v2/me", headers={
-        'Authorization': 'Bearer %s' % access_token
-    })
-    print(response)
-    user = response.json()
-    print(user)
-    return user
+    try:
+        #request access token
+        response = requests.post(token_url, data=data, headers=headers)
+        response.raise_for_status()  #raise an exception for HTTP errors
+        credentials = response.json()
+        access_token = credentials['access_token']
+        if not access_token:
+            raise ValueError("Access token not found in response")
+        #fetch user info
+        headers = {'Authorization': f'Bearer {access_token}'}
+        response = requests.get(user_info_url, headers=headers)
+        response.raise_for_status()
+        user = response.json()
+        print(f"Fetched user data: {user}")
+        return user
+    
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
+    except ValueError as e:
+        print(f"ValueError: {e}")
+        return None
+    # print (requests)
+    # response = requests.post('https://api.intra.42.fr/oauth/token', data=data, headers=headers)
+    # print("response will be")
+    # print(response)
+    # credentials = response.json()
+    # access_token = credentials['access_token']
+    # response = requests.get("https://api.intra.42.fr/v2/me", headers={
+    #     'Authorization': 'Bearer %s' % access_token
+    # })
+    # print(response)
+    # user = response.json()
+    # print(user)
+    # return user
 

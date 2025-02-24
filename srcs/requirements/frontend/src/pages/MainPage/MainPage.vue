@@ -11,14 +11,6 @@
       />
       <Game :settings="gameSettings" @on-close-menu="closeMenu" />
     </section>
-  
-    <header>
-    <nav>
-      <button @click="handleLogout">Logout</button>
-    </nav>
-  </header>
-
-
   </main>
 </template>
 
@@ -33,14 +25,6 @@ import { Game, Menu } from 'features';
 import { useGameSocketInject } from 'features/Game/composables/index.js';
 import { MENU_ITEMS_KEYS } from 'features/Menu/config/constants.js';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-
-//logout
-import { logout } from '@/components/authUtils';
-
-function handleLogout() {
-  logout();
-}
-
 
 const gameSocket = useGameSocketInject();
 
