@@ -13,8 +13,6 @@
 import { useRouter } from 'vue-router';
 import { provideGameSocket } from 'features/Game/composables/useGameSocket.js';
 import { MainPage } from 'pages';
-import { RegisterPage } from 'pages';
-import { LoginPage } from 'pages';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 import { ANTD_THEME_CONFIG } from './config/constants.js';

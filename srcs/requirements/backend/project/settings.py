@@ -32,11 +32,11 @@ SIMPLE_JWT = {
     #more
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False, #receive a new refresh token along with the new access token.
-    'UPDATE_LAST_LOGIN': False,
-    'AUTH_COOKIE': 'refresh_token',  # Custom cookie name for refresh token
+    'UPDATE_LAST_LOGIN': True,
+    'AUTH_COOKIE': 'access_token', 
     'AUTH_COOKIE_HTTP_ONLY': True,   # Secure cookie
-    'AUTH_COOKIE_SECURE': False,     # Set True for HTTPS
-    'AUTH_COOKIE_SAMESITE': 'Lax',   # Restrict cross-site requests
+    'AUTH_COOKIE_SECURE': True,     # Set True for HTTPS
+    'AUTH_COOKIE_SAMESITE': 'None',   # Restrict cross-site requests
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,

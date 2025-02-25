@@ -43,12 +43,12 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  // if the route requires authentication
   if (to.meta.requiresAuth) {
     try {
       //cookies
       const token = await getToken();
       if (!token || !isAuthenticated()) {
+        console.error("Access token not found, redirecting to login...");
         return next({ name: 'Login' });
       }
       return next();

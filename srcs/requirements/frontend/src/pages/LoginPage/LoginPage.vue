@@ -6,11 +6,9 @@
       alt="background" 
       class="login__bg" 
     />
-
     <!-- Login Form -->
     <form class="login__form" @submit.prevent="handleSubmit">
       <h1 class="login__title">Login</h1>
-
       <!-- Input Fields -->
       <div class="login__inputs">
         <div class="login__box">
@@ -143,7 +141,6 @@
       loading.value = true;
       const otpSentSuccessfully = await sendOTP(username.value, password.value);
       if (otpSentSuccessfully) {
-      //true only if sendOTP succeeds
         isOTPSent.value = true;
         console.log(isOTPSent.value, "isOTPSent");
     } else {
@@ -158,8 +155,6 @@
     loading.value = false;
     console.log("Loading state after OTP send:", loading.value);
   };
-
-  //validate
   const verifyOTP = async() =>{
     try{
       console.log("verifying OTP");
@@ -177,8 +172,6 @@
       errors.value.push('rukopop')
     }
   };
-
-    //OTP input fields
   const handleInput = (index, event) => {
     const value = event.target.value;
 
@@ -217,5 +210,4 @@
 
 <style scoped>
   @import "@/pages/LoginPage/components/css/styles.css";
-
 </style>

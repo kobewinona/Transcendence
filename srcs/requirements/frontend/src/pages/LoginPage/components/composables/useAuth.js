@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import { setToken, unsetToken, getToken, getTokenPayload } from '@/components/tokenUtils';
+import { setToken, unsetToken } from '@/components/tokenUtils';
 const route = useRoute();
 
 export function useAuth() {
@@ -68,12 +68,11 @@ export function useAuth() {
         loading.value = false;
       }
     } else if (error.request) {
-      // No response received
       errors.value.push('No response received from the server.')
       loading.value = false;
       return false;
     } else {
-      // Other errors
+      //other errors
       errors.value.push('An unexpected error occurred. Please try again.')
       loading.value = false;
       return false;
@@ -119,16 +118,40 @@ export function useAuth() {
       }
   }
 
-  const handleOAuthLogin = () => {
+  const handleOAuthLogin = async() => {
       console.log("OAuth login button clicked!"); 
       const clientId = 'u-s4t2ud-c691b276ef7aa2660fa1d1be08026efd0282c75fdb314fb7307fdcfd7f61d6ce'; //should take from backend
       const redirectUri = 'http://localhost:8000/oauth/redirect/';
       const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public`;
       console.log(authUrl);
       window.location.href = authUrl;
+  };
+  
+
+      // try {
+      //   const response = await axios.get('/oauth/redirect/');
+      //   const oauthToken = response.data.access_token;
+      //   console.log("OAuth Token:", oauthToken);
+      //   localStorage.setItem('access_token', oauthToken);
+    
+      //   router.push('/mainpage');
+      // } catch (error) {
+      //   console.error("Error fetching OAuth token:", error);
+      // }
     // Once the the request approved, the OAuth provider will redirect usr back to specified 
     // redirect_uri along with an authorization code.
+  
+const checkAccessToken = () => {
+  const accessToken = document.cookie.split('; ').find(row => row.startsWith('access_token='));
+  if (accessToken) {
+      console.log("Access token found, navigating to main page...");
+      router.push('/mainpage'); // Navigate to the main page
+  } else {
+      console.error("Access token not found, redirecting to login...");
+      router.push('/'); // Redirect to login page
   }
+};
+
 
   
   const logout = async () => {
@@ -139,13 +162,13 @@ export function useAuth() {
       handleError(error);
     }
   };
-
   return {
     loading,
     errors,
     sendOTP,
     checkOTP,
     handleOAuthLogin,
+    checkAccessToken,
     logout
   }
 }

@@ -3,6 +3,8 @@ from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login, logout #database
 from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from django.http import HttpResponseBadRequest
 import requests
@@ -13,19 +15,15 @@ def home(request : HttpRequest) -> JsonResponse:
 
 @login_required(login_url="/oauth/login/") # change for login url
 
-
 def get_authenticated_user(request : HttpRequest) : 
     return JsonResponse({"msg": "Authenticated"})
 
 def intra_login(request : HttpRequest):
     client_id = os.getenv("CLIENT_ID")
-    # redirect_uri = "https://localhost/game"
     redirect_uri = "http://localhost:8000/oauth/redirect"
     auth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
     print("Redirecting to:", auth_url)
     return redirect(auth_url)
-
-
 
 def intra_login_redirect(request):
     code = request.GET.get("code")
@@ -42,8 +40,13 @@ def intra_login_redirect(request):
         if intra_user is None:
             print("Authentication failed")
         login(request, intra_user, backend='project.apps.intrauth.auth.IntraAuthenticationBackend')
-        # print(f"User logged in successfully: {intra_user}")
-        return redirect("https://localhost/mainpage")
+        refresh = RefreshToken.for_user(intra_user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+        response = redirect("https://localhost/mainpage")
+        response.set_cookie('access_token', access_token, secure=True, max_age=60 * 15)
+        response.set_cookie('refresh_token', refresh_token, httponly=True, secure=True, max_age=60 * 60 * 24 * 7)
+        return response
     except Exception as e:
         print(f"Error during OAuth redirect: {e}")
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
@@ -85,17 +88,3 @@ def exhange_code(code: str):
     except ValueError as e:
         print(f"ValueError: {e}")
         return None
-    # print (requests)
-    # response = requests.post('https://api.intra.42.fr/oauth/token', data=data, headers=headers)
-    # print("response will be")
-    # print(response)
-    # credentials = response.json()
-    # access_token = credentials['access_token']
-    # response = requests.get("https://api.intra.42.fr/v2/me", headers={
-    #     'Authorization': 'Bearer %s' % access_token
-    # })
-    # print(response)
-    # user = response.json()
-    # print(user)
-    # return user
-
