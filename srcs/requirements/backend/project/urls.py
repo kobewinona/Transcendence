@@ -40,7 +40,3 @@ urlpatterns = [
     path('api/get-otp/', GetOTPView.as_view(), name='get_otp'),
     path('api/verify-otp/', VerifyOTPView.as_view(), name='verify_otp'),
 ]
-
-# Serve static files during development
-# if settings.DEBUG:
-    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
