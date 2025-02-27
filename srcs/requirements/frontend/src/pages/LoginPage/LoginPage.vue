@@ -207,7 +207,7 @@
     }
   };
 </script>
-
 <style scoped>
   @import "@/pages/LoginPage/components/css/styles.css";
+
 </style>

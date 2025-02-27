@@ -149,14 +149,6 @@ const handleSubmit = async () => {
 <style scoped>
 @import "@/pages/RegisterPage/components/css/register-styles.css";
 
-.password-toggle {
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.password-toggle:hover {
-  opacity: 0.8;
-}
 </style>
 
 

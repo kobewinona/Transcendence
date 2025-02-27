@@ -115,3 +115,11 @@ img {
 .register__login a:hover {
   text-decoration: underline;
 }
+.password-toggle {
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.password-toggle:hover {
+  opacity: 0.8;
+}
