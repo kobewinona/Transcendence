@@ -1,8 +1,8 @@
-import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 import { setToken, unsetToken } from '@/components/tokenUtils';
-const route = useRoute();
 
 export function useAuth() {
   const router = useRouter()
@@ -151,7 +151,6 @@ const checkAccessToken = () => {
       router.push('/'); // Redirect to login page
   }
 };
-
 
   
   const logout = async () => {

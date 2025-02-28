@@ -1,20 +1,3 @@
-
-/*=============== VARIABLES CSS ===============*/
-:root {
-  /*========== Colors ==========*/
-  /*Color mode HSL(hue, saturation, lightness)*/
-  --white-color: hsl(0, 0%, 100%);
-  --black-color: hsl(0, 0%, 0%);
-  --grey-color: hsl(0, 0%, 60%);
-
-  /*========== Font and typography ==========*/
-  /*.5rem = 8px | 1rem = 16px ...*/
-  --body-font: "Poppins", sans-serif;
-  --h1-font-size: 2rem;
-  --normal-font-size: 1rem;
-  --small-font-size: .813rem;
-}
-
 /*=============== BASE ===============*/
 * {
   box-sizing: border-box;
@@ -25,8 +8,8 @@
 body,
 input,
 button {
-  font-family: var(--body-font);
-  font-size: var(--normal-font-size);
+  font-family: "Poppins", sans-serif;
+  font-size: var(--regular-space);
 }
 
 a {
@@ -42,13 +25,12 @@ img {
 
 /*=============== LOGIN ===============*/
 
-
 .login__check {
   display: flex;
-  justify-content: space-between; /* Push elements to edges */
+  justify-content: space-between; 
   align-items: center;
-  width: 100%; /* Ensure full width */
-  margin-bottom: 1.5rem;
+  width: 100%;
+  margin-bottom: var(--big-space);
 }
 
 .login__bg {
@@ -63,43 +45,43 @@ img {
 
 .login__form {
   position: relative;
-  margin-inline: 1.5rem;
+  margin-inline: var(--regular-space);
   max-width: 500px;
   margin: 0 auto;
   background-color: hsla(0, 0%, 100%, .01);
   border: 2px solid hsla(0, 0%, 100%, .7);
-  padding: 2.5rem 1.5rem;
-  color: var(--white-color);
-  border-radius: 1rem;
+  padding: var(--big-space) var(--regular-space);
+  color: var(--light-color); 
+  border-radius: var(--regular-space);
   backdrop-filter: blur(16px);
 }
 
 .login__title {
   text-align: center;
-  font-size: var(--h1-font-size);
-  margin-bottom: 1.25rem;
+  font-size: 2rem; 
+  margin-bottom: var(--regular-space);
 }
 
-.login__inputs, 
+.login__inputs,
 .login__box {
   display: grid;
 }
 
 .login__inputs {
-  row-gap: 1.25rem;
-  margin-bottom: 1rem;
+  row-gap: var(--regular-space);
+  margin-bottom: var(--regular-space);
 }
 
 .login__box {
   grid-template-columns: 1fr max-content;
-  column-gap: .75rem;
+  column-gap: var(--smaller-space);
   align-items: center;
   border: 2px solid hsla(0, 0%, 100%, .7);
-  padding-inline: 1.25rem;
-  border-radius: 4rem;
+  padding-inline: var(--regular-space);
+  border-radius: var(--regular-space);
 }
 
-.login__input, 
+.login__input,
 .login__button {
   border: none;
   outline: none;
@@ -108,33 +90,33 @@ img {
 .login__input {
   width: 100%;
   background: none;
-  color: var(--white-color);
-  padding-block: 1rem;
+  color: var(--light-color); 
+  padding-block: var(--regular-space);
 }
 
 .login__input::placeholder {
-  color: var(--white-color);
+  color: var(--light-color); 
 }
 
 .login__box i {
-  font-size: 1.25rem;
+  font-size: 1.25rem; 
 }
 
-.login__check, 
+.login__check,
 .login__check-box {
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Space between checkbox and label */
+  gap: var(--small-space);
 }
 
 .login__check-box {
-  column-gap: .5rem;
+  column-gap: var(--small-space);
 }
 
 .login__check-input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--white-color);
+  width: var(--small-space);
+  height: var(--small-space);
+  accent-color: var(--light-color); 
 }
 
 .login__forgot:hover {
@@ -143,29 +125,30 @@ img {
 
 .login__button {
   width: 100%;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 4rem;
+  padding: var(--regular-space);
+  margin-bottom: var(--regular-space);
+  border-radius: var(--regular-space);
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.4s;
 }
- 
 
 .login__button:hover {
-  background-color: hsl(0, 0%, 90%);
+  background-color: var(--light-color-opacity-90); 
 }
 
 .login__register {
-  font-size: var(--small-font-size);
+  font-size: 0.813rem; 
   text-align: center;
   margin-bottom: 0.5rem;
+  
 }
 
 .login__register a {
-  color: var(--white-color);
+  color: var(--light-color); 
   font-weight: 500;
   margin-left: 9rem;
+  
 }
 
 .login__register a:hover {
@@ -173,61 +156,61 @@ img {
 }
 
 .login__forgot {
-  color: #007bff;
+  color: var(--secondary-color); 
   text-decoration: none;
 }
 
 .login__oauth-button {
-  background-color: #007bff;
+  background-color: var(--secondary-color); 
   color: white;
-  padding: 10px 20px;
+  padding: var(--regular-space) var(--big-space);
   border: none;
-  border-radius: 20px;
+  border-radius: var(--regular-space);
   cursor: pointer;
   transition: background-color 0.4s;
-  margin-top: 20px;
-  margin-bottom: 0.8rem;
-  margin-top: 0.2rem;
-  
+  /* margin-top: var(--regular-space); */
+  margin-bottom: var(--regular-space);
+  margin-left: 2.2rem; 
 }
 
 .login__oauth-button:hover {
-  background-color: #b3005a;
+  background-color: var(--complementary-2-color); 
   transition: background-color 0.4s;
 }
 
 .login__otp-input-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--regular-space);
 }
 
 .login__otp-input {
   display: flex;
   align-items: center;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: var(--small-space);
+  border: 1px solid var(--dark-color-opacity-50); 
+  border-radius: var(--small-space);
   width: 150px;
 }
 
 .login__verify-otp-button {
-  background-color: #28a745;
+  background-color: var(--complementary-1-color); 
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: var(--regular-space) var(--big-space);
+  border-radius: var(--small-space);
   cursor: pointer;
 }
 
 .login__verify-otp-button:disabled {
-  background-color: #ccc;
+  background-color: var(--light-color-opacity-50); 
   cursor: not-allowed;
 }
+
 .otp {
   display: flex;
-  gap: 1rem;
-  margin: 1rem auto;
+  gap: var(--regular-space);
+  margin: var(--regular-space) auto;
   width: 80%;
   justify-content: center;
 }
@@ -237,21 +220,20 @@ img {
   width: 2rem;
   display: flex;
   justify-content: center;
-  padding: 0px;
-  margin-right: 1rem;
+  padding: var(--small-space);
+  margin-right: var(--small-space);
   color: inherit;
-  border: 1px solid #222222;
-  border-radius: 8px;
-  padding: 0.85rem;
-  padding-right: 0;
+  border: 1px solid var(--dark-color); 
+  border-radius: var(--small-space);
   font-family: inherit;
-  font-size: 1.5rem;
+  font-size: 1.5rem; 
   font-weight: 700;
   line-height: 20px;
   appearance: none;
   letter-spacing: normal;
+  margin-bottom: var(--regular-space);
 }
 
 .input:focus {
-  border: 2px solid #222222;
+  border: 2px solid var(--dark-color); 
 }

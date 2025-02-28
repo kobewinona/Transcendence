@@ -10,16 +10,13 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
 import { provideGameSocket } from 'features/Game/composables/useGameSocket.js';
-import { MainPage } from 'pages';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 import { ANTD_THEME_CONFIG } from './config/constants.js';
 import { i18n } from './main.js';
 import { provideLang } from './shared/composables';
 
-const router = useRouter();
 
 provideLang(i18n);
 provideGameSocket(import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/pong/');

@@ -6,15 +6,18 @@
       alt="background" 
       class="login__bg" 
     />
-    <!-- Login Form -->
     <form class="login__form" @submit.prevent="handleSubmit">
       <h1 class="login__title">Login</h1>
-      <!-- Input Fields -->
+
+      <!-- Login Form Inputs
+      <LoginFormInputs v-model:username="username" v-model:password="password" /> -->
+      
+      <!-- Login Form -->
       <div class="login__inputs">
         <div class="login__box">
           <input 
-            type="username" 
             v-model="username" 
+            type="username" 
             placeholder="username" 
             required 
             class="login__input" 
@@ -24,8 +27,8 @@
 
         <div class="login__box">
           <input 
-            type="password" 
             v-model="password" 
+            type="password" 
             placeholder="Password" 
             required 
             class="login__input" 
@@ -34,37 +37,20 @@
         </div>
       </div>
 
-      <!-- Error Messages -->
-      <div 
-        v-if="errors.length" 
-        class="bg-red-300 text-white rounded-lg p-6 mb-4"
-      >
-        <p v-for="(error, index) in errors" :key="index">{{ error }}</p>
-      </div>
 
+      <!-- Error Messages -->
+      <ErrorMessages :errors="errors" />
+      
       <!-- Remember Me & Forgot Password -->
-      <div class="login__check">
-        <div class="login__check-box">
-          <input 
-            type="checkbox" 
-            id="remember-me" 
-            v-model="rememberMe" 
-            class="login__check-input" 
-          />
-          <label for="remember-me" class="login__check-label">Remember me</label>
-        </div>
-        <router-link to="/forgot-password" class="login__forgot">
-          Forgot Password?
-        </router-link>
-      </div>
+      <RememberMeForgotPassword v-model:remember-me="rememberMe" />
 
       <!-- Buttons -->
-      <div class="login__buttons" id="login__buttons">
+      <div id="login__buttons" class="login__buttons">
         <button 
           type="submit" 
           class="login__button" 
-          @click="handleSubmit" 
           :disabled="loading"
+          @click="handleSubmit" 
         >
           {{ loading ? 'Sending...' : 'Send Otp' }}
         </button>
@@ -75,12 +61,12 @@
             v-for="(digitInput, index) in otpLength"
             :key="index"
             v-model="otpArray[index]"
-            @keydown="handleEnter(index, $event)"
-            @input="handleInput(index, $event)"
-            @paste="handlePaste(index, $event)"
             type="text"
             maxlength="1"
             class="input"
+            @keydown="handleEnter(index, $event)"
+            @input="handleInput(index, $event)"
+            @paste="handlePaste(index, $event)"
           />
         </div>
       </div>
@@ -90,8 +76,8 @@
         v-if="isOTPSent" 
         type="button" 
         class="login__verify-otp-button" 
-        @click="verifyOTP" 
         :disabled="loading"
+        @click="verifyOTP" 
       >
         Verify OTP
       </button>
@@ -100,17 +86,14 @@
       <button 
         type="button" 
         class="login__oauth-button" 
-        @click="handleOAuthLogin" 
         :disabled="loading"
+        @click="handleOAuthLogin" 
       >
         Login with 42
       </button>
 
       <!-- Register Link -->
-      <div class="login__register">
-        Don't have an account? 
-        <router-link to="/register">Register</router-link>
-      </div>
+      <RegisterLink />
     </form>
   </div>
 </template>
@@ -120,19 +103,22 @@
 <script setup>
   
   import { ref } from 'vue'
+  import { useRouter } from 'vue-router';
+
+  import ErrorMessages from '@/components/LoginPage/ErrorMessages.vue';
+  import RegisterLink from '@/components/LoginPage/RegisterLink.vue';
+  import RememberMeForgotPassword from '@/components/LoginPage/RememberMeForgotPassword.vue';
   import { useAuth} from '@/pages/LoginPage/components/composables/useAuth'
 
   const username = ref('');
   const password = ref('');
-  const otp = ref('');
   const rememberMe = ref(false)
   const isOTPSent = ref(false);
   const otpLength = ref(6); // Number of OTP digits
   const otpArray = ref(Array(otpLength.value).fill('')); // Array to hold OTP digits
-  const isUserValidated = ref(false);
 
   const { loading, errors,sendOTP, checkOTP,handleOAuthLogin } = useAuth()
-
+  const router = useRouter();
 //send otp
   const handleSubmit = async() => {
     try {
@@ -149,7 +135,7 @@
       console.log(isOTPSent.value, "isOTPSent");
     }
     catch (error) {
-      console.error("failed ot send otp");
+      console.error("failed ot send otp:", error);
       errors.value.push('Failed to send OTP. Please try again.');
     }
     loading.value = false;
@@ -168,7 +154,7 @@
         errors.value.push('Invalid OTP. Please try again.');
       }
     } catch (error){
-      console.error('OTP verification failed')
+      console.error('OTP verification failed:', error);
       errors.value.push('rukopop')
     }
   };
@@ -211,3 +197,20 @@
   @import "@/pages/LoginPage/components/css/styles.css";
 
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

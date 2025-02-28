@@ -1,5 +1,5 @@
 // import 
-import Cookies from 'js-cookie';
+
 import VueCookies from 'vue-cookies';
 export const setToken = async (token) => {
 	VueCookies.set('access_token', token.access)

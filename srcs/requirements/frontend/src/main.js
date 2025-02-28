@@ -14,10 +14,9 @@ import App from './App.vue';
 import en from './locales/en.json';
 import ru from './locales/ru.json';
 import th from './locales/th.json';
-import { svgComponents } from './shared/lib';
-
 //routers
 import router from './router';
+import { svgComponents } from './shared/lib';
 
 export const i18n = createI18n({
   locale: localStorage.getItem('lang'),

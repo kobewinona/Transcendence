@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LoginPage from '@/pages/LoginPage/LoginPage.vue';
+
+import { getToken, isAuthenticated } from '@/components/tokenUtils';
 import Game from '@/features/Game/Game.vue';
-import RegisterPage from '@/pages/RegisterPage/RegisterPage.vue';
+import LoginPage from '@/pages/LoginPage/LoginPage.vue';
 import MainPage from '@/pages/MainPage/MainPage.vue';
 import NotFound from '@/pages/NotFound.vue';
-import { getToken, isAuthenticated } from '@/components/tokenUtils';
-import axios from 'axios';
+import RegisterPage from '@/pages/RegisterPage/RegisterPage.vue';
 
 const router = createRouter({
   history: createWebHistory(),
