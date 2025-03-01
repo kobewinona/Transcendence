@@ -1,4 +1,26 @@
 services:
+  postgres:
+    container_name: postgres
+    build:
+      context: './requirements/postgresql'
+      dockerfile: Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - ft_transcendence
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+
   backend:
     container_name: backend
     build:
@@ -11,6 +33,9 @@ services:
     expose:
       - 8000
     restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m
@@ -35,7 +60,7 @@ services:
       start_period: 5s
 
   nginx:
-    container_name: nginx-modsecurity
+    container_name: nginx
     build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
@@ -64,6 +89,8 @@ networks:
 
 volumes:
   frontend_build:
+  database-postgres:
+  postgres_data:
 
 secrets:
   ssl_certificate:

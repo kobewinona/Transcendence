@@ -1,26 +1,35 @@
 FROM python:3.12
 
-LABEL org.opencontainers.image.authors="Lera, Dima, Wolf, Jeremy"
+LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
 
 WORKDIR /usr/src/app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install system dependencies first
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
+# Install Pipenv separately to improve caching
+RUN pip install --upgrade pip && pip install pipenv
+
+# Copy dependency files first for better Docker caching
+COPY Pipfile Pipfile.lock ./
+
+# Install dependencies using Pipenv
+RUN pipenv install --deploy --ignore-pipfile
+
+# Copy the rest of the project files
 COPY . .
 
 # Create STATIC_ROOT directory
 RUN mkdir -p /usr/src/app/staticfiles
 
 # Collect static files
-RUN python manage.py collectstatic --noinput
+RUN pipenv run python manage.py collectstatic --noinput
 
-# Apply migrations
-RUN python manage.py makemigrations --noinput
-RUN python manage.py migrate --noinput
+# Copy entrypoint script and make it executable
+COPY ./tools/entrypoint.sh /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
 
-# Start Daphne server
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+
+# Start Daphne server using Pipenv
+CMD ["pipenv", "run", "daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]

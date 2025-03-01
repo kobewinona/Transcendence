@@ -5,9 +5,9 @@ GAME_STATUS_COUNTDOWN = 3  # started countdown to new game
 GAME_STATUS_IN_PROGRESS = 4  # game in progress
 GAME_STATUS_ENDED = 5  # game ended
 GAME_COUNTDOWN_DURATION = 3
-DEMO_GAME_MODE = 'demo'
-QUICK_START_GAME_MODE = 'quick_start'
-NEW_GAME_GAME_MODE = 'new_game'
+DEMO_GAME_MODE = "demo"
+QUICK_START_GAME_MODE = "quick_start"
+NEW_GAME_GAME_MODE = "new_game"
 
 PADDLE_DEFAULT_WIDTH = 2.5  # %
 PADDLE_DEFAULT_HEIGHT = 13  # %

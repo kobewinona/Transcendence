@@ -1,28 +1,18 @@
-# FROM nginx:stable
-
-# LABEL org.opencontainers.image.authors="Lera, Dima, Wolf, Jeremy"
-
-# COPY conf/nginx.conf /etc/nginx/nginx.conf
-
-# RUN chmod 644 /etc/nginx/nginx.conf && chown root:root /etc/nginx/nginx.conf
-
-# EXPOSE 80 443
-
-# ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
-
-# Step 1 : Use Debian image
 FROM debian:bullseye-slim
 
-# Step 2 : Install usefull dependencies
+LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
+
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     g++ flex bison curl apache2-dev doxygen libyajl-dev ssdeep \
     liblua5.2-dev libgeoip-dev libtool dh-autoreconf libcurl4-gnutls-dev \
     libxml2 libpcre++-dev libxml2-dev git liblmdb-dev libpkgconf3 \
     lmdb-doc pkgconf zlib1g-dev libssl-dev wget make \
     systemctl vim \
+    && apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Step 3 : Install ModSecurity
+# Install ModSecurity
 RUN git clone --depth 1 -b v3.0.12 https://github.com/SpiderLabs/ModSecurity.git \
     && cd ModSecurity \
     && git submodule init \
@@ -33,7 +23,7 @@ RUN git clone --depth 1 -b v3.0.12 https://github.com/SpiderLabs/ModSecurity.git
     && make install \
     && cd ..
 
-# Step 4 : Install modsecurity-nginx and NGINX
+# Install modsecurity-nginx and nginx
 RUN wget http://nginx.org/download/nginx-1.27.3.tar.gz \
     && tar -xzf nginx-1.27.3.tar.gz \
     && git clone https://github.com/SpiderLabs/ModSecurity-nginx.git \
@@ -47,15 +37,22 @@ RUN wget http://nginx.org/download/nginx-1.27.3.tar.gz \
     && ln -s /usr/local/nginx/sbin/nginx /usr/local/sbin/nginx \
     && cd ..
 
-# # Step 5 : Copy the config files
+# Copy the config files
 COPY conf/nginx.conf /usr/local/nginx/conf/nginx.conf
 COPY conf/modsecurity.conf /usr/local/nginx/conf/modsecurity.conf
 COPY conf/unicode.mapping /usr/local/nginx/conf/unicode.mapping
 COPY conf/owasp-crs /usr/local/nginx/conf/owasp-crs
 
-# # Step 6 : Configure the NGINX User
+# Configure the nginx user
 RUN useradd -r -M -s /sbin/nologin nginx
 
-# # Step 7 : Expose port 443 and 80, and start NGINX
+# Expose port 443 and 80, and start nginx
 EXPOSE 80 443
+
+# Copy entrypoint script and make it executable
+COPY ./tools/entrypoint.sh /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+
 CMD ["nginx", "-g", "daemon off;"]

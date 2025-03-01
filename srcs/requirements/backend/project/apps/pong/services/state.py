@@ -1,9 +1,9 @@
 import json
 import logging
 
-from .constants import (GAME_STATUS_IDLE, GAME_COUNTDOWN_DURATION)
+from .constants import GAME_STATUS_IDLE, GAME_COUNTDOWN_DURATION
 
-logger = logging.getLogger('pong.consumer')
+logger = logging.getLogger("pong.consumer")
 
 
 class GameState:

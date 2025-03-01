@@ -17,6 +17,7 @@ setup:
 	@mkdir -p ./secrets
 	@chmod 777 ./secrets
 	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
+	@cd srcs/requirements/backend && pipenv lock && cd -
 
 run: setup
 	@echo "Running the services for ft_transcendence..."

@@ -14,13 +14,17 @@ from channels.auth import AuthMiddlewareStack
 from django.urls import path
 from project.apps.pong.consumers import PongConsumer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter([
-            path("ws/pong/", PongConsumer.as_asgi()),
-        ])
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(
+            URLRouter(
+                [
+                    path("ws/pong/", PongConsumer.as_asgi()),
+                ]
+            )
+        ),
+    }
+)
