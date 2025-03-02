@@ -32,6 +32,8 @@ services:
       - ft_transcendence
     expose:
       - 8000
+    ports:
+      - "8000:8000"
     restart: always
     depends_on:
       postgres:

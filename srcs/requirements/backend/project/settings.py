@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +20,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+#Does this backend recognize this user and their credentials?
+#modelbackend - checks the database for a user with the provided username and password.
+#intra - Validating users based on an oauth, API
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'project.apps.intrauth.auth.IntraAuthenticationBackend'
+]
+# so django will not use will use the default User model - easier migrations- just add new fields
+AUTH_USER_MODEL = 'intrauth.CustomUser'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -32,21 +43,27 @@ INSTALLED_APPS = [
     # Third-Party Apps
     "corsheaders",
     "channels",
+    'rest_framework',
+    'rest_framework_simplejwt',
     "django.contrib.postgres",
     # Custom Project Apps
     "project.apps.pong",
     "project.apps.chat",
+    "project.apps.custom_auth",
+    "project.apps.intrauth",
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',#compresses and caches static files, reducing load times.
+
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -121,8 +138,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "/static/"
-STATIC_ROOT = "/usr/src/app/staticfiles"
+STATIC_URL = "/staticfiles/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -140,6 +158,62 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost",
     "https://localhost",
 ]
+
+
+"""
+    rest - how the framework handles authentication and permissions for API endpoints
+    requiring usr to include a valid JWT in the Authorization header of their requests (Bearer token). 
+        The server validates the token to authenticate the user and 
+    ensures that only authenticated users can access the API endpoints.
+"""
+
+REST_FRAMEWORK = {
+    'STATIC_URL': STATIC_URL,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# Simple JWT settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10), #how long tokens are valid
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    
+    # JWT creation and validation.
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    
+    # Authentication Header
+    'AUTH_HEADER_TYPES': ('Bearer',), #token must be sent in the Authorization header with the prefix Bearer
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    
+    #ti strict security set ti true was in dock 
+    'ROTATE_REFRESH_TOKENS': False,#a new refresh token is issued every time an access token is refreshed.
+    'BLACKLIST_AFTER_ROTATION': False,#old refresh tokens are blacklisted after rotation to prevent reuse.
+    
+    #tracking user activity not useful 
+    'UPDATE_LAST_LOGIN': True,
+    
+    #for frontend if store in cookies very important for local just delete 
+    'AUTH_COOKIE': 'access_token',
+    'AUTH_COOKIE_HTTP_ONLY': True,# Prevents JavaScript from accessing the cookie
+    'AUTH_COOKIE_SECURE': True,#Ensures the cookie is only sent over HTTPS.
+    'AUTH_COOKIE_SAMESITE': 'None',#Controls cross-site request behavior set to true but fronted
+    
+    #User Identification
+    'USER_ID_FIELD': 'id', #tells the server which field in the database identifies the user
+    'USER_ID_CLAIM': 'user_id',#where to find the user"s id in the jwt blabla
+    
+    #Token Classes
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
 
 # Ensure logs directory and log file exist
 LOGS_DIR = os.path.join(os.path.dirname(__file__), "logs")
