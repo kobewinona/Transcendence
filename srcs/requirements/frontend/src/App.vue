@@ -1,17 +1,14 @@
 <template>
-  <ConfigProvider :theme="ANTD_THEME_CONFIG">
-    <!--  <div class="no-cursor-overlay" :class="{ 'no-cursor-overlay_active': isCursorDisabled }" />-->
-    <div class="grain-overlay" />
-    <MainPage />
-  </ConfigProvider>
+  <!--  <div class="no-cursor-overlay" :class="{ 'no-cursor-overlay_active': isCursorDisabled }" />-->
+  <div class="grain-overlay" />
+  <MainPage />
 </template>
 
 <script setup>
-import { provideGameSocket } from 'features/Game/composables/useGameSocket.js';
+import { provideGameSocket } from 'entities/Game/composables';
 import { MainPage } from 'pages';
 import { onMounted, onUnmounted, ref } from 'vue';
 
-import { ANTD_THEME_CONFIG } from './config/constants.js';
 import { i18n } from './main.js';
 import { provideLang } from './shared/composables';
 

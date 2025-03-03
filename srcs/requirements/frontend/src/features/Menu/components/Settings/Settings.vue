@@ -1,8 +1,9 @@
 <template>
   <ul class="settings">
-    <MySection :title="t('menu.settings.game')">
+    <SettingsLayout class-name="settings__section">
+      <SectionTitle :title="t('menu.settings.system')" />
       <div class="settings__item">
-        <span>{{ t('menu.settings.game.language') }}</span>
+        <p class="settings__item-label">{{ t('menu.settings.system.language') }}</p>
         <CarouselSelect
           :value="i18n.global.locale.value"
           :options="options"
@@ -16,26 +17,30 @@
           </template>
         </CarouselSelect>
       </div>
-    </MySection>
+    </SettingsLayout>
   </ul>
 </template>
 
 <script setup>
-import { CarouselSelect, MySection } from 'components';
+import { CarouselSelect } from 'components';
 import { LANG_OPTIONS } from 'config';
+import { SettingsLayout } from 'layouts';
+import { SectionTitle } from 'layouts/SettingsLayout/components/SettingsSection/components';
 import { useLangInject } from 'shared/composables';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
 
+const { t } = useI18n();
 const { i18n, changeLang } = useLangInject();
 
 const iso = computed(() => {
   const currentLocale = i18n.global.locale.value || 'gb';
-  if (currentLocale === 'en') {
+  const currentLocalePrefix = currentLocale.split('-')[0];
+
+  if (currentLocalePrefix === 'en') {
     return 'GB';
   } else {
-    return currentLocale.toUpperCase();
+    return currentLocalePrefix.toUpperCase();
   }
 });
 
@@ -60,6 +65,13 @@ const options = computed(() => LANG_OPTIONS(t));
   list-style: none;
 }
 
+::v-deep(.settings__section) {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--smaller-space);
+  padding: 0;
+}
+
 .settings__item {
   display: flex;
   flex-direction: row;
@@ -67,6 +79,10 @@ const options = computed(() => LANG_OPTIONS(t));
   justify-content: space-between;
 
   width: 100%;
+}
+
+.settings__item-label {
+  margin: 0;
 }
 
 .settings__item-lang-option {

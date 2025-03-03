@@ -3,9 +3,8 @@
 </template>
 
 <script setup>
+import { useGameSocketInject } from 'entities/Game/composables';
 import { onMounted, onUnmounted, ref } from 'vue';
-
-import { useGameSocketInject } from '../../composables';
 
 const { name, side, controls } = defineProps({
   name: {

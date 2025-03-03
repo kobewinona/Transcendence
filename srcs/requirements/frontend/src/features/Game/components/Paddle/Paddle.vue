@@ -25,10 +25,9 @@
 </template>
 
 <script setup>
+import { useGameSocketInject } from 'entities/Game/composables';
 import { COLORS } from 'entities/Game/config/constants.js';
 import { computed } from 'vue';
-
-import { useGameSocketInject } from '../../composables';
 
 const { name, side, paddleIndex, hasMoreThanTwoPlayers } = defineProps({
   name: {
@@ -82,7 +81,7 @@ const styles = computed(() => {
   --right-paddle-bg: '';
 
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   transform: translateY(-50%);
 
   display: flex;

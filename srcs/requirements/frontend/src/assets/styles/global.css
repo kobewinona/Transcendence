@@ -15,29 +15,31 @@
 }
 
 :root {
-  /* colors */
-  --primary-color: #fc3b3b;
-  --primary-color-opacity-50: rgb(252 59 59 / 0.5);
-  --primary-color-opacity-70: rgb(252 59 59 / 0.7);
-  --primary-color-opacity-90: rgb(252 59 59 / 0.9);
-  --secondary-color: #36a2eb;
-  --secondary-color-opacity-50: rgba(54 162 235 / 0.5);
-  --complementary-1-color: #3bfc97;
-  --complementary-1-color-opacity-50: rgba(59 252 151 / 0.5);
-  --complementary-2-color: #fc3bf4;
-  --complementary-2-color-opacity-50: rgba(252 59 244 / 0.5);
-  --complementary-3-color: #9b36eb;
-  --complementary-3-color-opacity-50: rgba(155 54 235 / 0.5);
-  --complementary-4-color: #36ebc1;
-  --complementary-4-color-opacity-50: rgba(54 235 193 / 0.5);
-  --light-color: #e0ded6;
-  --light-color-opacity-50: rgb(224 222 214 / 0.5);
-  --light-color-opacity-90: rgb(224 222 214 / 0.9);
-  --dark-color: #242428;
-  --dark-color-opacity-50: rgb(36 36 40 / 0.5);
-  --dark-color-opacity-90: rgb(36 36 40 / 0.9);
-  --dark-color-opacity-95: rgb(36 36 40 / 0.95);
-  --darker-color: #323236;
+  --primary-color: #ff4d4d;
+  --primary-color-opacity-50: rgb(255 77 77 / 0.5);
+  --primary-color-opacity-70: rgb(255 77 77 / 0.7);
+  --primary-color-opacity-90: rgb(255 77 77 / 0.9);
+  --secondary-color: #2f80ed;
+  --secondary-color-opacity-50: rgb(47 128 237 / 0.5);
+  --complementary-1-color: #ffa3de;
+  --complementary-1-color-opacity-50: rgb(255 163 222 / 0.5);
+  --complementary-2-color: #d8b4fe;
+  --complementary-2-color-opacity-50: rgb(216 180 254 / 0.5);
+  --complementary-3-color: #ffb496;
+  --complementary-3-color-opacity-50: rgb(255 180 150 / 0.5);
+  --complementary-4-color: #38bdf8;
+  --complementary-4-color-opacity-50: rgb(56 189 248 / 0.5);
+  --complementary-5-color: #15877f;
+  --complementary-5-color-opacity-50: rgb(21 135 127 / 0.5);
+  --complementary-6-color: #d6ffce;
+  --complementary-6-color-opacity-50: rgb(214 255 206 / 0.5);
+  --light-color: #e6f0ff;
+  --light-color-opacity-50: rgb(230 240 255 / 0.5);
+  --light-color-opacity-90: rgb(230 240 255 / 0.9);
+  --dark-color: #091e26;
+  --dark-color-opacity-50: rgb(9 30 38 / 0.5);
+  --dark-color-opacity-90: rgb(9 30 38 / 0.9);
+  --dark-color-opacity-95: rgb(9 30 38 / 0.95);
 
   /* dimensions */
   --small-space: 6px;

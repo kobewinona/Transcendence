@@ -1,11 +1,7 @@
+import { BALL_DEFAULT_HEIGHT } from 'entities/Ball/config/constants.js';
+import { PADDLE_DEFAULT_HEIGHT, PADDLE_DEFAULT_WIDTH } from 'entities/Paddle/config/constants.js';
 import { debounce } from 'shared/lib';
 import { inject, onMounted, onUnmounted, provide, ref } from 'vue';
-
-import { BALL_DEFAULT_HEIGHT } from '../components/Ball/config/constants.js';
-import {
-  PADDLE_DEFAULT_HEIGHT,
-  PADDLE_DEFAULT_WIDTH,
-} from '../components/Paddle/config/constants.js';
 
 const useGameDimensions = (containerRef, onUpdate) => {
   const containerWidth = ref(0);

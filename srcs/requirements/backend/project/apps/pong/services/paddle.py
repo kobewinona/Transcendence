@@ -8,7 +8,7 @@ from .constants import (
     PADDLE_DEACCELERATION,
 )
 
-logger = logging.getLogger("pong.paddle")
+logger = logging.getLogger("game_logs")
 
 
 class Paddle:
@@ -44,14 +44,10 @@ class Paddle:
         else:
             if self.speed > 0:
                 self.speed -= PADDLE_DEACCELERATION
-                self.speed = max(
-                    0, self.speed
-                )  # Prevent negative speed when decelerating
+                self.speed = max(0, self.speed)
             elif self.speed < 0:
                 self.speed += PADDLE_DEACCELERATION
-                self.speed = min(
-                    0, self.speed
-                )  # Prevent positive speed when decelerating
+                self.speed = min(0, self.speed)
 
         # Update position based on speed
         self.position += self.speed
@@ -63,17 +59,11 @@ class Paddle:
         )
 
         # Adjust paddle height based on speed, but only if not near the edges
-        stretch_factor = (
-            PADDLE_STRETCHING_FACTOR + abs(self.speed) / PADDLE_MAX_SPEED
-        )  # Stretch more at higher speed
+        stretch_factor = PADDLE_STRETCHING_FACTOR + abs(self.speed) / PADDLE_MAX_SPEED
         if half_paddle_height < self.position < self.boundary - half_paddle_height:
-            # Stretch the height if not near top or bottom boundary
             self.height = max(self.base_height, self.base_height * stretch_factor)
-            self.height = min(
-                self.height, self.base_height * 2
-            )  # Clamp to a max stretch (e.g., 1.5x)
+            self.height = min(self.height, self.base_height * 2)
         else:
-            # Reset to base height when near edges
             self.height = self.base_height
 
         return self.position

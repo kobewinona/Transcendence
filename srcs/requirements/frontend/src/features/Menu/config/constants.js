@@ -17,6 +17,14 @@ export const MENU_ITEMS_KEYS = {
   SETTINGS,
 };
 
+export const MENU_ICONS = {
+  [QUICK_START]: svgComponents['LaunchIcon'],
+  [NEW_GAME]: svgComponents['GameConsoleIcon'],
+  [PLAY_ONLINE]: svgComponents['GamepadIcon'],
+  [PROFILE]: svgComponents['DeveloperIcon'],
+  [SETTINGS]: svgComponents['GameDevelopmentIcon'],
+};
+
 export const MODES_WITH_SOCKET_REQUIRED = [QUICK_START, NEW_GAME, PLAY_ONLINE];
 
 export const MENU_ITEMS = (t) => [
@@ -28,7 +36,7 @@ export const MENU_ITEMS = (t) => [
         title: t('menu.items.item.quick_start.title'),
         description: t('menu.items.item.quick_start.description'),
         content: null,
-        icon: svgComponents['GameIcon'],
+        icon: MENU_ICONS[QUICK_START],
         iconSlideTo: 'bottom',
         disabled: false,
       },
@@ -37,7 +45,7 @@ export const MENU_ITEMS = (t) => [
         title: t('menu.items.item.new_game.title'),
         description: t('menu.items.item.new_game.description'),
         content: NewGame,
-        icon: svgComponents['GameConsoleIcon'],
+        icon: MENU_ICONS[NEW_GAME],
         iconSlideTo: 'bottom',
         disabled: false,
       },
@@ -45,7 +53,7 @@ export const MENU_ITEMS = (t) => [
         key: PLAY_ONLINE,
         title: t('menu.items.item.online.title'),
         description: t('menu.items.item.online.description'),
-        icon: svgComponents['GamepadIcon'],
+        icon: MENU_ICONS[PLAY_ONLINE],
         iconSlideTo: 'bottom',
         disabled: true,
       },
@@ -58,7 +66,7 @@ export const MENU_ITEMS = (t) => [
         key: PROFILE,
         title: t('menu.items.item.profile.title'),
         description: t('menu.items.item.profile.description'),
-        icon: svgComponents['DeveloperIcon'],
+        icon: MENU_ICONS[PLAY_ONLINE][PROFILE],
         iconSlideTo: 'right',
         disabled: true,
       },
@@ -67,7 +75,7 @@ export const MENU_ITEMS = (t) => [
         title: t('menu.items.item.settings.title'),
         description: t('menu.items.item.settings.description'),
         content: Settings,
-        icon: svgComponents['GameDevelopmentIcon'],
+        icon: MENU_ICONS[SETTINGS],
         iconSlideTo: 'right',
         disabled: false,
       },

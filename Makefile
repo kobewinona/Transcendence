@@ -17,7 +17,7 @@ setup:
 	@mkdir -p ./secrets
 	@chmod 777 ./secrets
 	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
-	@cd srcs/requirements/backend && pipenv lock && cd -
+	@docker build -t backend_setup --build-arg LOCK_ONLY=true -f srcs/requirements/backend/Dockerfile srcs/requirements/backend
 
 run: setup
 	@echo "Running the services for ft_transcendence..."
@@ -27,11 +27,11 @@ run: setup
 	echo "Error: Unable to run the services."
 
 dev: setup
-	cd ./srcs/requirements/backend && source venv/bin/activate && watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application" &
+	cd ./srcs/requirements/backend && pipenv run watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application" &
 	cd ./srcs/requirements/frontend && yarn run dev &
 
 backend-dev: setup
-	cd ./srcs/requirements/backend && source venv/bin/activate && watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application"
+	cd ./srcs/requirements/backend && pipenv run watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application"
 
 stop:
 	@echo "Stopping the services for ft_transcendence..."

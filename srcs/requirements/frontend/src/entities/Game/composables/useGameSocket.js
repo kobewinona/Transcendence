@@ -11,11 +11,15 @@ import { inject, onUnmounted, provide, ref } from 'vue';
 const useGameSocket = (url) => {
   let animationFrameId;
 
-  const paddleNames = ref([]);
-
   // Game State
   const status = ref(0);
   const countdown = ref(0);
+  const leftScore = ref(0);
+  const rightScore = ref(0);
+  const isDeuce = ref(false);
+  const isLeftAdvantage = ref(false);
+  const isRightAdvantage = ref(false);
+  const winner = ref(undefined);
 
   // Ball State
   const ballPositionX = ref(0);
@@ -26,6 +30,7 @@ const useGameSocket = (url) => {
   const ballCurve = ref(0);
   const ballBouncedOffSurface = ref(0);
 
+  const paddleNames = ref([]);
   const paddleWidths = ref([]);
   const paddleHeights = ref([]);
   const paddlePositions = ref([]);
@@ -36,17 +41,33 @@ const useGameSocket = (url) => {
   function handleMessage(dataView) {
     const messageType = dataView.getUint8(0);
 
-    if (dataView.byteLength < 3) {
-      console.error(
-        '❌ Invalid GAME_STATE_MESSAGE_TYPE: Insufficient data length',
-        dataView.byteLength
-      );
-      return;
-    }
-
     if (messageType === GAME_STATE_MESSAGE_TYPE) {
-      status.value = dataView.getUint8(1);
-      countdown.value = dataView.getUint8(2);
+      let offset = 1;
+
+      const minStatusStateSize = 1 + 4 * 4 + 3 + 4; // B, i i i i B B B B
+      if (dataView.byteLength < minStatusStateSize) {
+        console.error(
+          '❌ Invalid GAME_STATE_MESSAGE_TYPE: Insufficient data length',
+          dataView.byteLength
+        );
+        return;
+      }
+
+      status.value = dataView.getInt32(offset, true);
+      offset += 4;
+      countdown.value = dataView.getInt32(offset, true);
+      offset += 4;
+      leftScore.value = dataView.getInt32(offset, true);
+      offset += 4;
+      rightScore.value = dataView.getInt32(offset, true);
+      offset += 4;
+      isDeuce.value = Boolean(dataView.getUint8(offset));
+      offset += 1;
+      isLeftAdvantage.value = Boolean(dataView.getUint8(offset));
+      offset += 1;
+      isRightAdvantage.value = Boolean(dataView.getUint8(offset));
+      offset += 1;
+      winner.value = dataView.getInt32(offset, true);
 
       if (status.value === GAME_STATUS_IDLE) {
         actions.startGame(DEMO_DEFAULT_GAME_SETTINGS);
@@ -127,7 +148,7 @@ const useGameSocket = (url) => {
 
     paddleNames.value = sanitizedSettings[CONTROLLERS_INPUT_NAME]?.map(({ name }) => name);
 
-    sendMessage({ action: 'start', settings: sanitizedSettings });
+    sendMessage({ action: 'start', data: sanitizedSettings });
   }
 
   function stopGame() {
@@ -174,6 +195,12 @@ const useGameSocket = (url) => {
   return {
     socket,
     status,
+    leftScore,
+    rightScore,
+    isDeuce,
+    isLeftAdvantage,
+    isRightAdvantage,
+    winner,
     ballPositionX,
     ballPositionY,
     ballVelocityX,
@@ -181,6 +208,7 @@ const useGameSocket = (url) => {
     isBallOutOfBounds,
     ballCurve,
     ballBouncedOffSurface,
+    paddleNames,
     paddleWidths,
     paddleHeights,
     paddlePositions,

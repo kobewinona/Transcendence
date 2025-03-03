@@ -21,6 +21,7 @@ export default defineConfig({
       entities: '/src/entities',
       components: '/src/components',
       shared: '/src/shared',
+      layouts: '/src/layouts',
       assets: '/src/assets',
       config: '/src/config',
     },

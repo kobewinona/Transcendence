@@ -7,7 +7,15 @@
   ],
   "overrides": [
     {
-      "files": ["*.vue", "**/*.vue"]
+      "files": ["*.vue", "**/*.vue"],
+      "rules": {
+        "selector-pseudo-element-no-unknown": [
+          true,
+          {
+            "ignorePseudoElements": ["v-deep"]
+          }
+        ]
+      }
     }
   ],
   "rules": {

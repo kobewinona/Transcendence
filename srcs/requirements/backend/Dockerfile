@@ -13,6 +13,10 @@ RUN pip install --upgrade pip && pip install pipenv
 # Copy dependency files first for better Docker caching
 COPY Pipfile Pipfile.lock ./
 
+# If we are only locking, then stop here
+ARG LOCK_ONLY=false
+RUN if [ "$LOCK_ONLY" = "true" ]; then pipenv lock && exit 0; fi
+
 # Install dependencies using Pipenv
 RUN pipenv install --deploy --ignore-pipfile
 

@@ -2,11 +2,7 @@
   <div class="layout">
     <!-- Carousel animation for the SVG -->
     <div class="carousel">
-      <component
-        :is="svgComponents['GameConsoleIcon']"
-        v-if="isVueComponent(svgComponents['GameConsoleIcon'])"
-        class="quick-start-icon"
-      />
+      <component :is="icon" v-if="isVueComponent(icon)" class="quick-start-icon" />
     </div>
 
     <!-- Geometrical shapes rotating and scaling -->
@@ -22,10 +18,16 @@
 <script setup>
 // noinspection JSFileReferences
 import { AnimatedShapes } from 'shared/components';
-import { svgComponents } from 'shared/lib';
 import { isVueComponent } from 'shared/lib';
 
 const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = AnimatedShapes;
+
+defineProps({
+  icon: {
+    type: Node,
+    required: true,
+  },
+});
 
 // TODO add prop for icon
 </script>

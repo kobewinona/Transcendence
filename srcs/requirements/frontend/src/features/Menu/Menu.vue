@@ -87,9 +87,11 @@
 import { isVueComponent } from 'shared/lib';
 import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 const { t } = useI18n();
 
-import { useGameSocketInject } from '../Game/composables/index.js';
+import { useGameSocketInject } from 'entities/Game/composables';
+
 import { ItemContentWrapper } from './components';
 import { MENU_ITEMS, MODES_WITH_SOCKET_REQUIRED } from './config/constants.js';
 
@@ -181,12 +183,8 @@ const handleMouseLeave = () => {
 };
 
 // Add timout id clearance
-const handleMenuOptionSelect = ({ key: optionKey, content }) => {
-  if (!content) {
-    emit('on-menu-option-select', optionKey);
-    return;
-  }
-
+const handleMenuOptionSelect = ({ key: optionKey }) => {
+  emit('on-menu-option-select', optionKey);
   menuItemClickedKey.value = optionKey;
   menuItemOpenedKey.value = optionKey;
 };

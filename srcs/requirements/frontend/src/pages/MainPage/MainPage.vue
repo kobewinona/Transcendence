@@ -2,7 +2,7 @@
   <main class="main">
     <section class="container">
       <transition name="transit" appear>
-        <GameLoader v-show="isLoadingGame" />
+        <GameLoader v-show="isLoadingGame" :icon="MENU_ICONS[selectedMenuOptionKey]" />
       </transition>
       <Menu
         :is-open="isMenuOpen"
@@ -16,14 +16,14 @@
 
 <script setup>
 import { GameLoader } from 'components';
+import { useGameSocketInject } from 'entities/Game/composables';
 import {
   CONTROLLERS_INPUT_NAME,
   GAME_STATUS_IN_PROGRESS,
   QUICK_START_DEFAULT_GAME_SETTINGS,
 } from 'entities/Game/config/constants.js';
 import { Game, Menu } from 'features';
-import { useGameSocketInject } from 'features/Game/composables/index.js';
-import { MENU_ITEMS_KEYS } from 'features/Menu/config/constants.js';
+import { MENU_ICONS, MENU_ITEMS_KEYS } from 'features/Menu/config/constants.js';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 const gameSocket = useGameSocketInject();
@@ -34,6 +34,8 @@ const isLoadingGame = ref(false);
 
 const switchToGameTimeoutId = ref(null);
 const closeMenuTimeoutId = ref(null);
+
+const selectedMenuOptionKey = ref(null);
 
 const closeMenu = (delay) => {
   const close = () => {
@@ -49,15 +51,27 @@ const closeMenu = (delay) => {
 
 const startNewGame = (newGameSettings) => {
   isLoadingGame.value = true;
-  gameSettings.value = newGameSettings;
+  let filteredGameSettings = newGameSettings;
 
-  if (!newGameSettings) {
+  // Filter controllers with no selected side
+  if (newGameSettings) {
+    filteredGameSettings = {
+      ...newGameSettings,
+      [CONTROLLERS_INPUT_NAME]: newGameSettings[CONTROLLERS_INPUT_NAME].filter(
+        (controller) => controller.side !== undefined
+      ),
+    };
+  }
+
+  gameSettings.value = filteredGameSettings;
+
+  if (!filteredGameSettings) {
     gameSocket.actions.startGame(QUICK_START_DEFAULT_GAME_SETTINGS);
   } else {
     gameSocket.actions.startGame({
-      ...newGameSettings,
+      ...filteredGameSettings,
       [CONTROLLERS_INPUT_NAME]: [
-        ...newGameSettings[CONTROLLERS_INPUT_NAME].map(({ side, name }) => ({ side, name })),
+        ...filteredGameSettings[CONTROLLERS_INPUT_NAME].map(({ side, name }) => ({ side, name })),
       ],
     });
   }
@@ -65,6 +79,8 @@ const startNewGame = (newGameSettings) => {
 
 // Get rid of timeout
 const handleMenuOptionSelect = (optionKey) => {
+  selectedMenuOptionKey.value = optionKey;
+
   if (optionKey === MENU_ITEMS_KEYS.QUICK_START) {
     startNewGame(QUICK_START_DEFAULT_GAME_SETTINGS);
   }
@@ -75,6 +91,8 @@ const handleKeyDown = (event) => {
     isMenuOpen.value = !isMenuOpen.value;
 
     // TODO handle escape during game other than quick start
+    selectedMenuOptionKey.value = null;
+    isLoadingGame.value = false;
     gameSettings.value = undefined;
     gameSocket.actions.stopGame();
 
