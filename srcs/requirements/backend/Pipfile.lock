@@ -1645,11 +1645,11 @@
         },
         "zope.publisher": {
             "hashes": [
-                "sha256:8baa7db87ba069997ef0cf0794bf6c37ae358bad2224698515f637110a515fae",
-                "sha256:b6b20d8e7340bafda5d27a5f2364111e824d33e23b2dfdcf472e9e699b388dae"
+                "sha256:74c95eada138d729b16b52fdcbac2eb8718bd6462e1782901b01bcbf6a44ddcd",
+                "sha256:da1eb6a5e0a3a6438a3ea77605220b4e32154449908206096e8a0e2d2427e3e8"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==7.2"
+            "version": "==7.3"
         },
         "zope.schema": {
             "hashes": [
@@ -1752,11 +1752,11 @@
         },
         "zope.testbrowser": {
             "hashes": [
-                "sha256:5936d2a0d77d8781d001358fd0b11461285b02dc6e3b324b84c1ed9326b1ff3f",
-                "sha256:75fa5f63f69fe4ebd6e6a7cebf2dc7da61a4c2a248f69b0b171d218af51a860e"
+                "sha256:2ce8b377d338951822c2b4ab77e2c635a6b228955bafd98694c32fe728251a10",
+                "sha256:bdf80c68fb266f4ca4dfeaec9e7e5ffe0556073970ca989e5fe36a673bb7ed0d"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==7.0"
+            "version": "==7.0.1"
         },
         "zope.testing": {
             "hashes": [

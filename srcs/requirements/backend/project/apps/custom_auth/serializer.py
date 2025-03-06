@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from intrauth.models import Profile
+# from intrauth.models import Profile
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
 #         model = Profile
 #         fields = ['id', 'username', 'email', 'is_online', 'avatar', 'wins', 'losses', 'friends']
 #         read_only_fields = ['id', 'username', 'email', 'is_online']
+        
         
 class OTPRequestSerializer(serializers.Serializer):
 	username = serializers.CharField()

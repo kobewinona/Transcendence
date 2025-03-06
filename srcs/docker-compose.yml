@@ -75,6 +75,7 @@ services:
       - ft_transcendence
     depends_on:
       - frontend
+      - backend
     secrets:
       - ssl_certificate
       - ssl_certificate_key

@@ -39,7 +39,11 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = [] 
 
 # class Profile(models.Model):
-#     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+#     user = models.OneToOneField(
+#         settings.AUTH_USER_MODEL,  # Links to the CustomUser model(can be changed- so direct link to the model)
+#         on_delete=models.CASCADE,  #profile deleted link delets too
+#         related_name='profile'     #accrss profile like user.profile
+#         )
 #     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 #     wins = models.PositiveIntegerField(default=0)
 #     losses = models.PositiveIntegerField(default=0)

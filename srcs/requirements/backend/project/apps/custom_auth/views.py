@@ -17,6 +17,8 @@ import requests
 from django.core.cache import cache
 # from datetime import datetime, timedelta #
 
+from rest_framework.permissions import AllowAny
+
 
 User = get_user_model()
 ###registration
@@ -67,7 +69,7 @@ def send_email(email, otp):
 		print(f'Error sending email: {str(e)}')
         
 class GetOTPView(APIView):
-
+	permission_classes = [AllowAny]  # Allow unauthenticated access DELETE AFTER USE POSTMAN
 	def post(self, request):
      	# print('in api great')
 		serializer = OTPRequestSerializer(data=request.data)

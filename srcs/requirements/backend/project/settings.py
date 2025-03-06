@@ -140,6 +140,7 @@ USE_TZ = True
 
 STATIC_URL = "/staticfiles/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type
@@ -213,6 +214,8 @@ SIMPLE_JWT = {
     #Token Classes
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+    
+    # 'TOKEN_OBTAIN_SERIALIZER': 'project.apps.custom_auth.serializers.CustomTokenObtainSerializer',
 }
 
 # Ensure logs directory and log file exist
