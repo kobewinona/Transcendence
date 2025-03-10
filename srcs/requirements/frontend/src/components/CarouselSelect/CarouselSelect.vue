@@ -38,7 +38,7 @@ const { t } = useI18n();
 
 const slots = useSlots();
 
-const { optionClassName, name, defaultValue, value, options } = defineProps({
+const { optionClassName, defaultValue, value, options } = defineProps({
   optionClassName: {
     type: String,
     default: '',
@@ -84,11 +84,7 @@ const nextOption = () => {
 const updateValue = (newValue) => {
   activeValue.value = newValue;
   emit('update:value', newValue);
-  emit(
-    'on-change',
-    name,
-    options.find((option) => option.value === newValue)
-  );
+  emit('on-change', newValue);
 };
 
 watch(

@@ -30,9 +30,12 @@ services:
       - DJANGO_SETTINGS_MODULE=project.settings
     networks:
       - ft_transcendence
-    expose:
-      - 8000
+    ports:
+      - "8000:8000"
+      - "8001:8001"
     restart: always
+    volumes:
+      - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
     depends_on:
       postgres:
         condition: service_healthy

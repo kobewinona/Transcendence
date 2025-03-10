@@ -5,6 +5,7 @@ import './styles.css';
 import './assets/styles/global.css';
 
 import CountryFlag from '@dzangolab/vue-country-flag-icon';
+import { svgComponents } from 'shared/lib';
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 
@@ -13,12 +14,14 @@ import en from './locales/en.json';
 import fr from './locales/fr.json';
 import ru from './locales/ru.json';
 import th from './locales/th.json';
-import { svgComponents } from './shared/lib';
+import router from './router';
 
 export const i18n = createI18n({
   locale: localStorage.getItem('lang'),
   fallbackLocale: 'en-US',
   legacy: false,
+  escapeParameterHtml: false,
+  interpolation: { escapeValue: false, defaultVariables: {} },
   messages: {
     en,
     fr,
@@ -37,4 +40,5 @@ Object.entries(svgComponents).forEach(([name, component]) => {
 app.component('CountryFlag', CountryFlag);
 
 app.use(i18n);
+app.use(router);
 app.mount('#app');

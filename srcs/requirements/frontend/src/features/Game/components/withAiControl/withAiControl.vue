@@ -31,6 +31,10 @@ const { name, side, index } = defineProps({
     type: Number,
     required: true,
   },
+  controls: {
+    type: Object,
+    default: null,
+  },
 });
 
 const gameSocket = useGameSocketInject();

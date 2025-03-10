@@ -42,7 +42,7 @@ const { t } = useI18n();
 
 const { mode } = defineProps({
   mode: {
-    type: Number,
+    type: String,
     required: true,
   },
 });

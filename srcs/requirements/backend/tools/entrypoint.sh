@@ -11,4 +11,4 @@ pipenv run python manage.py makemigrations --noinput
 pipenv run python manage.py migrate --noinput
 echo "✓ Migrations are successfully applied!"
 
-exec pipenv run "$@"
+exec "$@"

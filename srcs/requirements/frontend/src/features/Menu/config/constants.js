@@ -1,7 +1,7 @@
 // noinspection JSFileReferences
 import { svgComponents } from 'shared/lib';
 
-import { NewGame, Settings } from '../components';
+import { NewGame, Profile, Settings } from '../components';
 
 const QUICK_START = 'quick_start';
 const NEW_GAME = 'new_game';
@@ -66,9 +66,10 @@ export const MENU_ITEMS = (t) => [
         key: PROFILE,
         title: t('menu.items.item.profile.title'),
         description: t('menu.items.item.profile.description'),
-        icon: MENU_ICONS[PLAY_ONLINE][PROFILE],
+        content: Profile,
+        icon: MENU_ICONS[PROFILE],
         iconSlideTo: 'right',
-        disabled: true,
+        disabled: false,
       },
       {
         key: SETTINGS,

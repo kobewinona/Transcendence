@@ -1,0 +1,7 @@
+services:
+  backend:
+    build:
+      args:
+        DEV_MODE: "true"
+    volumes:
+      - ./requirements/backend:/usr/src/app

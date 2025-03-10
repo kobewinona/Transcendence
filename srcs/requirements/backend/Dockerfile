@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
 WORKDIR /usr/src/app
 
 # Install system dependencies first
-RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y netcat-openbsd supervisor lsof && rm -rf /var/lib/apt/lists/*
 
 # Install Pipenv separately to improve caching
 RUN pip install --upgrade pip && pip install pipenv
@@ -18,22 +18,18 @@ ARG LOCK_ONLY=false
 RUN if [ "$LOCK_ONLY" = "true" ]; then pipenv lock && exit 0; fi
 
 # Install dependencies using Pipenv
-RUN pipenv install --deploy --ignore-pipfile
+ARG DEV_MODE=false
+RUN if [ "$DEV_MODE" = "true" ]; then pipenv install --deploy --ignore-pipfile --dev; else pipenv install --deploy --ignore-pipfile; fi
 
 # Copy the rest of the project files
 COPY . .
 
 # Create STATIC_ROOT directory
 RUN mkdir -p /usr/src/app/staticfiles
-
-# Collect static files
 RUN pipenv run python manage.py collectstatic --noinput
-
-# Copy entrypoint script and make it executable
-COPY ./tools/entrypoint.sh /usr/src/app/entrypoint.sh
-RUN chmod +x /usr/src/app/entrypoint.sh
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
-# Start Daphne server using Pipenv
-CMD ["pipenv", "run", "daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+COPY ./conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

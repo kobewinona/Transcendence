@@ -21,6 +21,8 @@
   --primary-color-opacity-90: rgb(255 77 77 / 0.9);
   --secondary-color: #2f80ed;
   --secondary-color-opacity-50: rgb(47 128 237 / 0.5);
+  --secondary-color-opacity-70: rgb(47 128 237 / 0.7);
+  --secondary-color-opacity-90: rgb(47 128 237 / 0.9);
   --complementary-1-color: #ffa3de;
   --complementary-1-color-opacity-50: rgb(255 163 222 / 0.5);
   --complementary-2-color: #d8b4fe;
@@ -40,6 +42,30 @@
   --dark-color-opacity-50: rgb(9 30 38 / 0.5);
   --dark-color-opacity-90: rgb(9 30 38 / 0.9);
   --dark-color-opacity-95: rgb(9 30 38 / 0.95);
+
+  /* Success Color Opacity */
+  --success-color: #2ea043;
+  --success-color-opacity-10: rgb(46 160 67 / 0.1);
+  --success-color-opacity-25: rgb(46 160 67 / 0.25);
+  --success-color-opacity-50: rgb(46 160 67 / 0.5);
+  --success-color-opacity-75: rgb(46 160 67 / 0.75);
+  --success-color-opacity-90: rgb(46 160 67 / 0.9);
+
+  /* Error Color Opacity */
+  --error-color: #d7263d;
+  --error-color-opacity-10: rgb(215 38 61 / 0.1);
+  --error-color-opacity-25: rgb(215 38 61 / 0.25);
+  --error-color-opacity-50: rgb(215 38 61 / 0.5);
+  --error-color-opacity-75: rgb(215 38 61 / 0.75);
+  --error-color-opacity-90: rgb(215 38 61 / 0.9);
+
+  /* Warning Color Opacity */
+  --warning-color: #d97706;
+  --warning-color-opacity-10: rgb(217 119 6 / 0.1);
+  --warning-color-opacity-25: rgb(217 119 6 / 0.25);
+  --warning-color-opacity-50: rgb(217 119 6 / 0.5);
+  --warning-color-opacity-75: rgb(217 119 6 / 0.75);
+  --warning-color-opacity-90: rgb(217 119 6 / 0.9);
 
   /* dimensions */
   --small-space: 6px;

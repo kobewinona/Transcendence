@@ -45,7 +45,7 @@ const iso = computed(() => {
 });
 
 const handleLangChange = (newLang) => {
-  changeLang(newLang.value);
+  changeLang(newLang);
 };
 
 const options = computed(() => LANG_OPTIONS(t));

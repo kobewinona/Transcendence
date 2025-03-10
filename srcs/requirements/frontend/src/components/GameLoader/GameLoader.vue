@@ -1,5 +1,5 @@
 <template>
-  <div class="layout">
+  <div v-if="Boolean(icon)" class="layout">
     <!-- Carousel animation for the SVG -->
     <div class="carousel">
       <component :is="icon" v-if="isVueComponent(icon)" class="quick-start-icon" />
@@ -24,8 +24,8 @@ const { FlyingRectangle, Shapeshifter, LineShapeshifter, RotatingCircle } = Anim
 
 defineProps({
   icon: {
-    type: Node,
-    required: true,
+    type: Object,
+    default: null,
   },
 });
 

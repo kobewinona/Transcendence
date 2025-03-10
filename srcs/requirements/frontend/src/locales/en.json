@@ -13,6 +13,28 @@
   "low": "Low",
   "high": "High",
 
+  "success": "Success",
+  "error": "Error occurred",
+  "unknown_error": "Unknown error occurred",
+
+  "validation.required": "{field_name} is required.",
+  "validation.min-length": "{field_name} must be at least {min_length} characters long.",
+  "validation.incorrect": "The provided value is invalid",
+
+  "auth.signup.title": "Sign Up",
+  "auth.signin.title": "Sign In",
+  "auth.signout.title": "Sign Out",
+  "auth.otp.description": "Enter OTP sent to your Email",
+  "auth.username.label": "Username",
+  "auth.email.label": "Email",
+  "auth.password.label": "Password",
+  "auth.signup.submit-button.text": "Sign Up",
+  "auth.signin.submit-button.text": "Sign In",
+  "auth.return-to-signin.text": "Return to Sign In page",
+
+  "auth.signup.link-to-signin.text": "Already have an account?",
+  "auth.signin.link-to-signup.text": "Don't have an account?",
+
   "menu.items.item.quick_start.title": "Quick Start",
   "menu.items.item.quick_start.description": "Start a quick game against AI",
 
@@ -26,7 +48,7 @@
   "menu.items.item.profile.description": "Configure your profile settings",
 
   "menu.items.item.settings.title": "Settings",
-  "menu.items.item.settings.description": "Configure game settings",
+  "menu.items.item.settings.description": "Configure system settings",
 
   "menu.settings": "Settings",
   "menu.settings.system": "System",
