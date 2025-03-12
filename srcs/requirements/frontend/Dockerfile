@@ -1,6 +1,6 @@
 FROM node:20 AS build
 
-LABEL org.opencontainers.image.authors="Lera, Dima, Wolf, Jeremy"
+LABEL org.opencontainers.image.authors="Dima, Wolf, Jeremy"
 
 WORKDIR /usr/src/app
 

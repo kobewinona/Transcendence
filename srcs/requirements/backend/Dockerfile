@@ -1,6 +1,6 @@
 FROM python:3.12
 
-LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
+LABEL org.opencontainers.image.authors="Dima, Wolf, Jeremy"
 
 WORKDIR /usr/src/app
 

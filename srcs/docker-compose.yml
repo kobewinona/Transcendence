@@ -1,4 +1,23 @@
 services:
+
+  apache:
+    image: custom-apache
+    container_name: apache
+    build:
+      context: ./requirements/apache
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - nginx
+    networks:
+      - ft_transcendence
+    secrets:
+      - ssl_certificate
+      - ssl_certificate_key
+    restart: always
+
   postgres:
     container_name: postgres
     build:
@@ -72,11 +91,9 @@ services:
       context: ./requirements/nginx
       dockerfile: Dockerfile
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:8080"
     volumes:
       - frontend_build:/usr/share/nginx/html
-      - vault_cert:/vault/certs
     networks:
       - ft_transcendence
     depends_on:
@@ -135,3 +152,7 @@ volumes:
 secrets:
   vault_secrets_json:
     file: ../secrets/secrets.json
+  ssl_certificate:
+    file: ../secrets/ssl/certificate.crt
+  ssl_certificate_key:
+    file: ../secrets/ssl/certificate.key
