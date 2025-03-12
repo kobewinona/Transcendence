@@ -1,23 +1,26 @@
-"""
-URL configuration for project project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+from django.http import HttpResponse
 from django.contrib import admin
 from django.urls import path, include
+from project.apps.custom_auth.views import (
+    SignUp,
+    GetOTP,
+    SignIn,
+    RefreshTokens,
+    SignOut,
+)
+
+
+def home(request):
+    return HttpResponse("Hello, Django is running!")
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('chat/', include('project.apps.chat.urls')),
+    path("", home),
+    path("admin/", admin.site.urls),
+    path("api/signup/", SignUp.as_view(), name="signup"),
+    path("api/otp/", GetOTP.as_view(), name="otp"),
+    path("api/signin/", SignIn.as_view(), name="signin"),
+    path("api/signout/", SignOut.as_view(), name="signout"),
+    path("api/refresh_tokens/", RefreshTokens.as_view(), name="refresh_tokens"),
+    path("api/users/", include("project.apps.users.urls")),
 ]

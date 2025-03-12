@@ -116,6 +116,7 @@ import {
   BALL_COLORS,
   BALL_REGULAR_TYPE_SKIN_KEY,
   BALL_SKINS,
+  BALL_SPECIAL_SKINS_COLORS,
   BALL_SPECIAL_TYPE_SKIN_KEY,
 } from 'entities/BallSkin/config/constants.js';
 import {
@@ -153,6 +154,9 @@ const handleColorChange = (index) => {
 const handleSkinChange = (index, type) => {
   setValue(skinTypeInputName, type);
   setValue(skinInputName, BALL_SKINS[type][index]);
+  if (type === BALL_SPECIAL_TYPE_SKIN_KEY) {
+    setValue(colorInputName, BALL_SPECIAL_SKINS_COLORS[index]);
+  }
 };
 </script>
 

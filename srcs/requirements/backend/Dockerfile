@@ -1,30 +1,35 @@
 FROM python:3.12
 
-LABEL org.opencontainers.image.authors="Lera, Dima, Wolf, Jeremy"
+LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
 
 WORKDIR /usr/src/app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install system dependencies first
+RUN apt-get update && apt-get install -y netcat-openbsd supervisor lsof && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
+# Install Pipenv separately to improve caching
+RUN pip install --upgrade pip && pip install pipenv
+
+# Copy dependency files first for better Docker caching
+COPY Pipfile Pipfile.lock ./
+
+# If we are only locking, then stop here
+ARG LOCK_ONLY=false
+RUN if [ "$LOCK_ONLY" = "true" ]; then pipenv lock && exit 0; fi
+
+# Install dependencies using Pipenv
+ARG DEV_MODE=false
+RUN if [ "$DEV_MODE" = "true" ]; then pipenv install --deploy --ignore-pipfile --dev; else pipenv install --deploy --ignore-pipfile; fi
+
+# Copy the rest of the project files
 COPY . .
 
 # Create STATIC_ROOT directory
 RUN mkdir -p /usr/src/app/staticfiles
+RUN pipenv run python manage.py collectstatic --noinput
 
-# Create logs directory and log file
-RUN mkdir -p /usr/src/app/project/logs
-RUN touch /usr/src/app/project/logs/game_logs.log
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+COPY ./conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Apply migrations
-RUN python manage.py makemigrations --noinput
-RUN python manage.py migrate --noinput
-
-# Start Daphne server
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

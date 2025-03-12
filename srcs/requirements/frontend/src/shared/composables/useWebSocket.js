@@ -62,6 +62,7 @@ const useWebSocket = (url, options = {}) => {
       };
 
       socket.onerror = (error) => {
+        console.log('error', error);
         isError.value = true;
         onError(error);
       };

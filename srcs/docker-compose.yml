@@ -1,4 +1,26 @@
 services:
+  postgres:
+    container_name: postgres
+    build:
+      context: './requirements/postgresql'
+      dockerfile: Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - ft_transcendence
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+
   backend:
     container_name: backend
     build:
@@ -12,10 +34,14 @@ services:
     depends_on:
       vault:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     volumes:
       - vault_token:/vault/token/backend
-    expose:
-      - 8000
+      - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
+    ports:
+      - "8000:8000"
+      - "8001:8001"
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
@@ -41,7 +67,7 @@ services:
       start_period: 5s
 
   nginx:
-    container_name: nginx-modsecurity
+    container_name: nginx
     build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
@@ -103,6 +129,8 @@ volumes:
   vault_build:
   vault_token:
   vault_cert:
+  database-postgres:
+  postgres_data:
 
 secrets:
   vault_secrets_json:

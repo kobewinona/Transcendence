@@ -18,7 +18,7 @@
 
 <script setup>
 import { isEqual } from 'lodash';
-import { computed, ref } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -33,28 +33,36 @@ const { tabs } = defineProps({
 const emit = defineEmits(['on-change']);
 
 const tabRefs = ref([]);
-
 const activeTab = ref(tabs[0]);
+const markerStyle = ref({});
+const timeoutId = ref(null);
 
-const markerStyle = computed(() => {
-  const activeIndex = tabs.findIndex((tab) => isEqual(tab, activeTab.value));
-  const activeElement = tabRefs.value[activeIndex];
+watch(
+  () => activeTab.value,
+  () => {
+    timeoutId.value = setTimeout(() => {
+      const activeIndex = tabs.findIndex((tab) => isEqual(tab, activeTab.value));
+      const activeElement = tabRefs.value[activeIndex];
 
-  if (!activeElement) return {};
+      if (!activeElement) return;
 
-  const rect = activeElement.getBoundingClientRect();
+      const rect = activeElement.getBoundingClientRect();
 
-  return {
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    transform: `translate(${activeElement.offsetLeft}px, ${activeElement.offsetTop}px)`,
-  };
-});
+      markerStyle.value = {
+        width: `${rect.width}px`,
+        transform: `translate(${activeElement.offsetLeft}px, ${activeElement.offsetTop}px)`,
+      };
+    }, 100);
+  },
+  { immediate: true }
+);
 
 const handleChange = (newTab) => {
   activeTab.value = newTab;
   emit('on-change', newTab);
 };
+
+onUnmounted(() => clearTimeout(timeoutId.value));
 </script>
 
 <!--suppress CssUnusedSymbol -->
@@ -81,6 +89,8 @@ const handleChange = (newTab) => {
 .nav-tabs__active-tab-marker {
   position: absolute;
   z-index: 300;
+
+  height: 44px;
 
   background-color: var(--light-color);
   border-radius: 12px;

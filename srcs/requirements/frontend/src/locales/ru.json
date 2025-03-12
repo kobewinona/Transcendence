@@ -18,11 +18,11 @@
   "menu.items.item.settings.description": "Общие настройки",
 
   "menu.settings": "Настройки",
-  "menu.settings.game": "Игра",
-  "menu.settings.game.language": "Язык",
+  "menu.settings.system": "Игра",
+  "menu.settings.system.language": "Язык",
 
   "game_settings.tabs.sides.title": "Стороны",
-  "game_settings.tabs.gameplay.title": "Геймлей",
+  "game_settings.tabs.game.title": "Геймлей",
   "game_settings.tabs.ball_skin.title": "Скины",
   "game_settings.tabs.ball_skin.colors.title": "Цвета",
   "game_settings.tabs.ball_skin.skins_list.regular.title": "Стандартные",

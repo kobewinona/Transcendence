@@ -3,27 +3,30 @@ import './vendor/normalize.css';
 import './vendor/fonts/lexend_exa/lexend_exa.css';
 import './styles.css';
 import './assets/styles/global.css';
-import 'ant-design-vue/dist/reset.css';
 
 import CountryFlag from '@dzangolab/vue-country-flag-icon';
-import Antd, { ConfigProvider } from 'ant-design-vue';
+import { svgComponents } from 'shared/lib';
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import App from './App.vue';
 import en from './locales/en.json';
+import fr from './locales/fr.json';
 import ru from './locales/ru.json';
 import th from './locales/th.json';
-import { svgComponents } from './shared/lib';
+import router from './router';
 
 export const i18n = createI18n({
   locale: localStorage.getItem('lang'),
-  fallbackLocale: 'en',
+  fallbackLocale: 'en-US',
   legacy: false,
+  escapeParameterHtml: false,
+  interpolation: { escapeValue: false, defaultVariables: {} },
   messages: {
     en,
-    ru,
+    fr,
     th,
+    ru,
   },
 });
 
@@ -35,8 +38,7 @@ Object.entries(svgComponents).forEach(([name, component]) => {
 });
 
 app.component('CountryFlag', CountryFlag);
-app.component('ConfigProvider', ConfigProvider);
 
 app.use(i18n);
-app.use(Antd);
+app.use(router);
 app.mount('#app');

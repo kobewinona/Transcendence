@@ -16,13 +16,16 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': '/src',
+      api: '/src/api',
       pages: '/src/pages',
       features: '/src/features',
       entities: '/src/entities',
       components: '/src/components',
       shared: '/src/shared',
+      layouts: '/src/layouts',
       assets: '/src/assets',
       config: '/src/config',
+      store: '/src/store',
     },
   },
 });

@@ -1,6 +1,6 @@
 <template>
   <div :class="[className, 'item-content', { 'item-content_opened': isOpen }]">
-    <h1 class="item-content__title">{{ title }}</h1>
+    <h1>{{ title }}</h1>
     <button class="item-content__close-btn" type="button" @click="handleClose">
       <component
         :is="svgComponents['DeclineIcon']"

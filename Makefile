@@ -9,6 +9,7 @@ DATA_PATH := /home/$(USER)/data/
 
 ENV_PATH = ./srcs/.env
 COMPOSE_FILE := ./srcs/docker-compose.yml
+DEV_COMPOSE_FILE := ./srcs/docker-compose.dev.yml
 
 all: setup run
 
@@ -16,20 +17,20 @@ setup:
 	@echo "Setting up the environment for ft_transcendence..."
 	@mkdir -p ./secrets
 	@chmod 777 ./secrets
+	@chmod +x ./srcs/requirements/backend/tools/entrypoint.sh
 	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
+	@docker build -t backend_setup --build-arg LOCK_ONLY=true -f srcs/requirements/backend/Dockerfile srcs/requirements/backend
+
 
 run: setup
 	@echo "Running the services for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) up --build -d && \
-	echo "Services are up and running." || \
-	echo "Error: Unable to run the services."
+	echo "Services are up and running." || echo "Error: Unable to run the services."
 
-dev:
-	cd ./srcs/requirements/backend && source venv/bin/activate && watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application" &
-	cd ./srcs/requirements/frontend && yarn run dev &
-
-backend-dev:
-	cd ./srcs/requirements/backend && source venv/bin/activate && watchfiles "daphne -b 0.0.0.0 -p 8000 project.asgi:application"
+dev: setup
+	@echo "Running development mode..."
+	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) -f $(DEV_COMPOSE_FILE) up --build -d backend postgres
+	@docker exec -it backend pipenv run python manage.py watchfiles
 
 stop:
 	@echo "Stopping the services for ft_transcendence..."
@@ -56,7 +57,7 @@ clean:
 	@rm -rf ./srcs/requirements/frontend/build
 	@rm -rf ./srcs/requirements/frontend/package-lock.json
 
-prune:
+prune: clean
 	@echo "Pruning the environment for ft_transcendence..."
 	@docker system prune -a
 

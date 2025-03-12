@@ -22,3 +22,5 @@ export const BALL_COLORS = [
   '--complementary-3-color',
   '--complementary-4-color',
 ];
+
+export const BALL_SPECIAL_SKINS_COLORS = ['#0061a6'];

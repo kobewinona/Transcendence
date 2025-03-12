@@ -1,7 +1,9 @@
 # Step 1 : Use Debian image
 FROM debian:bullseye-slim
 
-# Step 2 : Install usefull dependencies
+LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
+
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     g++ flex bison curl apache2-dev doxygen libyajl-dev ssdeep \
     liblua5.2-dev libgeoip-dev libtool dh-autoreconf libcurl4-gnutls-dev \

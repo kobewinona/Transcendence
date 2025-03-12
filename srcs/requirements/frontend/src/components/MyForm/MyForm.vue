@@ -5,11 +5,11 @@
 </template>
 
 <script setup>
-import { provide } from 'vue';
+import { provide, watch } from 'vue';
 
 import { useForm } from './composables';
 
-const { provideKey, ...formParams } = defineProps({
+const { provideKey, errors, ...formParams } = defineProps({
   provideKey: {
     type: String,
     default: undefined,
@@ -22,11 +22,15 @@ const { provideKey, ...formParams } = defineProps({
     type: String,
     default: 'onChange',
   },
+  errors: {
+    type: Object,
+    default: () => {},
+  },
 });
 
 const emit = defineEmits(['on-submit', 'on-error']);
 
-const { handleSubmit, ...methods } = useForm(formParams);
+const { handleSubmit, setError, ...methods } = useForm(formParams);
 
 if (provideKey) {
   provide(provideKey, { handleSubmit, ...methods });
@@ -39,6 +43,21 @@ const onSubmit = (formData) => {
 const onError = (errors) => {
   emit('on-error', errors);
 };
+
+watch(
+  () => errors?.value,
+  (newErrors = {}) => {
+    if (!newErrors || typeof newErrors !== 'object') return;
+
+    Object.keys(newErrors).forEach((field) => {
+      const errorMessage = Array.isArray(newErrors[field])
+        ? newErrors[field].join(' ')
+        : String(newErrors[field]);
+
+      setError(field, errorMessage);
+    });
+  }
+);
 </script>
 
 <style scoped>

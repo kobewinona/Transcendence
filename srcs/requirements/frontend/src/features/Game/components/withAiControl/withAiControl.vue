@@ -3,10 +3,13 @@
 </template>
 
 <script setup>
+import { useGameSocketInject } from 'entities/Game/composables';
+import {
+  PADDLE_DEFAULT_DEACCELERATION,
+  PADDLE_DEFAULT_WIDTH,
+} from 'entities/Paddle/config/constants.js';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { useGameSocketInject } from '../../composables';
-import { PADDLE_DEFAULT_DEACCELERATION, PADDLE_DEFAULT_WIDTH } from '../Paddle/config/constants.js';
 import {
   EARLY_STOP_BUFFER,
   MAX_ERROR_FACTOR,
@@ -27,6 +30,10 @@ const { name, side, index } = defineProps({
   index: {
     type: Number,
     required: true,
+  },
+  controls: {
+    type: Object,
+    default: null,
   },
 });
 

@@ -19,7 +19,9 @@
         'curve-splash': isCurveApplied,
         'curve-splash-max': isMaxCurveApplied,
       }"
-      :style="{ backgroundColor: `var(${color})` }"
+      :style="{
+        backgroundColor: skinType === BALL_SPECIAL_TYPE_SKIN_KEY ? color : `var(${color})`,
+      }"
       @animationend="onCurveSplashAnimationEnd"
     >
       <div class="ball__wrapper">
@@ -30,25 +32,31 @@
 </template>
 
 <script setup>
-import { BALL_REGULAR_TYPE_SKIN_KEY } from 'entities/BallSkin/config/constants.js';
-import { mapRange } from 'shared/lib';
-import { computed, ref, watch } from 'vue';
-
-import { useGameDimensionsInject, useGameSocketInject } from '../../composables';
 import {
   MAX_CURVE,
   MAX_ROTATE_DURATION,
   MIN_CURVE,
   MIN_ROTATE_DURATION,
-} from './config/constants.js';
+} from 'entities/Ball/config/constants.js';
+import {
+  BALL_REGULAR_TYPE_SKIN_KEY,
+  BALL_SPECIAL_TYPE_SKIN_KEY,
+} from 'entities/BallSkin/config/constants.js';
+import { useGameDimensionsInject, useGameSocketInject } from 'entities/Game/composables';
+import { mapRange } from 'shared/lib';
+import { computed, ref, watch } from 'vue';
 
 const { ballWidth, ballHeight } = useGameDimensionsInject();
 const gameSocket = useGameSocketInject();
 
-defineProps({
+const { color, skinType } = defineProps({
   color: {
     type: String,
-    default: '',
+    default: '--primary-color',
+  },
+  skinType: {
+    type: String,
+    default: BALL_REGULAR_TYPE_SKIN_KEY,
   },
   skin: {
     type: String,
@@ -137,7 +145,6 @@ const onCurveSplashAnimationEnd = () => {
   isMaxCurveApplied.value = false;
 };
 </script>
-
 <!--suppress CssUnusedSymbol -->
 <style scoped>
 @keyframes bubble-anim-vertical {
@@ -223,36 +230,36 @@ const onCurveSplashAnimationEnd = () => {
 @keyframes curve-splash-wiggle {
   0% {
     transform: scale(1) rotate(0deg) translate(0, 0);
-    opacity: 1;
+    opacity: 0;
     border-width: 2px;
   }
 
   10% {
-    transform: scale(1.2) rotate(5deg) translate(3px, -3px);
-    opacity: 0.9;
+    transform: scale(1.1) rotate(5deg) translate(5px, -5px);
+    opacity: 0.8;
     border-width: 4px;
   }
 
   20% {
-    transform: scale(1.5) rotate(-5deg) translate(-3px, 3px);
-    opacity: 0.8;
+    transform: scale(1.2) rotate(-5deg) translate(-5px, 5px);
+    opacity: 0.5;
     border-width: 6px;
   }
 
   50% {
-    transform: scale(2) rotate(3deg) translate(2px, -2px);
+    transform: scale(1.7) rotate(3deg) translate(4px, -4px);
     opacity: 0.4;
     border-width: 8px;
   }
 
   75% {
-    transform: scale(2.5) rotate(-3deg) translate(-2px, 2px);
+    transform: scale(1.9) rotate(-3deg) translate(-4px, 4px);
     opacity: 0.2;
     border-width: 10px;
   }
 
   100% {
-    transform: scale(3) rotate(0deg) translate(0, 0);
+    transform: scale(2) rotate(0deg) translate(0, 0);
     opacity: 0;
   }
 }
@@ -284,7 +291,7 @@ const onCurveSplashAnimationEnd = () => {
   --rotate-duration: 0;
 
   position: absolute;
-  z-index: 1;
+  z-index: 4;
   top: 0;
   left: 0;
 
@@ -320,7 +327,7 @@ const onCurveSplashAnimationEnd = () => {
   height: 100%;
 
   opacity: 0;
-  background-color: var(--primary-color);
+  background-color: inherit;
   border-radius: 50%;
   mix-blend-mode: multiply;
 
@@ -340,6 +347,7 @@ const onCurveSplashAnimationEnd = () => {
   height: 110%;
 
   opacity: 0;
+  background-color: transparent;
   border-top: 4px solid var(--secondary-color);
   border-right: 4px solid var(--secondary-color);
   border-radius: 50%;

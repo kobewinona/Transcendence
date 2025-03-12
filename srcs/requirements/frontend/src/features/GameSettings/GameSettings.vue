@@ -95,7 +95,6 @@ watch(
   flex-direction: column;
   row-gap: var(--regular-space);
 
-  width: 100%;
   height: 100%;
 }
 

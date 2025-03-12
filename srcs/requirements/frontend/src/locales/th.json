@@ -18,8 +18,8 @@
   "menu.items.item.settings.description": "ตั้งค่าเกมส์",
 
   "menu.settings": "ตั้งค่า",
-  "menu.settings.game": "เกมส์",
-  "menu.settings.game.language": "ภาษา",
+  "menu.settings.system": "เกมส์",
+  "menu.settings.system.language": "ภาษา",
 
   "form.validation.required": "Field is required"
 }

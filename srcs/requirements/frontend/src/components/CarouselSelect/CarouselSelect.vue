@@ -1,6 +1,6 @@
 <template>
   <div class="carousel-select" :style="{ '--swipe-translate': swipeTranslateOffset }">
-    <button class="carousel-select__button" @click="prevOption">
+    <button class="carousel-select__button" type="button" @click="prevOption">
       <component
         :is="svgComponents['DownloadIcon']"
         v-if="isVueComponent(svgComponents['DownloadIcon'])"
@@ -13,11 +13,11 @@
           <slot name="renderOption" :option="activeOption" />
         </template>
         <span v-else>
-          {{ activeOption?.label }}
+          {{ t(activeOption?.label || '') }}
         </span>
       </div>
     </transition>
-    <button class="carousel-select__button" @click="nextOption">
+    <button class="carousel-select__button" type="button" @click="nextOption">
       <component
         :is="svgComponents['DownloadIcon']"
         v-if="isVueComponent(svgComponents['DownloadIcon'])"
@@ -32,16 +32,27 @@
 import { svgComponents } from 'shared/lib';
 import { isVueComponent } from 'shared/lib';
 import { computed, ref, useSlots, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const slots = useSlots();
 
-const { optionClassName, value, options } = defineProps({
+const { optionClassName, defaultValue, value, options } = defineProps({
   optionClassName: {
     type: String,
     default: '',
   },
+  name: {
+    type: String,
+    default: undefined,
+  },
+  defaultValue: {
+    type: [String, Number],
+    default: undefined,
+  },
   value: {
-    type: String || Number,
+    type: [String, Number],
     default: undefined,
   },
   options: {
@@ -52,7 +63,7 @@ const { optionClassName, value, options } = defineProps({
 
 const emit = defineEmits(['update:value', 'on-change', 'render-option']);
 
-const activeValue = ref(value);
+const activeValue = ref(value || defaultValue || options[0]?.value);
 const swipeTranslateOffset = ref('60%');
 const activeOption = computed(() => options.find((option) => option.value === activeValue.value));
 
@@ -73,10 +84,7 @@ const nextOption = () => {
 const updateValue = (newValue) => {
   activeValue.value = newValue;
   emit('update:value', newValue);
-  emit(
-    'on-change',
-    options.find((option) => option.value === newValue)
-  );
+  emit('on-change', newValue);
 };
 
 watch(
@@ -100,8 +108,12 @@ watch(
 
 .carousel-select__button {
   cursor: pointer;
+
+  font-size: 0;
+
   background-color: transparent;
   border: none;
+
   transition: opacity 0.2s ease-in-out;
 }
 
@@ -112,6 +124,10 @@ watch(
 
 .carousel-select__item {
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 100%;
 }
 

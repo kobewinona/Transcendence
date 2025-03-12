@@ -5,6 +5,35 @@
   "french": "Français",
 
   "player": "Player",
+  "on": "On",
+  "off": "Off",
+  "default": "Default",
+  "slow": "Slow",
+  "fast": "Fast",
+  "low": "Low",
+  "high": "High",
+
+  "success": "Success",
+  "error": "Error occurred",
+  "unknown_error": "Unknown error occurred",
+
+  "validation.required": "{field_name} is required.",
+  "validation.min-length": "{field_name} must be at least {min_length} characters long.",
+  "validation.incorrect": "The provided value is invalid",
+
+  "auth.signup.title": "Sign Up",
+  "auth.signin.title": "Sign In",
+  "auth.signout.title": "Sign Out",
+  "auth.otp.description": "Enter OTP sent to your Email",
+  "auth.username.label": "Username",
+  "auth.email.label": "Email",
+  "auth.password.label": "Password",
+  "auth.signup.submit-button.text": "Sign Up",
+  "auth.signin.submit-button.text": "Sign In",
+  "auth.return-to-signin.text": "Return to Sign In page",
+
+  "auth.signup.link-to-signin.text": "Already have an account?",
+  "auth.signin.link-to-signup.text": "Don't have an account?",
 
   "menu.items.item.quick_start.title": "Quick Start",
   "menu.items.item.quick_start.description": "Start a quick game against AI",
@@ -19,22 +48,37 @@
   "menu.items.item.profile.description": "Configure your profile settings",
 
   "menu.items.item.settings.title": "Settings",
-  "menu.items.item.settings.description": "Configure game settings",
+  "menu.items.item.settings.description": "Configure system settings",
 
   "menu.settings": "Settings",
-  "menu.settings.game": "Game",
-  "menu.settings.game.language": "Language",
+  "menu.settings.system": "System",
+  "menu.settings.system.language": "Language",
 
   "game_settings.start": "Start",
+
   "game_settings.tabs.sides.title": "Sides",
   "game_settings.tabs.sides.controllers.not_enough_controllers_message": "At least one Controller should be set for each side",
+
+  "game_settings.tabs.game.title": "Game",
+  "game_settings.tabs.game.fields.score.label": "Max Score",
+  "game_settings.tabs.game.fields.deuce.label": "Deuce System",
   "game_settings.tabs.gameplay.title": "Gameplay",
+  "game_settings.tabs.gameplay.fields.ball_speed.label": "Ball Speed",
+  "game_settings.tabs.gameplay.fields.max_ball_curve.label": "Max Ball Curve",
+
   "game_settings.tabs.ball_skin.title": "Ball Skin",
   "game_settings.tabs.ball_skin.colors.title": "Colors",
   "game_settings.tabs.ball_skin.skins_list.regular.title": "Regular",
   "game_settings.tabs.ball_skin.skins_list.special.title": "Special",
   "game_settings.tabs.ball_skin.ball_preview.direction": "Direction",
   "game_settings.tabs.ball_skin.ball_preview.rotation_speed": "Rotation Speed",
+
+  "game.deuce": "deuce",
+  "game.advantage": "advantage",
+  "game.advantage.short": "A",
+  "game.left_side": "Left Side",
+  "game.right_side": "Right Side",
+  "game.won": "Won",
 
   "form.validation.required": "Field is required"
 }

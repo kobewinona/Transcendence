@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your One-Time Password (OTP)</title>
+  <style>
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0;
+      padding: 0;
+    }
+    
+    p {
+      margin: 0;
+    }
+
+    body {
+      font-family: LexendExa, system-ui, Avenir, Helvetica, Arial, sans-serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
+      color: #e6f0ff;
+      text-rendering: optimizelegibility;
+      
+      display: grid;
+      grid-template-rows: max-content auto max-content;
+      row-gap: 30px;
+
+      background-color: #091e26;
+      
+      font-synthesis: none;
+    }
+    
+    .header {
+      padding: 10px;
+      border-bottom: 1px solid rgb(230 240 255 / 0.5);
+    }
+    
+    .header__title {
+      text-align: center;
+    }
+    
+    .email-body {
+      width: 100%;
+      height: 100%;
+      
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      row-gap: 10px;
+    }
+    
+    .email-body__username {
+      font-weight: 800;
+      color: #2f80ed;
+    }
+    
+    .email-body__title {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    
+    .email-body__description {
+      font-size: 1.2rem;
+    }
+    
+    .email-body__otp-container {
+      padding: 10px 20px;
+      border-radius: 12px;
+      background-color: #e6f0ff;
+      margin: 15px 0;
+    }
+    
+    .email-body__otp {
+      font-size: 1.8rem;
+      color: #091e26;
+      letter-spacing: 6px;
+    }
+    
+    .email-body__captions {
+      width: 100%;
+      
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      row-gap: 2px;
+    }
+    
+    .body-email__disclaimer {
+      font-size: 0.85rem;
+      color: rgb(230 240 255 / 0.5);
+    }
+
+    .footer {
+      text-align: center;
+      border-top: 1px solid rgb(230 240 255 / 0.5);
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+<header class="header">
+  <p class="header__title">Transcendence Team</p>
+</header>
+<section class="email-body">
+  <p>Hello, <span class="email-body__username">{{ username }}</span></p>
+  <p class="email-body__title">Your Two-factor Authentication code</p>
+  <p class="email-body__description">Use the code below in the next 5 minutes to sign in.</p>
+  <div class="email-body__otp-container">
+    <strong class="email-body__otp">{{ otp }}</strong>
+  </div>
+  <div class="email-body__captions">
+    <p class="body-email__disclaimer">If you fail to enter it in time, you will have to Sign In again.</p>
+  </div>
+</section>
+<footer class="footer">
+  <p>Best Regards, ;)</p>
+</footer>
+</body>
+</html>
