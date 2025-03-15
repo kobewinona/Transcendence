@@ -145,12 +145,12 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "rest_framework",
     # Custom Project Apps
-    "project.core",
     "project.apps.pong",
     "project.apps.chat",
     "project.apps.oauth",
     "project.apps.intra_oauth",
     "project.apps.users",
+    "project.apps.tournaments",
 ]
 
 MIDDLEWARE = [
@@ -207,50 +207,19 @@ CHANNEL_LAYERS = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Ensure logs directory and log file exist
-LOGS_DIR = os.path.join(os.path.dirname(__file__), "logs")
-LOG_FILE = os.path.join(LOGS_DIR, "game_logs.log")
-
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-if not os.path.exists(LOG_FILE):
-    with open(LOG_FILE, "w"):
-        pass
-
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "formatters": {
         "colored": {
             "()": CustomFormatter,
-            "format": "{levelname} {asctime} {message}",
-            "style": "{",
-        },
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
         },
     },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-        },
-        "game_logs": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(os.path.dirname(__file__), "logs/game_logs.log"),
-            "formatter": "verbose",
-        },
-        "rest_api": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": "colored",
         },
     },
     "loggers": {
@@ -265,12 +234,12 @@ LOGGING = {
             "propagate": False,
         },
         "game_logs": {
-            "handlers": ["console", "game_logs"],
+            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },
         "rest_api": {
-            "handlers": ["console", "rest_api"],
+            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },

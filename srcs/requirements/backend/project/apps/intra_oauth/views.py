@@ -25,7 +25,6 @@ class SignInIntra(APIView):
 
     def get(self, request):
         client_id = os.getenv("CLIENT_ID")
-        logger.debug(f"client_id: { client_id }")
         params = {
             "client_id": os.getenv("CLIENT_ID"),
             "redirect_uri": REDIRECT_URI,
@@ -59,11 +58,11 @@ class SignInIntraCallback(APIView):
             response = requests.post(TOKEN_ENDPOINT, data=data, headers=headers)
             response.raise_for_status()
             token_data = response.json()
-            logger.debug(f"token_data: { token_data }")
+            logger.debug(f"ⓘ Intra Token_data: { token_data }")
 
             access_token = token_data.get("access_token")
             refresh_token = token_data.get("refresh_token")
-            logger.debug(f"access_token: { access_token }")
+            logger.debug(f"ⓘ Intra Access_token: { access_token }")
 
             if not access_token:
                 return HttpResponseBadRequest("Failed to get access token")
@@ -74,7 +73,7 @@ class SignInIntraCallback(APIView):
             intra_response = requests.get(intra_user_url, headers=headers)
             intra_response.raise_for_status()
             intra_user_data = intra_response.json()
-            logger.debug(f"Intra User Info: {intra_user_data}")
+            logger.debug(f"ⓘ Intra User Info: {intra_user_data}")
 
             get_or_create_intra_user(intra_user_data)
 

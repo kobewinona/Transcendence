@@ -5,8 +5,8 @@ import { svgComponents } from 'shared/lib';
 
 export const MAX_PLAYERS_AMOUNT = 6;
 
+// TODO if the score settings works correctly
 export const END_SCORE_OPTIONS = [
-  { value: 2, label: '2' },
   { value: 6, label: '6' },
   { value: 11, label: '11' },
   { value: 21, label: '21' },

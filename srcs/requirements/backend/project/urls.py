@@ -36,4 +36,5 @@ urlpatterns = [
     ),
     # users app
     path("api/users/", include("project.apps.users.urls")),
+    path("api/tournaments/", include("project.apps.tournaments.urls")),
 ]

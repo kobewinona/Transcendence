@@ -18,7 +18,7 @@ setup:
 	@mkdir -p ./secrets
 	@chmod 777 ./secrets
 	@chmod +x ./srcs/requirements/backend/tools/entrypoint.sh
-	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
+	@docker volume rm srcs_frontend_build 2>/dev/null || true
 	@docker build -t backend_setup --build-arg LOCK_ONLY=true -f srcs/requirements/backend/Dockerfile srcs/requirements/backend
 
 
@@ -26,12 +26,14 @@ run: setup
 	@echo "Running the services for ft_transcendence..."
 	@bash ./srcs/requirements/tools/create_ssl_cert.sh
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) up --build -d && \
-	echo "Services are up and running." || echo "Error: Unable to run the services."
+	echo "Services are up and running.\n\nThe app is accessible in a browser at https://localhost\n\n" || echo "Error: Unable to run the services."
 
 dev: setup
 	@echo "Running development mode..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) -f $(DEV_COMPOSE_FILE) up --build -d backend postgres
-	@docker exec -it backend pipenv run python manage.py watchfiles
+	@echo "\n\nThe app is accessible in a browser at http://localhost:5173\n\n"
+	@docker logs backend -f
+
 
 stop:
 	@echo "Stopping the services for ft_transcendence..."
