@@ -1,7 +1,9 @@
 import os
 import subprocess
-from watchfiles import watch
+
 from django.core.management.base import BaseCommand
+
+from watchfiles import watch
 
 
 class Command(BaseCommand):
@@ -11,8 +13,18 @@ class Command(BaseCommand):
     def restart_services():
         print("↻ Restarting Django and Daphne...")
         try:
-            subprocess.run(["supervisorctl", "restart", "django"], check=True)
-            subprocess.run(["supervisorctl", "restart", "daphne"], check=True)
+            # subprocess.run(["supervisorctl", "restart", "django"], check=True)
+            # subprocess.run(["supervisorctl", "restart", "daphne"], check=True)
+
+            subprocess.run(["supervisorctl", "stop", "django"], check=True)
+            subprocess.run(["supervisorctl", "stop", "daphne"], check=True)
+
+            print("✓ Stopped Django and Daphne, now starting...")
+
+            subprocess.run(["supervisorctl", "start", "django"], check=True)
+            subprocess.run(["supervisorctl", "start", "daphne"], check=True)
+
+            print("✓ Restart complete.")
         except subprocess.CalledProcessError as e:
             print(f"✕ Error restarting services: {e}")
 

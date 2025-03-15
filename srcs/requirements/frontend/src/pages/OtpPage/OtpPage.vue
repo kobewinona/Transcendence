@@ -10,11 +10,11 @@
             ref="otpRefs"
             v-model="otp[index]"
             class="otp__input"
-            type="text"
             maxlength="1"
+            type="text"
             @input="handleInput(index, $event)"
-            @keydown.backspace="handleBackspace(index)"
             @paste="handlePaste"
+            @keydown.backspace="handleBackspace(index)"
           />
         </div>
         <div :class="{ otp__loader: true, otp__loader_visible: isLoading }">
@@ -23,14 +23,14 @@
       </div>
 
       <span class="otp__link">
-        <router-link to="/signin">{{ t('auth.return-to-signin.text') }}</router-link>
+        <router-link to="/signin">{{ t('auth.return_to_signin.text') }}</router-link>
       </span>
     </AuthLayout>
   </MainBodyLayout>
 </template>
 
 <script setup>
-import { USERNAME_STORAGE_KEY } from 'config/constants.js';
+import { EMAIL_STORAGE_KEY } from 'config/constants.js';
 import { AuthLayout, MainBodyLayout } from 'layouts';
 import api from 'shared/api/Auth';
 import { Loader } from 'shared/components';
@@ -54,7 +54,7 @@ const { mutate: signIn, isLoading } = useMutation(api.signIn, {
   onSuccess: (res) => {
     const { access_token: token } = res?.data || {};
     auth.login(token);
-    sessionStorage.removeItem(USERNAME_STORAGE_KEY);
+    sessionStorage.removeItem(EMAIL_STORAGE_KEY);
     notify(t('success', 'success'));
     router.push('/');
   },
@@ -104,8 +104,8 @@ const handlePaste = (event) => {
 watch(
   () => isOtpComplete.value,
   () => {
-    const username = sessionStorage.getItem('username');
-    signIn({ data: { username, otp: otp.value.join('') } });
+    const email = sessionStorage.getItem(EMAIL_STORAGE_KEY);
+    signIn({ data: { email, otp: otp.value.join('') } });
   }
 );
 

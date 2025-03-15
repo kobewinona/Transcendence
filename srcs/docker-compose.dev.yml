@@ -3,5 +3,8 @@ services:
     build:
       args:
         DEV_MODE: "true"
+    environment:
+      - DJANGO_SETTINGS_MODULE=project.settings
+      - APP_ENV=dev
     volumes:
       - ./requirements/backend:/usr/src/app

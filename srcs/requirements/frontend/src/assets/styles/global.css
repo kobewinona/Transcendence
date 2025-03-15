@@ -37,9 +37,12 @@
   --complementary-6-color-opacity-50: rgb(214 255 206 / 0.5);
   --light-color: #e6f0ff;
   --light-color-opacity-50: rgb(230 240 255 / 0.5);
+  --light-color-opacity-70: rgb(230 240 255 / 0.7);
   --light-color-opacity-90: rgb(230 240 255 / 0.9);
+  --light-color-opacity-95: rgb(230 240 255 / 0.95);
   --dark-color: #091e26;
   --dark-color-opacity-50: rgb(9 30 38 / 0.5);
+  --dark-color-opacity-70: rgb(9 30 38 / 0.7);
   --dark-color-opacity-90: rgb(9 30 38 / 0.9);
   --dark-color-opacity-95: rgb(9 30 38 / 0.95);
 

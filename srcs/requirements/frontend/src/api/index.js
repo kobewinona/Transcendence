@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { ACCESS_TOKEN_STORAGE_KEY, HOST } from 'config/constants.js';
+import { ACCESS_TOKEN_STORAGE_KEY, API_HOST } from 'config/constants.js';
 import authApi from 'shared/api/Auth';
 import { auth } from 'store/auth.js';
 
-const baseURL = `${HOST}/api/`;
+const baseURL = `${API_HOST}/api/`;
 
 const api = axios.create({
   baseURL,
@@ -38,7 +38,7 @@ api.interceptors.response.use(
         refreshPromise = authApi
           .refreshTokens()
           .then((refreshResponse) => {
-            const newAccessToken = refreshResponse.data.access_token;
+            const newAccessToken = refreshResponse?.data?.access_token;
 
             if (newAccessToken) {
               localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, newAccessToken);

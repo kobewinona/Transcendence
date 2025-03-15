@@ -1,25 +1,18 @@
+import logging
 import os
+
 import pyotp
 import requests
-import logging
-
 from django.conf import settings
-from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.http import JsonResponse
 from django.template.loader import render_to_string
-from project.constants import REFRESH_TOKEN_LIFETIME_DAYS
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from project.utils.auth import get_auth_provider
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer, OTPRequestSerializer, OTPVerifySerializer
 
@@ -30,17 +23,16 @@ logger = logging.getLogger("rest_api")
 
 
 class SignUp(APIView):
-    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
 
 
 def generate_otp():
@@ -75,64 +67,57 @@ def send_email(email, username, otp):
 
 
 class GetOTP(APIView):
-    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = OTPRequestSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        username = serializer.validated_data["username"]
+        email = serializer.validated_data["email"]
 
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
             otp = generate_otp()
-            cache.set(
-                f"otp_{username}", otp, timeout=300
-            )  # caching duration in seconds
+            cache.set(f"otp_{email}", otp, timeout=300)  # caching duration in seconds
 
-            send_email(user.email, username, otp)
+            send_email(user.email, user.username, otp)
 
-            return Response(
+            return JsonResponse(
                 {"otp": otp}, status=status.HTTP_200_OK
             )  # TODO remove res body after development
         except User.DoesNotExist:
-            return Response(
-                {"detail": "User with this username does not exist."},
+            return JsonResponse(
+                {"detail": "User with this email does not exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
 
 class SignIn(APIView):
-    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = OTPVerifySerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        username = serializer.validated_data["username"]
-        logger.debug(f"username: { username }")
+        email = serializer.validated_data["email"]
         received_otp = serializer.validated_data["otp"]
-        stored_otp = cache.get(f"otp_{username}")
-        logger.debug(f"received_otp: { received_otp }")
-        logger.debug(f"stored_otp: { stored_otp }")
+        stored_otp = cache.get(f"otp_{email}")
 
         if not stored_otp or received_otp != stored_otp:
-            return Response(
+            return JsonResponse(
                 {"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        cache.delete(f"otp_{username}")
+        cache.delete(f"otp_{email}")
 
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response(
+            return JsonResponse(
                 {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
@@ -140,7 +125,9 @@ class SignIn(APIView):
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        response = Response({"access_token": access_token}, status=status.HTTP_200_OK)
+        response = JsonResponse(
+            {"access_token": access_token}, status=status.HTTP_200_OK
+        )
 
         response.set_cookie(
             key="refresh_token",
@@ -162,7 +149,7 @@ class RefreshTokens(APIView):
         refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
-            return Response(
+            return JsonResponse(
                 {"error": "Refresh token is missing"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
@@ -171,7 +158,7 @@ class RefreshTokens(APIView):
             refresh = RefreshToken(refresh_token)
             access_token = str(refresh.access_token)
 
-            response = Response(
+            response = JsonResponse(
                 {"access_token": access_token}, status=status.HTTP_200_OK
             )
             response.set_cookie(
@@ -185,7 +172,7 @@ class RefreshTokens(APIView):
             return response
 
         except InvalidToken:
-            return Response(
+            return JsonResponse(
                 {"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
@@ -197,17 +184,24 @@ class SignOut(APIView):
         refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
-            return Response({"error": "Refresh token missing"}, status=400)
-
-        try:
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-        except Exception:
-            return Response(
-                {"error": "Invalid or already used refresh token"}, status=400
+            return JsonResponse(
+                {"error": "Refresh token missing"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        response = Response({"message": "Signed out successfully"}, status=200)
+        auth_provider = get_auth_provider(refresh_token)
+
+        if auth_provider == "internal":
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception as e:
+                logger.error(f"Failed to blacklist refresh token: {e}")
+                return JsonResponse(
+                    {"error": "Invalid or already used refresh token"}, status=400
+                )
+
+        # If it's an Intra token, we just remove it from cookies since we can't revoke it properly with intra
+        response = JsonResponse({"message": "Signed out successfully"}, status=200)
         response.delete_cookie("refresh_token")
 
         return response

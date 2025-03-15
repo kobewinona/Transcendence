@@ -28,6 +28,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - DJANGO_SETTINGS_MODULE=project.settings
+      - APP_ENV=prod
     networks:
       - ft_transcendence
     ports:

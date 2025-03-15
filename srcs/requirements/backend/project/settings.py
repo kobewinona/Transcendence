@@ -1,19 +1,23 @@
 import os
-from pathlib import Path
 from datetime import timedelta
-from project.constants import REFRESH_TOKEN_LIFETIME_DAYS, ACCESS_TOKEN_LIFETIME_MINUTES
+from pathlib import Path
 
 # noinspection PyUnresolvedReferences
 from dotenv import load_dotenv
+from project.constants import REFRESH_TOKEN_LIFETIME_DAYS, ACCESS_TOKEN_LIFETIME_MINUTES
+
+from .utils.logger import CustomFormatter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+APP_ENV = os.getenv("APP_ENV", "dev")
 
 # Load environment variables
 load_dotenv()
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "/usr/src/app/staticfiles"
+INTRA_URL = "https://api.intra.42.fr"
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -25,7 +29,12 @@ USE_TZ = True
 SECRET_KEY = "django-insecure-k1!svx5pna71t3&y#w!9iie&5p2)7)0acb9%@k788a@2y=9r54"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if APP_ENV == "dev":
+    DEBUG = True
+    APP_URL = os.getenv("APP_URL_DEV")
+else:
+    DEBUG = False
+    APP_URL = os.getenv("APP_URL")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -33,15 +42,11 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost"]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost",
-    "https://localhost",
-    "http://localhost:5173",  # dev
-]
+CORS_ALLOWED_ORIGINS = [APP_URL]
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"]
 CORS_ALLOW_HEADERS = [
     "content-type",
@@ -64,9 +69,10 @@ CSRF_TRUSTED_ORIGINS = [
 REST_FRAMEWORK = {
     "STATIC_URL": STATIC_URL,
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "project.authentication.JWTOrIntraAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "EXCEPTION_HANDLER": "project.utils.exceptions.custom_exception_handler",
 }
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
@@ -86,6 +92,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTH_USER_MODEL = "users.CustomUser"
 
 # Simple JWT settings
 SIMPLE_JWT = {
@@ -140,7 +148,8 @@ INSTALLED_APPS = [
     "project.core",
     "project.apps.pong",
     "project.apps.chat",
-    "project.apps.custom_auth",
+    "project.apps.oauth",
+    "project.apps.intra_oauth",
     "project.apps.users",
 ]
 
@@ -213,6 +222,11 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
+        "colored": {
+            "()": CustomFormatter,
+            "format": "{levelname} {asctime} {message}",
+            "style": "{",
+        },
         "verbose": {
             "format": "{levelname} {asctime} {module} {message}",
             "style": "{",
@@ -233,6 +247,11 @@ LOGGING = {
             "filename": os.path.join(os.path.dirname(__file__), "logs/game_logs.log"),
             "formatter": "verbose",
         },
+        "rest_api": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
     },
     "loggers": {
         "django": {
@@ -251,7 +270,7 @@ LOGGING = {
             "propagate": False,
         },
         "rest_api": {
-            "handlers": ["console", "game_logs"],
+            "handlers": ["console", "rest_api"],
             "level": "DEBUG",
             "propagate": False,
         },

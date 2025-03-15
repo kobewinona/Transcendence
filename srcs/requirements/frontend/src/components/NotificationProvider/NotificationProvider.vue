@@ -37,7 +37,7 @@ defineExpose({ notify });
 .notifications-container {
   position: fixed;
   z-index: 1000;
-  top: 5%;
+  top: 10%;
   left: 50%;
   transform: translateX(-50%);
 

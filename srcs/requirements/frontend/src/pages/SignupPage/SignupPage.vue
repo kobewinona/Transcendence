@@ -1,21 +1,25 @@
 <template>
   <MainBodyLayout>
-    <AuthLayout class-name="auth-layout" :title="t('auth.signup.title')">
+    <AuthLayout :title="t('auth.signup.title')" class-name="auth-layout">
       <MyForm
+        :errors="serverErrors"
         :provide-key="SIGNUP_FORM_PROVIDE_KEY"
         mode="onBlur"
-        :errors="serverErrors"
         @on-submit="handleSubmit"
       >
         <div class="signup-form__fields">
           <AuthFormFields :provide-key="SIGNUP_FORM_PROVIDE_KEY" />
         </div>
         <div class="signup-form__controls">
-          <MyButton class-name="signup-form__button" type="submit" :loading="isLoading">{{
-            t('auth.signup.submit-button.text')
-          }}</MyButton>
+          <MyButton
+            :loading="isLoading"
+            class-name="signup-form__button"
+            color="secondary"
+            type="submit"
+            >{{ t('auth.signup.submit_button.text') }}
+          </MyButton>
           <span class="signup-form__redirect">
-            {{ t('auth.signup.link-to-signin.text') }}
+            {{ t('auth.signup.link_to_signin.text') }}
             <router-link to="/signin">{{ t('auth.signin.title') }}</router-link>
           </span>
         </div>

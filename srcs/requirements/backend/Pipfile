@@ -54,7 +54,8 @@ txaio = "==23.1.1"
 typing-extensions = "==4.12.2"
 urllib3 = "==2.3.0"
 whitenoise = "==6.9.0"
-zope.interface = "==7.2"
+zope = {interface = "==7.2"}
+colorama = "*"
 
 [dev-packages]
 black = "==25.1.0"

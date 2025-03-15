@@ -1,8 +1,9 @@
-export const HOST = 'https://localhost';
+export const API_HOST = import.meta.env.VITE_API_URL;
+export const WS_HOST = import.meta.env.VITE_WS_URL;
 
 export const MS_PER_SEC = 1000;
 
-export const USERNAME_STORAGE_KEY = 'username';
+export const EMAIL_STORAGE_KEY = 'email';
 export const ACCESS_TOKEN_STORAGE_KEY = 'access_token';
 
 export const LANG_OPTIONS = (t) => [

@@ -1,6 +1,8 @@
 import { MainPage, OtpPage, SigninPage, SignupPage } from 'pages';
-import { auth } from 'store/auth';
+import { auth } from 'store/auth.js';
 import { createRouter, createWebHistory } from 'vue-router';
+
+import { EMAIL_STORAGE_KEY } from './config/constants.js';
 
 const routes = [
   {
@@ -31,11 +33,17 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const username = sessionStorage.getItem('username');
+  const email = sessionStorage.getItem(EMAIL_STORAGE_KEY);
+  const accessToken = to.query.access_token;
+
+  if (accessToken) {
+    auth.login(accessToken);
+    return next('/');
+  }
 
   if (to.meta.requiresAuth && !auth.isAuthorized) {
     return next('/signin');
-  } else if (to.path === '/otp' && !username) {
+  } else if (to.path === '/otp' && !email) {
     next('/signin');
   }
 
