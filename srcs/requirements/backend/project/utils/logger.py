@@ -5,16 +5,18 @@ from colorama import Fore, Style
 
 class CustomFormatter(logging.Formatter):
     LEVEL_COLORS = {
-        "DEBUG": Fore.BLUE,  # Blue
-        "INFO": Fore.GREEN,  # Green
-        "WARNING": Fore.YELLOW,  # Yellow
-        "ERROR": Fore.RED,  # Red
+        "DEBUG": Fore.BLUE,
+        "INFO": Fore.GREEN,
+        "WARNING": Fore.YELLOW,
+        "ERROR": Fore.RED,
         "CRITICAL": Fore.LIGHTWHITE_EX + Fore.RED,
     }
 
     LOGGER_COLORS = {
-        "game_logs": Fore.CYAN,  # Cyan for game logs
-        "rest_api": Fore.LIGHTGREEN_EX,
+        "game_logs": Fore.CYAN,
+        "auth_logs": Fore.LIGHTGREEN_EX,
+        "fast-reload_logs": Fore.MAGENTA,
+        "tournaments_logs": Fore.LIGHTBLUE_EX,
     }
 
     def format(self, record):

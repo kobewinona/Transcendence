@@ -1,6 +1,8 @@
 export const API_HOST = import.meta.env.VITE_API_URL;
 export const WS_HOST = import.meta.env.VITE_WS_URL;
 
+export const AUTHORIZE_ENDPOINT = 'https://api.intra.42.fr/oauth/authorize';
+
 export const MS_PER_SEC = 1000;
 
 export const EMAIL_STORAGE_KEY = 'email';

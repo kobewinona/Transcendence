@@ -24,8 +24,8 @@
             :loading="isLoading"
             >{{ t('auth.signin.submit_button.text') }}
           </MyButton>
-          <a class="signin-form__intra-link" href="http://localhost:8001/api/signin_intra/">
-            <img class="signin-form__intra-logo" :src="logo42" alt="Intra 42 logo" />
+          <a class="signin-form__intra-link" :href="intraOAuthUrl">
+            <img class="signin-form__intra-logo" :src="logoPath" alt="Intra 42 logo" />
             {{ t('auth.signin_intra.submit_button.text') }}
           </a>
           <span class="signin-form__redirect">
@@ -39,6 +39,7 @@
 </template>
 
 <script setup>
+/* eslint-disable camelcase */
 import logo42 from 'assets/logo42.png';
 import { MyButton, MyForm } from 'components';
 import {
@@ -46,14 +47,29 @@ import {
   PASSWORD_INPUT_NAME,
   SIGNIN_FORM_PROVIDE_KEY,
 } from 'config/AuthForm/constants.js';
-import { EMAIL_STORAGE_KEY } from 'config/constants.js';
+import { AUTHORIZE_ENDPOINT, EMAIL_STORAGE_KEY } from 'config/constants.js';
 import { AuthFormFields } from 'features';
 import { AuthLayout, MainBodyLayout } from 'layouts';
 import api from 'shared/api/Auth';
 import { useMutation } from 'shared/composables';
-import { inject, reactive } from 'vue';
+import { computed, inject, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+
+const intraOAuthUrl = computed(() => {
+  const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    response_type: 'code',
+  });
+
+  return `${AUTHORIZE_ENDPOINT}?${params.toString()}`;
+});
+
+const logoPath = computed(() => (import.meta.env.DEV ? logo42 : '/logo42.png'));
 
 const { t } = useI18n();
 const router = useRouter();

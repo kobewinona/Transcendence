@@ -1,35 +1,44 @@
+# BASE IMAGE & AUTHOR INFORMATION
 FROM python:3.12
-
 LABEL org.opencontainers.image.authors="Lera, Dima, Jeremy"
 
+# SET WORKING DIRECTORY
 WORKDIR /usr/src/app
 
-# Install system dependencies first
-RUN apt-get update && apt-get install -y netcat-openbsd supervisor lsof && rm -rf /var/lib/apt/lists/*
+# INSTALL SYSTEM DEPENDENCIES
+RUN apt-get update && apt-get install -y \
+    netcat-openbsd \
+    supervisor \
+    lsof && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install Pipenv separately to improve caching
+# INSTALL PIPENV FOR MANAGING PYTHON DEPENDENCIES
 RUN pip install --upgrade pip && pip install pipenv
 
-# Copy dependency files first for better Docker caching
+# COPY DEPENDENCY FILES FIRST (CACHING LAYER)
 COPY Pipfile Pipfile.lock ./
 
-# If we are only locking, then stop here
-ARG LOCK_ONLY=false
-RUN if [ "$LOCK_ONLY" = "true" ]; then pipenv lock && exit 0; fi
-
-# Install dependencies using Pipenv
+# INSTALL PYTHON DEPENDENCIES USING PIPENV
 ARG DEV_MODE=false
-RUN if [ "$DEV_MODE" = "true" ]; then pipenv install --deploy --ignore-pipfile --dev; else pipenv install --deploy --ignore-pipfile; fi
+RUN if [ "$DEV_MODE" = "true" ]; then \
+        pipenv install --deploy --ignore-pipfile --dev; \
+    else \
+        pipenv install --deploy --ignore-pipfile; \
+    fi
 
-# Copy the rest of the project files
+# COPY PROJECT FILES
 COPY . .
 
-# Create STATIC_ROOT directory
+# STATIC FILES CONFIGURATION
 RUN mkdir -p /usr/src/app/staticfiles
 RUN pipenv run python manage.py collectstatic --noinput
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# SET EXECUTION PERMISSIONS FOR ENTRYPOINT
+RUN chmod +x /usr/src/app/tools/entrypoint.sh
 
+# ENTRYPOINT & SUPERVISOR CONFIGURATION
+ENTRYPOINT ["/usr/src/app/tools/entrypoint.sh"]
 COPY ./conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+COPY ./conf/supervisord.dev.conf /etc/supervisor/conf.d/supervisord.dev.conf
+ENV SUPERVISOR_CONF_PATH="/etc/supervisor/conf.d/supervisord.conf"
+CMD ["sh", "-c", "supervisord -c $SUPERVISOR_CONF_PATH"]

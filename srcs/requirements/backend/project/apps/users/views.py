@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 User = get_user_model()
 
-logger = logging.getLogger("rest_api")
+logger = logging.getLogger("auth_logs")
 
 
 class UserInfo(APIView):

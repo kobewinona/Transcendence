@@ -9,7 +9,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-logger = logging.getLogger("rest_api")
+logger = logging.getLogger("auth_logs")
 User = get_user_model()
 
 

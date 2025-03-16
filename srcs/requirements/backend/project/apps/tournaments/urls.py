@@ -1,6 +1,7 @@
-# from project.apps.users.views import UserInfo
+from typing import List, Union
 
+from django.urls import URLPattern, URLResolver
 
-urlpatterns = [
+urlpatterns: List[Union[URLPattern, URLResolver]] = [
     # path("me/", UserInfo.as_view(), name="user_info"),
 ]

@@ -63,6 +63,9 @@ mypy-extensions = "==1.0.0"
 pipenv = "==2024.4.1"
 virtualenv = "==20.29.2"
 watchfiles = "==1.0.3"
+mypy = "*"
+django-stubs = "*"
+djangorestframework-stubs = "*"
 
 [requires]
 python_version = "3.12"

@@ -111,7 +111,7 @@ const handleSignOut = () => {
   display: flex;
   flex-direction: row;
   column-gap: var(--regular-space);
-  align-items: flex-start;
+  align-items: center;
 
   width: 100%;
   min-width: 1px;
@@ -145,8 +145,10 @@ const handleSignOut = () => {
 .profile__person-details {
   display: flex;
   flex-direction: column;
-  row-gap: var(--smaller-space);
+  row-gap: var(--small-space);
+
   width: 100%;
+  height: 100%;
 }
 
 .profile__person-details-title {
