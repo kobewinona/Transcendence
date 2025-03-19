@@ -1,7 +1,7 @@
 # noinspection PyUnresolvedReferences
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -31,9 +31,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class OTPRequestSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    email = serializers.CharField()
 
 
 class OTPVerifySerializer(serializers.Serializer):
-    username = serializers.CharField()
+    email = serializers.CharField()
     otp = serializers.CharField()

@@ -1,47 +1,66 @@
 import os
-from pathlib import Path
 from datetime import timedelta
-from project.constants import REFRESH_TOKEN_LIFETIME_DAYS, ACCESS_TOKEN_LIFETIME_MINUTES
+from pathlib import Path
 
-# noinspection PyUnresolvedReferences
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from .constants import REFRESH_TOKEN_LIFETIME_DAYS, ACCESS_TOKEN_LIFETIME_MINUTES
+from .utils.logger import CustomFormatter
+
+# -----------------------------------------------
+# 🏗️ PROJECT BASE SETTINGS
+# -----------------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+APP_ENV_MODE = os.getenv("APP_ENV_MODE", "production")  # "development" or "production"
+APP_URL = os.getenv("APP_URL")  # Frontend URL
+INTRA_URL = "https://api.intra.42.fr"
+AUTH_USER_MODEL = "users.CustomUser"
 
 # Load environment variables
 load_dotenv()
 
+# -----------------------------------------------
+# 📂 STATIC & MEDIA FILES
+# -----------------------------------------------
+
 STATIC_URL = "/static/"
 STATIC_ROOT = "/usr/src/app/staticfiles"
 
-# Internationalization
+# -----------------------------------------------
+# 🌎 INTERNATIONALIZATION
+# -----------------------------------------------
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# -----------------------------------------------
+# 🔒 SECURITY SETTINGS
+# -----------------------------------------------
+
+# Secret Key (⚠️ Should be set in a secure way in production)
 SECRET_KEY = "django-insecure-k1!svx5pna71t3&y#w!9iie&5p2)7)0acb9%@k788a@2y=9r54"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Debug mode (ON in development, OFF in production)
+DEBUG = APP_ENV_MODE == "development"
 
+# Trusted Proxies (when using reverse proxy)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Ensure secure cookies
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Enforce secure cookies in production
+SESSION_COOKIE_SECURE = APP_ENV_MODE == "production"
+CSRF_COOKIE_SECURE = APP_ENV_MODE == "production"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["backend", "localhost"]
+
+# -----------------------------------------------
+# 🌍 CORS & CSRF CONFIGURATION
+# -----------------------------------------------
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost",
-    "https://localhost",
-    "http://localhost:5173",  # dev
-]
+CORS_ALLOWED_ORIGINS = [APP_URL]
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"]
 CORS_ALLOW_HEADERS = [
     "content-type",
@@ -50,79 +69,67 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+# Content Security Policy (CSP)
 CSP_CONNECT_SRC = (
     "'self'",
-    "http://localhost:8001",
-    "wss://localhost",
+    "http://localhost:8001",  # Backend API
+    APP_URL,  # Allow frontend connections
+    "wss://localhost" if APP_ENV_MODE == "production" else "ws://localhost:8000",
 )
 
+# CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost",
     "https://localhost",
+    APP_URL,
 ]
 
-REST_FRAMEWORK = {
-    "STATIC_URL": STATIC_URL,
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-}
+# -----------------------------------------------
+# 🔑 AUTHENTICATION & PASSWORD SECURITY
+# -----------------------------------------------
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
-# Password validation
+# Password Validation
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Simple JWT settings
+# -----------------------------------------------
+# 🔑 JWT AUTHENTICATION SETTINGS
+# -----------------------------------------------
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=REFRESH_TOKEN_LIFETIME_DAYS),
-    # JWT creation and validation.
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-    "VERIFYING_KEY": None,
-    "AUDIENCE": None,
-    "ISSUER": None,
-    # Authentication Header
-    "AUTH_HEADER_TYPES": (
-        "Bearer",
-    ),  # token must be sent in the Authorization header with the prefix Bearer
+    "AUTH_HEADER_TYPES": ("Bearer",),  # Token prefix: "Bearer <token>"
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    # to strict security set ti true was in dock
-    "ROTATE_REFRESH_TOKENS": False,  # a new refresh token is issued every time an access token is refreshed.
-    "BLACKLIST_AFTER_ROTATION": True,  # old refresh tokens are blacklisted after rotation to prevent reuse.
-    # tracking user activity not useful
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
-    # for frontend if store in cookies very important for local just delete
     "AUTH_COOKIE": "access_token",
-    "AUTH_COOKIE_HTTP_ONLY": True,  # Prevents JavaScript from accessing the cookie
-    "AUTH_COOKIE_SECURE": True,  # Ensures the cookie is only sent over HTTPS.
-    "AUTH_COOKIE_SAMESITE": "None",  # Controls cross-site request behavior set to true but fronted
-    # User Identification
-    "USER_ID_FIELD": "id",  # tells the server which field in the database identifies the user
-    "USER_ID_CLAIM": "user_id",  # where to find the user"s id in the jwt blabla
-    # Token Classes
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    "AUTH_COOKIE_SECURE": True,
+    "AUTH_COOKIE_SAMESITE": "None",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
 }
 
-# Application definition
+# -----------------------------------------------
+# ⚙️ APPLICATION CONFIGURATION
+# -----------------------------------------------
+
 INSTALLED_APPS = [
-    # Built-in Django Apps
+    # Django Built-in Apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -140,8 +147,9 @@ INSTALLED_APPS = [
     "project.core",
     "project.apps.pong",
     "project.apps.chat",
-    "project.apps.custom_auth",
+    "project.apps.oauth",
     "project.apps.users",
+    "project.apps.tournaments",
 ]
 
 MIDDLEWARE = [
@@ -177,7 +185,10 @@ TEMPLATES = [
 ASGI_APPLICATION = "project.asgi.application"
 WSGI_APPLICATION = "project.wsgi.application"
 
-# Database
+# -----------------------------------------------
+# 🛢️ DATABASE CONFIGURATION
+# -----------------------------------------------
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -189,75 +200,69 @@ DATABASES = {
     }
 }
 
-# Channels
+# -----------------------------------------------
+# ⚡ DJANGO CHANNELS (WebSockets)
+# -----------------------------------------------
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
 
+# -----------------------------------------------
+# ⚙️ REST FRAMEWORK SETTINGS
+# -----------------------------------------------
+
+REST_FRAMEWORK = {
+    "STATIC_URL": STATIC_URL,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "project.authentication.JWTOrIntraAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "EXCEPTION_HANDLER": "project.utils.exceptions.custom_exception_handler",
+}
+
+# -----------------------------------------------
+# 🏗️ DEFAULT CONFIGURATIONS
+# -----------------------------------------------
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Ensure logs directory and log file exist
-LOGS_DIR = os.path.join(os.path.dirname(__file__), "logs")
-LOG_FILE = os.path.join(LOGS_DIR, "game_logs.log")
-
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-if not os.path.exists(LOG_FILE):
-    with open(LOG_FILE, "w"):
-        pass
+# -----------------------------------------------
+# 📢 LOGGING CONFIGURATION
+# -----------------------------------------------
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
+        "colored": {
+            "()": CustomFormatter,
         },
     },
     "handlers": {
         "console": {
-            "level": "DEBUG",
+            "level": "DEBUG" if APP_ENV_MODE == "development" else "INFO",
             "class": "logging.StreamHandler",
-        },
-        "game_logs": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(os.path.dirname(__file__), "logs/game_logs.log"),
-            "formatter": "verbose",
+            "formatter": "colored",
         },
     },
     "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "channels": {
+        "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "channels": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "game_logs": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "auth_logs": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "fast-reload_logs": {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },
-        "game_logs": {
-            "handlers": ["console", "game_logs"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "rest_api": {
-            "handlers": ["console", "game_logs"],
+        "tournaments_logs": {
+            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-    },
+    "root": {"handlers": ["console"], "level": "WARNING"},
 }

@@ -3,7 +3,7 @@ import logging
 
 from .constants import GAME_STATUS_IDLE, GAME_COUNTDOWN_DURATION
 
-logger = logging.getLogger("pong.consumer")
+logger = logging.getLogger("game_logs")
 
 
 class GameState:
@@ -18,7 +18,7 @@ class GameState:
 
     @status.setter
     def status(self, value):
-        logger.debug(f"Setting game status: {value}")
+        logger.info(f"✓ Game status successfully changed. New status: {value}")
         self._status = value
 
     # Countdown value getters and setters
@@ -30,7 +30,6 @@ class GameState:
     def countdown_value(self, value):
         if value < 0:
             raise ValueError("Countdown value cannot be negative")
-        logger.debug(f"Setting countdown value: {value}")
         self._countdown_value = value
 
     # Serialize the current game state for sending to clients
@@ -45,6 +44,5 @@ class GameState:
 
     # Reset the game state to its initial values
     def reset(self):
-        logger.debug("Resetting game state to initial values")
         self._status = GAME_STATUS_IDLE
         self._countdown_value = GAME_COUNTDOWN_DURATION

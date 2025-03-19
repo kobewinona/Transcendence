@@ -11,7 +11,7 @@ ENV_PATH = ./srcs/.env
 COMPOSE_FILE := ./srcs/docker-compose.yml
 DEV_COMPOSE_FILE := ./srcs/docker-compose.dev.yml
 
-all: setup run
+all: run
 
 setup:
 	@echo "Setting up the environment for ft_transcendence..."
@@ -19,22 +19,20 @@ setup:
 	@chmod 777 ./secrets
 	@chmod +x ./srcs/requirements/backend/tools/entrypoint.sh
 	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
-	@docker build -t backend_setup --build-arg LOCK_ONLY=true -f srcs/requirements/backend/Dockerfile srcs/requirements/backend
-
-
-run: setup
-	@echo "Running the services for ft_transcendence..."
-	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) up --build -d && \
-	echo "Services are up and running." || echo "Error: Unable to run the services."
-
-dev: setup
-	@echo "Running development mode..."
-	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) -f $(DEV_COMPOSE_FILE) up --build -d backend postgres
-	@docker exec -it backend pipenv run python manage.py watchfiles
+# @docker build -t backend_setup --build-arg LOCK_ONLY=true -f srcs/requirements/backend/Dockerfile srcs/requirements/backend
 
 stop:
 	@echo "Stopping the services for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
+
+run: stop setup
+	@echo "Running the services for ft_transcendence..."
+	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) up --build -d && \
+	echo "Services are up and running.\n\nThe app is accessible in a browser at https://localhost\n\n" || echo "Error: Unable to run the services."
+
+dev: stop setup
+	@echo "Running development mode..."
+	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) -f $(DEV_COMPOSE_FILE) up --build backend postgres || true
 
 restart: stop run
 
@@ -42,24 +40,31 @@ list:
 	@echo "List of services running for ft_transcendence..."
 	@docker ps -a
 
+exec:
+	@docker exec -it $(word 2, $(MAKECMDGOALS)) bash
+
 volume:
 	@echo "List of volumes for ft_transcendence..."
 	@docker volume ls
 
+clean-build:
+	@echo "Removing exited containers..."
+	@docker ps -aq --filter "status=exited" | xargs -r docker rm -v
+
 clean:
 	@echo "Cleaning up the environment for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) down
-	@docker stop $(docker ps -qa) 2>/dev/null || true
-	@docker rm $(docker ps -qa) 2>/dev/null || true
-	@docker rmi -f $(docker images -qa) 2>/dev/null || true
-	@docker volume rm $(docker volume ls -q) 2>/dev/null || true
-	@docker network rm $(docker network ls -q) 2>/dev/null || true
+	@docker container prune -f
+	@docker image prune -a -f
+	@docker volume prune -f
+	@docker network prune -f
+	@rm -rf ./secrets
 	@rm -rf ./srcs/requirements/frontend/build
-	@rm -rf ./srcs/requirements/frontend/package-lock.json
+	@rm -f ./srcs/requirements/frontend/package-lock.json
 
-prune: clean
-	@echo "Pruning the environment for ft_transcendence..."
-	@docker system prune -a
+prune:
+	@echo "Pruning the entire system..."
+	@docker system prune -a -f
 	@docker volume prune -a
 
 .PHONY: setup run restart list volume clean

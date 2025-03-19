@@ -1,7 +1,12 @@
+import logging
 import os
 import subprocess
-from watchfiles import watch
+
 from django.core.management.base import BaseCommand
+
+from watchfiles import watch
+
+logger = logging.getLogger("fast-reload_logs")
 
 
 class Command(BaseCommand):
@@ -9,18 +14,19 @@ class Command(BaseCommand):
 
     @staticmethod
     def restart_services():
-        print("↻ Restarting Django and Daphne...")
+        logger.info("↻ Restarting Django and Daphne...")
         try:
             subprocess.run(["supervisorctl", "restart", "django"], check=True)
             subprocess.run(["supervisorctl", "restart", "daphne"], check=True)
+            logger.info("✓ Restart complete.")
         except subprocess.CalledProcessError as e:
-            print(f"✕ Error restarting services: {e}")
+            logger.error(f"✕ Error restarting services: {e}")
 
     def handle(self, *args, **kwargs):
         watch_path = os.getcwd()
         ignored_files = (".log", ".pyc", "__pycache__")
 
-        print(f"✓ 👀 Watching for file changes...")
+        logger.info(f"✓ 👀 Watching for file changes...")
 
         try:
             for changes in watch(watch_path, recursive=True):
@@ -31,7 +37,21 @@ class Command(BaseCommand):
                 ]
 
                 if filtered_changes:
-                    print("ⓘ Detected changes:", filtered_changes)
-                    self.restart_services()
+                    logger.debug(f"ⓘ Detected changes: { filtered_changes }")
+
+                    mypy_result = subprocess.run(
+                        ["pipenv", "run", "mypy", "."],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    )
+
+                    if mypy_result.returncode == 0:
+                        logger.info("✓ No Mypy issues found. Restarting services...")
+                        self.restart_services()
+                    else:
+                        logger.error("✕ Mypy found issues, skipping restart. FUCK!")
+                        if mypy_result.stdout.strip():
+                            logger.error(f"Mypy Output:\n{mypy_result.stdout}")
         except KeyboardInterrupt:
-            print("✕ Stopping file watcher...")
+            logger.error("✕ Stopping file watcher...")

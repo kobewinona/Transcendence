@@ -18,7 +18,7 @@
 <script setup>
 import { MyModal } from 'components';
 import { isVueComponent, svgComponents } from 'shared/lib';
-import { defineExpose, ref } from 'vue';
+import { ref } from 'vue';
 
 const modal = ref({
   isOpen: false,

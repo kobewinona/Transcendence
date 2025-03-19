@@ -54,7 +54,8 @@ txaio = "==23.1.1"
 typing-extensions = "==4.12.2"
 urllib3 = "==2.3.0"
 whitenoise = "==6.9.0"
-zope.interface = "==7.2"
+zope = {interface = "==7.2"}
+colorama = "*"
 
 [dev-packages]
 black = "==25.1.0"
@@ -62,6 +63,9 @@ mypy-extensions = "==1.0.0"
 pipenv = "==2024.4.1"
 virtualenv = "==20.29.2"
 watchfiles = "==1.0.3"
+mypy = "*"
+django-stubs = "*"
+djangorestframework-stubs = "*"
 
 [requires]
 python_version = "3.12"

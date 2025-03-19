@@ -3,9 +3,10 @@
 </template>
 
 <script setup>
+import { WS_HOST } from 'config/constants.js';
 import { provideGameSocket } from 'entities/Game/composables';
 
 import { Section } from './ui';
 
-provideGameSocket(import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/pong/');
+provideGameSocket(`${WS_HOST}/ws/pong/`);
 </script>

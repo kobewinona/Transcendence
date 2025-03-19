@@ -1,27 +1,35 @@
 <template>
   <MainBodyLayout>
-    <AuthLayout class-name="auth-layout" :title="t('auth.signin.title')">
+    <AuthLayout :title="t('auth.signin.title')" class-name="auth-layout">
       <MyForm
+        :errors="serverErrors"
         :provide-key="SIGNIN_FORM_PROVIDE_KEY"
         mode="onBlur"
-        :errors="serverErrors"
         @on-submit="handleSubmit"
       >
         <div class="signin-form__fields">
           <AuthFormFields
-            :provide-key="SIGNIN_FORM_PROVIDE_KEY"
             :fields="{
-              [USERNAME_INPUT_NAME]: true,
+              [EMAIL_INPUT_NAME]: true,
               [PASSWORD_INPUT_NAME]: true,
             }"
+            :provide-key="SIGNIN_FORM_PROVIDE_KEY"
           />
         </div>
         <div class="signin-form__controls">
-          <MyButton class-name="signin-form__button" type="submit" :loading="isLoading">{{
-            t('auth.signin.submit-button.text')
-          }}</MyButton>
+          <MyButton
+            class-name="signin-form__button"
+            color="secondary"
+            type="submit"
+            :loading="isLoading"
+            >{{ t('auth.signin.submit_button.text') }}
+          </MyButton>
+          <a class="signin-form__intra-link" :href="intraOAuthUrl">
+            <img class="signin-form__intra-logo" :src="logoPath" alt="Intra 42 logo" />
+            {{ t('auth.signin_intra.submit_button.text') }}
+          </a>
           <span class="signin-form__redirect">
-            {{ t('auth.signin.link-to-signup.text') }}
+            {{ t('auth.signin.link_to_signup.text') }}
             <router-link to="/signup">{{ t('auth.signup.title') }}</router-link>
           </span>
         </div>
@@ -31,20 +39,37 @@
 </template>
 
 <script setup>
+/* eslint-disable camelcase */
+import logo42 from 'assets/logo42.png';
 import { MyButton, MyForm } from 'components';
 import {
+  EMAIL_INPUT_NAME,
   PASSWORD_INPUT_NAME,
   SIGNIN_FORM_PROVIDE_KEY,
-  USERNAME_INPUT_NAME,
 } from 'config/AuthForm/constants.js';
-import { USERNAME_STORAGE_KEY } from 'config/constants.js';
+import { AUTHORIZE_ENDPOINT, EMAIL_STORAGE_KEY } from 'config/constants.js';
 import { AuthFormFields } from 'features';
 import { AuthLayout, MainBodyLayout } from 'layouts';
 import api from 'shared/api/Auth';
 import { useMutation } from 'shared/composables';
-import { inject, reactive } from 'vue';
+import { computed, inject, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+
+const intraOAuthUrl = computed(() => {
+  const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    response_type: 'code',
+  });
+
+  return `${AUTHORIZE_ENDPOINT}?${params.toString()}`;
+});
+
+const logoPath = computed(() => (import.meta.env.DEV ? logo42 : '/logo42.png'));
 
 const { t } = useI18n();
 const router = useRouter();
@@ -65,12 +90,12 @@ const { mutate: getOtp, isLoading } = useMutation(api.getOtp, {
       showErrorModal(error.status, errorMessage);
     }
 
-    sessionStorage.removeItem(USERNAME_STORAGE_KEY);
+    sessionStorage.removeItem(EMAIL_STORAGE_KEY);
   },
 });
 
 const handleSubmit = (formData) => {
-  sessionStorage.setItem(USERNAME_STORAGE_KEY, formData[USERNAME_INPUT_NAME]);
+  sessionStorage.setItem(EMAIL_STORAGE_KEY, formData[EMAIL_INPUT_NAME]);
   getOtp({ data: formData });
 };
 </script>
@@ -104,5 +129,31 @@ const handleSubmit = (formData) => {
   font-size: 0.85rem;
   color: var(--light-color-opacity-90);
   text-align: center;
+}
+
+.signin-form__intra-link {
+  display: flex;
+  flex-direction: row;
+  column-gap: var(--small-space);
+  align-items: center;
+  justify-content: center;
+
+  height: 44px;
+  padding: var(--smaller-space);
+
+  color: var(--dark-color);
+
+  background-color: var(--light-color);
+  border-radius: 12px;
+}
+
+.signin-form__intra-link:hover {
+  filter: brightness(85%);
+  transition: filter 0.2s ease-in-out;
+}
+
+.signin-form__intra-logo {
+  width: 20px;
+  height: 20px;
 }
 </style>

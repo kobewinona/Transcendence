@@ -1,8 +1,10 @@
-import json
-import struct
 import asyncio
+import json
 import logging
+import struct
+
 from channels.generic.websocket import AsyncWebsocketConsumer
+
 from .services import (
     GameState,
     Ball,
@@ -40,7 +42,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.ball = Ball()
         await self.accept()
         await self.set_game_status(GAME_STATUS_IDLE)
-        logger.debug("✓ Pong WebSocket Connected")
+        logger.info("✓ Pong WebSocket Connected")
 
     async def disconnect(self, close_code):
         if self.game_update_task:
@@ -82,7 +84,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if not self.are_dimensions_set:
             self.are_dimensions_set = True
-            logger.debug("✓ Dimensions set successfully")
+            logger.info("✓ Dimensions set successfully")
             await self.send_game_state("✓ Dimensions set successfully")
 
     async def handle_start(self, data):
@@ -109,7 +111,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.ball.set_ball_max_curve_angle(max_ball_curve)
 
         if not controllers:
-            logger.debug("✕ Cannot start game: No controllers found in settings!")
+            logger.error("✕ Cannot start game: No controllers found in settings!")
             await self.send_game_state(
                 "✕ Cannot start game: No controllers found in settings!"
             )
@@ -121,14 +123,14 @@ class PongConsumer(AsyncWebsocketConsumer):
             paddle_name = ctrl["name"]
             paddle_side = ctrl["side"]
             self.paddles[paddle_name] = Paddle(name=paddle_name, side=paddle_side)
-            logger.debug(f"✓ Created paddle: {paddle_name}")
+            logger.info(f"✓ Created paddle: {paddle_name}")
 
         if self.game_update_task:
             self.ball.reset(self.game_mode)
             for paddle in self.paddles.values():
                 paddle.reset()
             self.game_update_task.cancel()
-            logger.debug(
+            logger.info(
                 "✓ Game update loop canceled as part of initializing a new loop process"
             )
             await self.set_game_status(GAME_STATUS_ENDED)
@@ -142,9 +144,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.set_game_status(GAME_STATUS_COUNTDOWN)
 
             await self.set_game_status(GAME_STATUS_IN_PROGRESS)
-            logger.debug("✓ Game update loop started")
+            logger.info("✓ Game update loop started")
         except Exception as e:
-            logger.debug(f"✕ Failed to start new game update loop: {e}")
+            logger.error(f"✕ Failed to start new game update loop: {e}")
 
     async def handle_paddle(self, data):
         paddle_name = data.get("name")
@@ -164,7 +166,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def set_game_status(self, status):
         self.game_state.status = status
-        logger.debug(f"✓ Game state updated to {status}")
         await self.send_game_state(f"Game status updated")
 
     async def send_game_state(self, message):
@@ -172,7 +173,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         if self.score:
             score_data = self.score.get_score()
 
-        logger.debug(f"score_data { score_data }")
         payload = struct.pack(
             "<B i i i i B B B i",  # '<B i i',
             1,  # message_type

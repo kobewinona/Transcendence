@@ -1,7 +1,8 @@
+import asyncio
 import logging
 import math
 import random
-import asyncio
+
 from .constants import (
     DEMO_GAME_MODE,
     PADDLE_BOUNDARY_GRACE_OFFSET,
@@ -76,7 +77,7 @@ class Ball:
         self.height = height
         self.radius_x = width / 4
         self.radius_y = height / 4
-        logger.debug(
+        logger.info(
             f"✓ Ball dimensions set successfully: "
             f"width {self.width}, height {self.height}, "
             f"radius_x {self.radius_x}, radius_y {self.radius_y}"
@@ -168,9 +169,6 @@ class Ball:
                         self.position["x"] = (
                             paddle.width + self.radius_x
                         )  # Prevent ball from clipping through
-                        logger.debug(
-                            f"position_x after clipping handler { self.position['x']}"
-                        )
                         self.velocity["y"] += self.calculate_velocity_adjustment(
                             paddle.position, paddle.height
                         )
@@ -198,9 +196,6 @@ class Ball:
                         self.position["x"] = (
                             100 - paddle.width - self.radius_x
                         )  # Prevent ball from clipping through
-                        logger.debug(
-                            f"position_x after clipping handler { self.position['x']}"
-                        )
                         self.velocity["y"] += self.calculate_velocity_adjustment(
                             paddle.position, paddle.height
                         )

@@ -3,8 +3,15 @@ import { defineConfig } from 'vite';
 import svgLoader from 'vite-svg-loader';
 
 export default defineConfig({
+  base: '/',
+  publicDir: 'public',
   plugins: [vue(), svgLoader()],
   server: {
+    mimeTypes: {
+      ttf: 'font/ttf',
+      woff: 'font/woff',
+      woff2: 'font/woff2',
+    },
     proxy: {
       '/ws': {
         target: 'ws://localhost:8000',

@@ -1,6 +1,6 @@
 import '@dzangolab/vue-country-flag-icon/dist/CountryFlag.css';
 import './vendor/normalize.css';
-import './vendor/fonts/lexend_exa/lexend_exa.css';
+import './vendor/fonts/overpass/overpass.css';
 import './styles.css';
 import './assets/styles/global.css';
 

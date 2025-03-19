@@ -50,19 +50,19 @@ services:
       context: ./requirements/backend
       dockerfile: Dockerfile
     restart: always
-    environment:
-      - DJANGO_SETTINGS_MODULE=project.settings
+    env_file:
+      - ./requirements/backend/.env.production
     networks:
       - ft_transcendence
+    ports:
+      - "8000:8000"
+      - "8001:8001"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - vault_token:/vault/token/backend
       - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
-    ports:
-      - "8000:8000"
-      - "8001:8001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m

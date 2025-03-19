@@ -12,7 +12,7 @@ Here the list of command to use to start the project, from the Makefile.
 ### To clean every build files, secrets and more use the command make clean
 - make clean
 
-### To remove all image use commande make prune
+### To remove all image use command make prune
 - make prune
 
 ### make restart for stop and run
