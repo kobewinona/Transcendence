@@ -6,6 +6,7 @@ services:
     build:
       context: ./requirements/apache
       dockerfile: Dockerfile
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -13,16 +14,19 @@ services:
       - nginx
     networks:
       - ft_transcendence
-    secrets:
-      - ssl_certificate
-      - ssl_certificate_key
-    restart: always
+    volumes:
+      - vault-certs:/etc/apache2/ssl
+    # secrets:
+    #   - ssl_certificate
+    #   - ssl_certificate_key
 
   postgres:
+    image: custom-postgresql
     container_name: postgres
     build:
       context: './requirements/postgresql'
       dockerfile: Dockerfile
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -38,21 +42,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    restart: always
 
   backend:
+    image: custom-backend
     container_name: backend
     build:
       context: ./requirements/backend
       dockerfile: Dockerfile
+    restart: always
     environment:
       - DJANGO_SETTINGS_MODULE=project.settings
-      - VAULT_ADDR=http://vault:8200
     networks:
       - ft_transcendence
     depends_on:
-      vault:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     volumes:
@@ -61,7 +63,6 @@ services:
     ports:
       - "8000:8000"
       - "8001:8001"
-    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m
@@ -69,15 +70,16 @@ services:
       retries: 5
 
   frontend:
+    image: custom-frontend
     container_name: frontend
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
+    restart: "no"
     networks:
       - ft_transcendence
     volumes:
       - frontend_build:/usr/src/app/dist
-    restart: "no"
     healthcheck:
       test: ["CMD", "test", "-f", "/usr/src/app/build/index.html"]
       interval: 10s
@@ -86,10 +88,12 @@ services:
       start_period: 5s
 
   nginx:
+    image: custom-nginx
     container_name: nginx
     build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
+    restart: always
     ports:
       - "8080:8080"
     volumes:
@@ -97,9 +101,7 @@ services:
     networks:
       - ft_transcendence
     depends_on:
-      vault:
-        condition: service_healthy
-    restart: always
+      - backend
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 1m30s
@@ -107,52 +109,109 @@ services:
       retries: 5
 
   vault:
+    image: custom-vault
     container_name: vault
     build:
       context: ./requirements/vault
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "127.0.0.1:8200:8200"
     cap_add:
       - IPC_LOCK
     environment:
       VAULT_ADDR: "http://vault:8200"
       VAULT_API_ADDR: "http://vault:8200"
+    ports:
+      - "8200:8200"
     volumes:
-      - ./requirements/vault/conf/vault.hcl:/vault/config/vault.hcl
-      - ./requirements/vault/tools:/vault/scripts
       - vault_build:/vault/data
-      - vault_token:/vault/token
     networks:
-      - ft_transcendence
-    secrets:
-      - vault_secrets_json
+      vault_network:
+          ipv4_address: 192.168.100.2
     healthcheck:
       test: ["CMD", "vault", "status"]
       interval: 30s
       timeout: 10s
       retries: 5
 
+  vault-init:
+    image: vault-init
+    container_name: vault-init
+    build:
+      context: ./requirements/vault-init
+      dockerfile: Dockerfile
+    restart: on-failure
+    depends_on:
+      - vault
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+    volumes:
+        - ../secrets/unseal_keys:/vault-init/unseal
+        - ../secrets/ssl:/vault-init/ssl 
+        - vault_agent_auth:/vault/auth
+    networks:
+      vault_network:
+          ipv4_address: 192.168.100.3
+
+
+  vault-agent:
+    image: custom-vault-agent
+    container_name: vault-agent
+    build:
+      context: ./requirements/vault-agent
+      dockerfile: Dockerfile
+    restart: always
+    cap_add:
+      - IPC_LOCK
+      - SETFCAP
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+    volumes:
+      - ./requirements/vault-agent/conf/vault-agent.hcl:/vault/config/vault-agent.hcl
+      - vault_agent_auth:/vault/auth
+      - vault-certs:/vault/certs
+    depends_on:
+      - vault
+    ports:
+      - "8201:8201"
+    networks:
+      vault_network:
+          ipv4_address: 192.168.100.4
+      ft_transcendence: {}
+    security_opt:
+      - no-new-privileges:true
+
 networks:
-  ft_transcendence:
+  vault_network:
+    name: vault_network
     driver: bridge
     ipam:
       config:
         - subnet: 192.168.100.0/24
+  ft_transcendence:
+    name: ft_transcendence
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.200.0/24
 
 volumes:
   frontend_build:
   vault_build:
   vault_token:
-  vault_cert:
+  vault_logs:
+  vault_files:
+  vault-certs:
+  vault_data:
   database-postgres:
   postgres_data:
+  vault_agent_auth:
 
-secrets:
-  vault_secrets_json:
-    file: ../secrets/secrets.json
-  ssl_certificate:
-    file: ../secrets/ssl/certificate.crt
-  ssl_certificate_key:
-    file: ../secrets/ssl/certificate.key
+# secrets:
+#   vault_unseal_keys:
+#     file: ../secrets/unseal_keys.json
+#   vault_secrets_json:
+#     file: ../secrets/secrets.json
+#   ssl_certificate:
+#     file: ../secrets/ssl/certificate.crt
+#   ssl_certificate_key:
+#     file: ../secrets/ssl/certificate.key

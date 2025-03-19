@@ -26,7 +26,4 @@ yarn-error.log*
 
 # secrets
 srcs/.env
-!/secrets/
-/secrets/*
-!/secrets/README.md
 secrets/

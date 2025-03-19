@@ -60,5 +60,6 @@ clean:
 prune: clean
 	@echo "Pruning the environment for ft_transcendence..."
 	@docker system prune -a
+	@docker volume prune -a
 
 .PHONY: setup run restart list volume clean
