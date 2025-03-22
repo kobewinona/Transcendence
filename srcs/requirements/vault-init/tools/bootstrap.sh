@@ -39,12 +39,9 @@ done
 echo "🔧 Running setup_policies.sh..."
 sh /vault-init/setup_policies.sh
 
-echo "🔧 Running store_secrets.sh..."
+echo "🔧 Running setup_secrets.sh..."
 sh /vault-init/setup_secrets.sh
 
-
-echo "✅ Vault-init setup completed. Keeping container alive..."
-tail -f /dev/null
 
 echo "✅ Vault is unsealed!"
 exit 0

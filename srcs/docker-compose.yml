@@ -15,10 +15,7 @@ services:
     networks:
       - ft_transcendence
     volumes:
-      - vault-certs:/etc/apache2/ssl
-    # secrets:
-    #   - ssl_certificate
-    #   - ssl_certificate_key
+      - vault_certs:/etc/apache2/ssl
 
   postgres:
     image: custom-postgresql
@@ -32,7 +29,7 @@ services:
     ports:
       - '5432:5432'
     networks:
-      - ft_transcendence
+      - database_network
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -54,6 +51,7 @@ services:
       - ./requirements/backend/.env.production
     networks:
       - ft_transcendence
+      - database_network
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -61,7 +59,6 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - vault_token:/vault/token/backend
       - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
@@ -152,7 +149,6 @@ services:
       vault_network:
           ipv4_address: 192.168.100.3
 
-
   vault-agent:
     image: custom-vault-agent
     container_name: vault-agent
@@ -168,7 +164,7 @@ services:
     volumes:
       - ./requirements/vault-agent/conf/vault-agent.hcl:/vault/config/vault-agent.hcl
       - vault_agent_auth:/vault/auth
-      - vault-certs:/vault/certs
+      - vault_certs:/vault/certs
     depends_on:
       - vault
     ports:
@@ -179,6 +175,18 @@ services:
       ft_transcendence: {}
     security_opt:
       - no-new-privileges:true
+
+  prometheus:
+    image: custom-prometheus
+    container_name: prometheus
+    build:
+      context: ./requirements/prometheus
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9090:9090"
+    networks:
+      - ft_transcendence
 
 networks:
   vault_network:
@@ -193,25 +201,15 @@ networks:
     ipam:
       config:
         - subnet: 192.168.200.0/24
+  database_network:
+    name: database_network
+    driver: bridge
 
 volumes:
   frontend_build:
-  vault_build:
-  vault_token:
-  vault_logs:
-  vault_files:
-  vault-certs:
-  vault_data:
-  database-postgres:
   postgres_data:
+  vault_build:
+  vault_logs:
+  vault_certs:
   vault_agent_auth:
-
-# secrets:
-#   vault_unseal_keys:
-#     file: ../secrets/unseal_keys.json
-#   vault_secrets_json:
-#     file: ../secrets/secrets.json
-#   ssl_certificate:
-#     file: ../secrets/ssl/certificate.crt
-#   ssl_certificate_key:
-#     file: ../secrets/ssl/certificate.key
+  vault_postgre_env:
