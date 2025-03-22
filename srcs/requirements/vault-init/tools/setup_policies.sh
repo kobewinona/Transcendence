@@ -79,6 +79,14 @@ path "secret/data/ssl/*" {
 path "secret/metadata/ssl/*" {
   capabilities = ["list"]
 }
+
+path "secret/data/postgres" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/postgres" {
+  capabilities = ["list"]
+}
 EOF
 
 

@@ -11,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - nginx
+       - nginx
     networks:
       - ft_transcendence
     volumes:
@@ -26,14 +26,15 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - vault_postgre_env:/run/secrets/postgres_env
     ports:
       - '5432:5432'
     networks:
       - database_network
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # environment:
+    #   - POSTGRES_DB=${POSTGRES_DB}
+    #   - POSTGRES_USER=${POSTGRES_USER}
+    #   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
@@ -144,6 +145,7 @@ services:
     volumes:
         - ../secrets/unseal_keys:/vault-init/unseal
         - ../secrets/ssl:/vault-init/ssl 
+        - ../secrets/postgres:/vault-init/postgres
         - vault_agent_auth:/vault/auth
     networks:
       vault_network:
@@ -165,6 +167,7 @@ services:
       - ./requirements/vault-agent/conf/vault-agent.hcl:/vault/config/vault-agent.hcl
       - vault_agent_auth:/vault/auth
       - vault_certs:/vault/certs
+      - vault_postgre_env:/vault/postgres
     depends_on:
       - vault
     ports:
@@ -175,6 +178,11 @@ services:
       ft_transcendence: {}
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   prometheus:
     image: custom-prometheus

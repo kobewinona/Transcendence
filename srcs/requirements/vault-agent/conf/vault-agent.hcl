@@ -46,5 +46,16 @@ template {
 EOF
 }
 
+template {
+  destination = "/vault/postgres/.env"
+  contents = <<EOF
+{{ with secret "secret/data/postgres" }}
+POSTGRES_DB={{ .Data.data.POSTGRES_DB }}
+POSTGRES_USER={{ .Data.data.POSTGRES_USER }}
+POSTGRES_PASSWORD={{ .Data.data.POSTGRES_PASSWORD }}
+{{ end }}
+EOF
+}
+
 
 exit_after_auth = false
