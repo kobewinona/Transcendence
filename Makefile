@@ -14,12 +14,10 @@ DEV_COMPOSE_FILE := ./srcs/docker-compose.dev.yml
 all: run
 
 setup:
-	@echo "Setting up the environment for ft_transcendence..."
-	@mkdir -p ./secrets
-	@chmod 777 ./secrets
-	@chmod +x ./srcs/requirements/backend/tools/entrypoint.sh
-	@docker volume rm rm srcs_frontend_build 2>/dev/null || true
-# @docker build -t backend_setup --build-arg LOCK_ONLY=true -f srcs/requirements/backend/Dockerfile srcs/requirements/backend
+    @echo "Setting up the environment for ft_transcendence..."
+    @mkdir -p ./secrets
+    @chmod 777 ./secrets
+    @docker volume rm srcs_frontend_build 2>/dev/null || true
 
 stop:
 	@echo "Stopping the services for ft_transcendence..."
