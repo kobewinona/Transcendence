@@ -61,8 +61,8 @@ services:
         condition: service_healthy
     volumes:
       - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
-      - vault_backend_env:/usr/src/app/vault/secrets/backend_env
-      - vault_postgre_env:/usr/src/app/vault/secrets/postgres_env
+      - vault_backend_env:/usr/src/app/vault/secrets/backend
+      - vault_postgre_env:/usr/src/app/vault/secrets/postgres
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m

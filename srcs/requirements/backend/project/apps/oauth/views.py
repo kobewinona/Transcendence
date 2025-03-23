@@ -22,8 +22,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .constants import REDIRECT_URI, TOKEN_ENDPOINT
 from .serializers import UserSerializer, OTPRequestSerializer, OTPVerifySerializer
 
+from project.settings import secrets_backend
+
 User = get_user_model()
-resend = os.environ.get("RESEND_API_KEY")
+resend = secrets_backend.get("RESEND_API_KEY")
+# resend = os.environ.get("RESEND_API_KEY")
 logger = logging.getLogger("auth_logs")
 
 
@@ -192,8 +195,10 @@ class SignInIntraCallback(APIView):
             return HttpResponseBadRequest("Authorization code missing")
 
         data = {
-            "client_id": os.getenv("CLIENT_ID"),
-            "client_secret": os.getenv("CLIENT_SECRET"),
+            "client_id": secrets_backend.get("CLIENT_ID"),
+            "client_secret": secrets_backend.get("CLIENT_SECRET"),
+            # "client_id": os.getenv("CLIENT_ID"),
+            # "client_secret": os.getenv("CLIENT_SECRET"),
             "redirect_uri": REDIRECT_URI,
             "grant_type": "authorization_code",
             "code": code,
