@@ -87,6 +87,14 @@ path "secret/data/postgres" {
 path "secret/metadata/postgres" {
   capabilities = ["list"]
 }
+
+path "secret/data/backend" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/backend" {
+  capabilities = ["list"]
+}
 EOF
 
 

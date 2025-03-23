@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ENV_FILE="/run/secrets/postgres_env/.env"
+ENV_FILE="/run/secrets/postgres_env/.env.db"
 
 echo "⏳ Waiting for Vault Agent to generate .env..."
 while [ ! -f "$ENV_FILE" ]; do

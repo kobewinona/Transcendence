@@ -47,12 +47,23 @@ EOF
 }
 
 template {
-  destination = "/vault/postgres/.env"
+  destination = "/vault/postgres/.env.db"
   contents = <<EOF
 {{ with secret "secret/data/postgres" }}
 POSTGRES_DB={{ .Data.data.POSTGRES_DB }}
 POSTGRES_USER={{ .Data.data.POSTGRES_USER }}
 POSTGRES_PASSWORD={{ .Data.data.POSTGRES_PASSWORD }}
+{{ end }}
+EOF
+}
+
+template {
+  destination = "/vault/backend/.env.key"
+  contents = <<EOF
+{{ with secret "secret/data/backend" }}
+RESEND_API_KEY={{ .Data.data.RESEND_API_KEY }}
+CLIENT_ID={{ .Data.data.CLIENT_ID }}
+CLIENT_SECRET={{ .Data.data.CLIENT_SECRET }}
 {{ end }}
 EOF
 }

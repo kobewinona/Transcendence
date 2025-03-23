@@ -4,11 +4,11 @@ LABEL org.opencontainers.image.authors="Dima, Wolf, Jeremy"
 
 COPY conf/vault-agent.hcl /vault/config/vault-agent.hcl
 
-RUN mkdir -p /vault/certs /vault/postgres && \
+RUN mkdir -p /vault/certs /vault/postgres /vault/backend && \
     chmod -R 777 /vault/certs && \
-    chown -R vault:vault /vault/certs /vault/postgres && \
+    chown -R vault:vault /vault/certs /vault/postgres /vault/backend && \
     chmod -R 755 /vault/certs  && \
-    chmod -R 750 /vault/postgres
+    chmod -R 750 /vault/postgres /vault/backend
 
 EXPOSE 8201
 

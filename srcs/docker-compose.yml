@@ -61,6 +61,8 @@ services:
         condition: service_healthy
     volumes:
       - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
+      - vault_backend_env:/usr/src/app/vault/secrets/backend_env
+      - vault_postgre_env:/usr/src/app/vault/secrets/postgres_env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m
@@ -146,6 +148,7 @@ services:
         - ../secrets/unseal_keys:/vault-init/unseal
         - ../secrets/ssl:/vault-init/ssl 
         - ../secrets/postgres:/vault-init/postgres
+        - ../secrets/api:/vault-init/api
         - vault_agent_auth:/vault/auth
     networks:
       vault_network:
@@ -168,6 +171,7 @@ services:
       - vault_agent_auth:/vault/auth
       - vault_certs:/vault/certs
       - vault_postgre_env:/vault/postgres
+      - vault_backend_env:/vault/backend
     depends_on:
       - vault
     ports:
@@ -221,3 +225,4 @@ volumes:
   vault_certs:
   vault_agent_auth:
   vault_postgre_env:
+  vault_backend_env:
