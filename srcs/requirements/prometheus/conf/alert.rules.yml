@@ -1,0 +1,25 @@
+groups:
+  - name: temperature_alerts
+    rules:
+      - alert: HighCPUTemperature
+        expr: node_hwmon_temp_celsius > 70
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High temperature detected"
+          description: "A sensor has detected {{ $value }}°C on {{ $labels.chip }}/{{ $labels.sensor }}"
+
+
+
+  # # Rules for test alertmanager container to send email message to the useremail adress (cf: check in spam)
+  # - name: test_alerts
+  #   rules:
+  #     - alert: AlwaysFiring
+  #       expr: vector(1)
+  #       for: 1m
+  #       labels:
+  #         severity: test
+  #       annotations:
+  #         summary: "Alert test"
+  #         description: "This is a test alert message from alertmanager"

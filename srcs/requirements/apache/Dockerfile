@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y apache2-utils && \
 # Copy main Apache configuration files
 COPY ./conf/httpd.conf /usr/local/apache2/conf/httpd.conf
 COPY ./conf/httpd-vhosts.conf /usr/local/apache2/conf/extra/httpd-vhosts.conf
+COPY ./conf/grafana-vhost.conf /usr/local/apache2/conf/extra/grafana-vhost.conf
 
 # Copy ModSecurity configuration and rules
 COPY ./conf/modsecurity.conf /usr/local/apache2/conf/modsecurity.conf
@@ -35,6 +36,9 @@ RUN mkdir -p /usr/local/apache2/run /etc/modsecurity.d /opt/owasp-crs /var/log &
     chmod -R 750 /usr/local/apache2/conf && \
     chmod -R 770 /usr/local/apache2/logs /usr/local/apache2/run /etc/modsecurity.d /opt/owasp-crs && \
     chmod 640 /var/log/modsec_debug.log /var/log/modsec_audit.log
+
+# Remove the auto-generate certficate by the image
+RUN echo '#!/bin/sh\nexit 0' > /usr/local/bin/generate-certificate && chmod +x /usr/local/bin/generate-certificate
 
 # Switch to non-root user for security
 USER apache

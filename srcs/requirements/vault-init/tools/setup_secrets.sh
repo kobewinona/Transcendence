@@ -2,6 +2,8 @@
 
 VAULT_ADDR="http://vault:8200"
 SSL_DIR="/vault-init/ssl"
+POSTGRES_ENV_FILE="/vault-init/postgres/.env.db"
+API_ENV_FILE="/vault-init/api/.env.key"
 VAULT_TOKEN_FILE="/vault-init/unseal/vault-init-token.txt"
 
 
@@ -21,6 +23,7 @@ fi
 echo "✅ Vault token successfully loaded!"
 
 
+# Add ssl certificat secret to vault
 echo "🔑 Storing SSL secrets in Vault..."
 
 if [ ! -d "$SSL_DIR" ]; then
@@ -34,7 +37,6 @@ else
     echo "ℹ️ Secrets engine 'kv' already enabled."
 fi
 
-
 for cert_file in "$SSL_DIR"/*; do
   filename=$(basename "$cert_file")
   
@@ -44,6 +46,35 @@ for cert_file in "$SSL_DIR"/*; do
     echo "❌ ERROR: Unable to store $filename in Vault!" >&2
   fi
 done
+
+# Add postgres access admin to vault
+echo "🔑 Storing Postgres credentials in Vault..."
+
+if [ ! -f "$POSTGRES_ENV_FILE" ]; then
+  echo "⚠️ Postgres .env.db file not found at $POSTGRES_ENV_FILE"
+else
+  echo "📄 Reading $POSTGRES_ENV_FILE..."
+  vault kv put secret/postgres \
+    $(grep -v '^#' "$POSTGRES_ENV_FILE" | xargs)
+  echo "✅ Postgres secrets stored in Vault!"
+fi
+
+# Add backend API keys to Vault
+echo "🔑 Storing Backend API keys from $API_ENV_FILE into Vault..."
+
+if [ ! -f "$API_ENV_FILE" ]; then
+  echo "❌ ERROR: API env file not found at $API_ENV_FILE"
+else
+  echo "📄 Reading $API_ENV_FILE..."
+  vault kv put secret/backend \
+    $(grep -v '^#' "$API_ENV_FILE" | xargs)
+    
+  if [ $? -eq 0 ]; then
+    echo "✅ Backend API secrets stored in Vault!"
+  else
+    echo "❌ ERROR: Failed to store backend API secrets!" >&2
+  fi
+fi
 
 
 echo "✅ All SSL secrets have been stored in Vault!"

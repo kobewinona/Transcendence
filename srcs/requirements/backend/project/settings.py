@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from .constants import REFRESH_TOKEN_LIFETIME_DAYS, ACCESS_TOKEN_LIFETIME_MINUTES
 from .utils.logger import CustomFormatter
 
+from project.load_env_file import load_env_file
+
 # -----------------------------------------------
 # 🏗️ PROJECT BASE SETTINGS
 # -----------------------------------------------
@@ -186,15 +188,28 @@ ASGI_APPLICATION = "project.asgi.application"
 WSGI_APPLICATION = "project.wsgi.application"
 
 # -----------------------------------------------
+# 🔑 CREDENTIAL FROM VAULT
+# -----------------------------------------------
+
+BACKEND_ENV_PATH = "/usr/src/app/vault/secrets/backend/.env.key"
+POSTGRES_ENV_PATH = "/usr/src/app/vault/secrets/postgres/.env.db"
+
+secrets_backend = load_env_file(BACKEND_ENV_PATH)
+secrets_postgres = load_env_file(POSTGRES_ENV_PATH)
+
+# -----------------------------------------------
 # 🛢️ DATABASE CONFIGURATION
 # -----------------------------------------------
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "NAME": secrets_postgres.get("POSTGRES_DB"),
+        "USER": secrets_postgres.get("POSTGRES_USER"),
+        "PASSWORD": secrets_postgres.get("POSTGRES_PASSWORD"),
+        # "NAME": os.getenv("POSTGRES_DB"),
+        # "USER": os.getenv("POSTGRES_USER"),
+        # "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": "postgres",
         "PORT": "5432",
     }

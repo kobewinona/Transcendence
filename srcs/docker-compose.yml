@@ -11,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - nginx
+       - nginx
     networks:
       - ft_transcendence
     volumes:
@@ -26,14 +26,15 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - vault_postgre_env:/run/secrets/postgres_env
     ports:
       - '5432:5432'
     networks:
       - database_network
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # environment:
+    #   - POSTGRES_DB=${POSTGRES_DB}
+    #   - POSTGRES_USER=${POSTGRES_USER}
+    #   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
@@ -60,6 +61,8 @@ services:
         condition: service_healthy
     volumes:
       - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
+      - vault_backend_env:/usr/src/app/vault/secrets/backend
+      - vault_postgre_env:/usr/src/app/vault/secrets/postgres
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m
@@ -144,6 +147,8 @@ services:
     volumes:
         - ../secrets/unseal_keys:/vault-init/unseal
         - ../secrets/ssl:/vault-init/ssl 
+        - ../secrets/postgres:/vault-init/postgres
+        - ../secrets/api:/vault-init/api
         - vault_agent_auth:/vault/auth
     networks:
       vault_network:
@@ -165,6 +170,8 @@ services:
       - ./requirements/vault-agent/conf/vault-agent.hcl:/vault/config/vault-agent.hcl
       - vault_agent_auth:/vault/auth
       - vault_certs:/vault/certs
+      - vault_postgre_env:/vault/postgres
+      - vault_backend_env:/vault/backend
     depends_on:
       - vault
     ports:
@@ -175,6 +182,11 @@ services:
       ft_transcendence: {}
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   prometheus:
     image: custom-prometheus
@@ -185,6 +197,27 @@ services:
     restart: always
     ports:
       - "9090:9090"
+    networks:
+      - ft_transcendence
+
+  alertmanager:
+    image: custom-alertmanager
+    container_name: alertmanager
+    build:
+      context: ./requirements/alertmanager
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "9093"
+    networks:
+      - ft_transcendence
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    restart: always
+    expose:
+      - "9100"
     networks:
       - ft_transcendence
 
@@ -213,3 +246,4 @@ volumes:
   vault_certs:
   vault_agent_auth:
   vault_postgre_env:
+  vault_backend_env:
