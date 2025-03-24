@@ -1,0 +1,27 @@
+{
+    "id": null,
+    "uid": "alertmanager-dashboard",
+    "title": "Alertmanager Alerts",
+    "timezone": "browser",
+    "panels": [
+      {
+        "type": "alertlist",
+        "title": "Active Alerts",
+        "datasource": "Alertmanager",
+        "targets": [
+          {
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 10,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      }
+    ],
+    "schemaVersion": 36,
+    "version": 1
+  }
+  
