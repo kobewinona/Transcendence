@@ -188,6 +188,23 @@ services:
       timeout: 10s
       retries: 5
 
+  grafana:
+    image: custom-grafana
+    container_name: grafana
+    build:
+      context: ./requirements/grafana
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - GF_SERVER_ROOT_URL=https://monitoring.localhost
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - ft_transcendence
+
   prometheus:
     image: custom-prometheus
     container_name: prometheus
@@ -247,3 +264,4 @@ volumes:
   vault_agent_auth:
   vault_postgre_env:
   vault_backend_env:
+  grafana_data:
