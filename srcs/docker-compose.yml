@@ -200,6 +200,27 @@ services:
     networks:
       - ft_transcendence
 
+  alertmanager:
+    image: custom-alertmanager
+    container_name: alertmanager
+    build:
+      context: ./requirements/alertmanager
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "9093"
+    networks:
+      - ft_transcendence
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    restart: always
+    expose:
+      - "9100"
+    networks:
+      - ft_transcendence
+
 networks:
   vault_network:
     name: vault_network

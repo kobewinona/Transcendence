@@ -1,0 +1,14 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'pong25.transcendence@gmail.com'
+  smtp_auth_username: 'pong25.transcendence@gmail.com'
+  smtp_auth_password: 'xxxx xxxx xxxx xxxx'
+  smtp_require_tls: true
+
+route:
+  receiver: 'emailUser'
+
+receivers:
+  - name: 'emailUser'
+    email_configs:
+      - to: 'jeremyhurpy@gmail.com'
