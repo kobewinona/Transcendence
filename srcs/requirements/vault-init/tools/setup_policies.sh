@@ -95,6 +95,14 @@ path "secret/data/backend" {
 path "secret/metadata/backend" {
   capabilities = ["list"]
 }
+
+path "secret/data/grafana" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/grafana" {
+  capabilities = ["list"]
+}
 EOF
 
 

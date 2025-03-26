@@ -9,12 +9,3 @@ providers:
     editable: true
     options:
       path: /etc/grafana/provisioning/dashboards
-
-  - name: 'alertmanager-dashboard'
-    orgId: 1
-    folder: 'Monitoring'
-    type: file
-    disableDeletion: false
-    editable: true
-    options:
-      path: /etc/grafana/provisioning/dashboards

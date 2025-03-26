@@ -31,10 +31,8 @@ services:
       - '5432:5432'
     networks:
       - database_network
-    # environment:
-    #   - POSTGRES_DB=${POSTGRES_DB}
-    #   - POSTGRES_USER=${POSTGRES_USER}
-    #   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - vault-agent
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
@@ -149,6 +147,7 @@ services:
         - ../secrets/ssl:/vault-init/ssl 
         - ../secrets/postgres:/vault-init/postgres
         - ../secrets/api:/vault-init/api
+        - ../secrets/grafana:/vault-init/grafana
         - vault_agent_auth:/vault/auth
     networks:
       vault_network:
@@ -172,6 +171,7 @@ services:
       - vault_certs:/vault/certs
       - vault_postgre_env:/vault/postgres
       - vault_backend_env:/vault/backend
+      - vault_grafana_env:/vault/grafana
     depends_on:
       - vault
     ports:
@@ -196,12 +196,14 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - GF_SERVER_ROOT_URL=https://monitoring.localhost
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_PATHS_CONFIG=/vault/grafana/grafana.ini
     ports:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - vault_grafana_env:/vault/grafana:ro
+    depends_on:
+      - vault-agent
     networks:
       - ft_transcendence
 
@@ -218,11 +220,8 @@ services:
       - ft_transcendence
 
   alertmanager:
-    image: custom-alertmanager
+    image: prom/alertmanager
     container_name: alertmanager
-    build:
-      context: ./requirements/alertmanager
-      dockerfile: Dockerfile
     restart: always
     expose:
       - "9093"
@@ -264,4 +263,5 @@ volumes:
   vault_agent_auth:
   vault_postgre_env:
   vault_backend_env:
+  vault_grafana_env:
   grafana_data:
