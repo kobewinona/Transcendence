@@ -4,6 +4,7 @@ VAULT_ADDR="http://vault:8200"
 SSL_DIR="/vault-init/ssl"
 POSTGRES_ENV_FILE="/vault-init/postgres/.env.db"
 API_ENV_FILE="/vault-init/api/.env.key"
+GRAFANA_ENV_FILE="/vault-init/grafana/.env.grafana"
 VAULT_TOKEN_FILE="/vault-init/unseal/vault-init-token.txt"
 
 
@@ -73,6 +74,23 @@ else
     echo "✅ Backend API secrets stored in Vault!"
   else
     echo "❌ ERROR: Failed to store backend API secrets!" >&2
+  fi
+fi
+
+# Add Grafana admin credentials to Vault
+echo "🔑 Storing Grafana admin credentials from $GRAFANA_ENV_FILE into Vault..."
+
+if [ ! -f "$GRAFANA_ENV_FILE" ]; then
+  echo "❌ ERROR: Grafana env file not found at $GRAFANA_ENV_FILE"
+else
+  echo "📄 Reading $GRAFANA_ENV_FILE..."
+  vault kv put secret/grafana \
+    $(grep -v '^#' "$GRAFANA_ENV_FILE" | xargs)
+    
+  if [ $? -eq 0 ]; then
+    echo "✅ Grafana admin secrets stored in Vault!"
+  else
+    echo "❌ ERROR: Failed to store Grafana secrets!" >&2
   fi
 fi
 

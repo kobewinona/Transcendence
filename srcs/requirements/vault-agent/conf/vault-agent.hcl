@@ -68,5 +68,11 @@ CLIENT_SECRET={{ .Data.data.CLIENT_SECRET }}
 EOF
 }
 
+template {
+  source      = "/vault/config/templates/grafana_ini.ctmpl"
+  destination = "/vault/grafana/grafana.ini"
+  perms       = "0644"
+}
+
 
 exit_after_auth = false
