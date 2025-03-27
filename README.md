@@ -161,3 +161,7 @@ This project uses four isolated Docker networks to separate responsibilities and
 ## 👨‍💻 Author
 
 Project created as part of the `ft_transcendence` evaluation at 42.
+
+- Dima
+- Jeremy (https://github.com/Hotaruban)
+- Wolf
