@@ -27,8 +27,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - vault_postgre_env:/run/secrets/postgres_env
-    ports:
-      - '5432:5432'
+    expose:
+      - '5432'
     networks:
       - database_network
     depends_on:
@@ -92,8 +92,8 @@ services:
       context: ./requirements/nginx
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     volumes:
       - frontend_build:/usr/share/nginx/html
     networks:
@@ -118,8 +118,8 @@ services:
     environment:
       VAULT_ADDR: "http://vault:8200"
       VAULT_API_ADDR: "http://vault:8200"
-    ports:
-      - "8200:8200"
+    expose:
+      - "8200"
     volumes:
       - vault_build:/vault/data
     networks:
@@ -174,8 +174,8 @@ services:
       - vault_grafana_env:/vault/grafana
     depends_on:
       - vault
-    ports:
-      - "8201:8201"
+    expose:
+      - "8201"
     networks:
       vault_network:
           ipv4_address: 192.168.100.4
@@ -197,8 +197,8 @@ services:
     restart: always
     environment:
       - GF_PATHS_CONFIG=/vault/grafana/grafana.ini
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - vault_grafana_env:/vault/grafana:ro
@@ -206,6 +206,7 @@ services:
       - vault-agent
     networks:
       - ft_transcendence
+      - monitoring_network
 
   prometheus:
     image: custom-prometheus
@@ -214,10 +215,15 @@ services:
       context: ./requirements/prometheus
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
+    volumes:
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
     networks:
-      - ft_transcendence
+      - monitoring_network
 
   alertmanager:
     image: prom/alertmanager
@@ -226,7 +232,7 @@ services:
     expose:
       - "9093"
     networks:
-      - ft_transcendence
+      - monitoring_network
 
   node_exporter:
     image: prom/node-exporter
@@ -235,7 +241,7 @@ services:
     expose:
       - "9100"
     networks:
-      - ft_transcendence
+      - monitoring_network
 
 networks:
   vault_network:
@@ -253,6 +259,9 @@ networks:
   database_network:
     name: database_network
     driver: bridge
+  monitoring_network:
+    name: monitoring_network
+    driver: bridge
 
 volumes:
   frontend_build:
@@ -265,3 +274,4 @@ volumes:
   vault_backend_env:
   vault_grafana_env:
   grafana_data:
+  prometheus_data:
