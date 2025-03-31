@@ -209,7 +209,7 @@ class Ball:
                         score.update_score(
                             1 - (ball_left <= 0), 1 - (ball_right >= 100)
                         )
-                    await send_game_state(f"Game score updated")
+                    await send_game_state()
 
                     logger.debug(
                         f"ⓘ Ball is set to be out of bounds: "

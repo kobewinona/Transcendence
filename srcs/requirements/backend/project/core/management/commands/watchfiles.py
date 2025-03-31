@@ -50,7 +50,7 @@ class Command(BaseCommand):
                         logger.info("✓ No Mypy issues found. Restarting services...")
                         self.restart_services()
                     else:
-                        logger.error("✕ Mypy found issues, skipping restart. FUCK!")
+                        logger.error("✕ Mypy found issues, skipping restart.")
                         if mypy_result.stdout.strip():
                             logger.error(f"Mypy Output:\n{mypy_result.stdout}")
         except KeyboardInterrupt:

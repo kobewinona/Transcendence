@@ -42,16 +42,13 @@ const useWebSocket = (url, options = {}) => {
           if (typeof event.data === 'string') {
             data = JSON.parse(event.data);
           } else if (event.data instanceof ArrayBuffer) {
-            // console.log('📩 Binary data received:', event.data.byteLength, 'bytes');
-            // console.log('🔍 Raw Binary Data:', new Uint8Array(event.data));
-
             data = new DataView(event.data);
           } else if (event.data instanceof Blob) {
             const arrayBuffer = await event.data.arrayBuffer();
             data = new DataView(arrayBuffer);
           } else {
             // noinspection ExceptionCaughtLocallyJS
-            throw new Error('Unsupported WebSocket message type.');
+            throw new Error('️️⚠️ Unsupported WebSocket message type.');
           }
 
           onMessage(data);
@@ -62,7 +59,6 @@ const useWebSocket = (url, options = {}) => {
       };
 
       socket.onerror = (error) => {
-        console.log('error', error);
         isError.value = true;
         onError(error);
       };

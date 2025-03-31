@@ -5,8 +5,8 @@ import { svgComponents } from 'shared/lib';
 
 export const MAX_PLAYERS_AMOUNT = 6;
 
-// TODO if the score settings works correctly
 export const END_SCORE_OPTIONS = [
+  { value: 2, label: '2' },
   { value: 6, label: '6' },
   { value: 11, label: '11' },
   { value: 21, label: '21' },
@@ -29,13 +29,14 @@ export const VELOCITY_OPTIONS = [
   { value: 3, label: 'high' },
 ];
 
-export const DEFAULT_END_SCORE = END_SCORE_OPTIONS[1];
-export const DEFAULT_IS_DEUCE_ON = DEUCE_SYSTEM_OPTIONS[1];
-export const DEFAULT_BALL_SPEED = SPEED_OPTIONS[1];
-export const DEFAULT_MAX_BALL_CURVE = VELOCITY_OPTIONS[1];
+export const DEFAULT_END_SCORE = END_SCORE_OPTIONS[1].value;
+export const DEFAULT_IS_DEUCE_ON = DEUCE_SYSTEM_OPTIONS[1].value;
+export const DEFAULT_BALL_SPEED = SPEED_OPTIONS[1].value;
+export const DEFAULT_MAX_BALL_CURVE = VELOCITY_OPTIONS[1].value;
 
 export const GAME_STATE_MESSAGE_TYPE = 1;
 export const GAME_UPDATE_MESSAGE_TYPE = 2;
+export const GAME_ERROR_MESSAGE_TYPE = 3;
 
 export const GAME_STATUS_IDLE = 1;
 export const GAME_STATUS_INIT = 2;
@@ -46,13 +47,15 @@ export const GAME_STATUS_ENDED = 5;
 export const DEMO_GAME_MODE = 'demo';
 export const QUICK_START_GAME_MODE = 'quick_start';
 export const NEW_GAME_GAME_MODE = 'new_game';
+export const TOURNAMENT_GAME_MODE = 'tournament';
 
 export const MODE_INPUT_NAME = 'mode';
+export const TOURNAMENT_ID = 'tournament_id';
 
 export const CONTROLLERS_INPUT_NAME = 'controllers';
 export const SIDE_INPUT_NAME = 'side';
 export const NAME_INPUT_NAME = 'name';
-export const CONTROLLED_BY_INPUT_NAME = 'controlledBy';
+export const CONTROLLED_BY_INPUT_NAME = 'controlled_by';
 export const CONTROLS_INPUT_NAME = 'controls';
 
 export const GAME_INPUT_NAME = 'game';
@@ -163,6 +166,8 @@ export const QUICK_START_DEFAULT_GAME_SETTINGS = {
   [GAMEPLAY_INPUT_NAME]: null,
   [BALL_DESIGN_INPUT_NAME]: DEFAULT_DESIGN_SETTINGS,
 };
+
+export const NEW_GAME_FORM_PROVIDER_KEY = 'new_game_form';
 
 export const NEW_GAME_DEFAULT_GAME_SETTINGS = {
   [MODE_INPUT_NAME]: NEW_GAME_GAME_MODE,

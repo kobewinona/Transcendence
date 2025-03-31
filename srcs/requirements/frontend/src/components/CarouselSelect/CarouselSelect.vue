@@ -1,12 +1,12 @@
 <template>
   <div class="carousel-select" :style="{ '--swipe-translate': swipeTranslateOffset }">
-    <button class="carousel-select__button" type="button" @click="prevOption">
-      <component
-        :is="svgComponents['DownloadIcon']"
-        v-if="isVueComponent(svgComponents['DownloadIcon'])"
-        class="carousel-select__arrow carousel-select__arrow_left"
-      />
-    </button>
+    <MyButton
+      type="button"
+      variant="ghost"
+      :icon="svgComponents['ArrowLeftIcon']"
+      aria-label="Previous Option."
+      @click="prevOption"
+    />
     <transition name="bubble-anim" mode="out-in">
       <div :key="activeValue" :class="['carousel-select__item', optionClassName]">
         <template v-if="slots.renderOption">
@@ -17,20 +17,20 @@
         </span>
       </div>
     </transition>
-    <button class="carousel-select__button" type="button" @click="nextOption">
-      <component
-        :is="svgComponents['DownloadIcon']"
-        v-if="isVueComponent(svgComponents['DownloadIcon'])"
-        class="carousel-select__arrow carousel-select__arrow_right"
-      />
-    </button>
+    <MyButton
+      type="button"
+      variant="ghost"
+      :icon="svgComponents['ArrowRightIcon']"
+      aria-label="Next Option."
+      @click="nextOption"
+    />
   </div>
 </template>
 
 <script setup>
 // noinspection JSFileReferences
+import { MyButton } from 'components';
 import { svgComponents } from 'shared/lib';
-import { isVueComponent } from 'shared/lib';
 import { computed, ref, useSlots, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -67,6 +67,12 @@ const activeValue = ref(value || defaultValue || options[0]?.value);
 const swipeTranslateOffset = ref('60%');
 const activeOption = computed(() => options.find((option) => option.value === activeValue.value));
 
+const updateValue = (newValue) => {
+  activeValue.value = newValue.value;
+  emit('update:value', newValue);
+  emit('on-change', newValue);
+};
+
 const prevOption = () => {
   swipeTranslateOffset.value = '-60%';
   const currentIndex = options.findIndex((option) => option.value === activeValue.value);
@@ -79,12 +85,6 @@ const nextOption = () => {
   const currentIndex = options.findIndex((option) => option.value === activeValue.value);
   const newIndex = (currentIndex + 1) % options.length;
   updateValue(options[newIndex].value);
-};
-
-const updateValue = (newValue) => {
-  activeValue.value = newValue;
-  emit('update:value', newValue);
-  emit('on-change', newValue);
 };
 
 watch(
@@ -144,6 +144,19 @@ watch(
 
 .carousel-select__arrow_right {
   transform: rotate(-90deg);
+}
+
+::v-deep(.carousel-select__btn-icon) {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+::v-deep(.carousel-select__btn-icon_next) {
+  rotate: -90deg;
+}
+
+::v-deep(.carousel-select__btn-icon_prev) {
+  rotate: 90deg;
 }
 
 .bubble-anim-enter-active,

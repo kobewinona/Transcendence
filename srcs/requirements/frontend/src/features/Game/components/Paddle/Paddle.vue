@@ -1,6 +1,5 @@
 <template>
   <div
-    class="paddle"
     :class="{
       paddle_side_left: side === 'left',
       'paddle_side_left-color': hasMoreThanTwoPlayers && side === 'left',
@@ -8,9 +7,10 @@
       'paddle_side_right-color': hasMoreThanTwoPlayers && side === 'right',
     }"
     :style="styles"
+    class="paddle"
   >
     <div
-      v-show="hasMoreThanTwoPlayers"
+      v-show="hasMoreThanTwoPlayers || mode === TOURNAMENT_GAME_MODE"
       :class="[
         'paddle__name',
         {
@@ -26,7 +26,7 @@
 
 <script setup>
 import { useGameSocketInject } from 'entities/Game/composables';
-import { COLORS } from 'entities/Game/config/constants.js';
+import { COLORS, TOURNAMENT_GAME_MODE } from 'entities/Game/config/constants.js';
 import { computed } from 'vue';
 
 const { name, side, paddleIndex, hasMoreThanTwoPlayers } = defineProps({
@@ -51,6 +51,7 @@ const { name, side, paddleIndex, hasMoreThanTwoPlayers } = defineProps({
 
 const gameSocket = useGameSocketInject();
 
+const mode = computed(() => gameSocket.gameSettings.value.mode);
 const paddleWidth = computed(() => {
   return gameSocket.paddleWidths.value[paddleIndex];
 });

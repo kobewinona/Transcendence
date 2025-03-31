@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-function useMutation(fetchFn, options = {}) {
+function useMutation({ fetchFn, options = {} }) {
   const { enabled = true, onSuccess = () => {}, onError = () => {} } = options;
 
   const isLoading = ref(false);

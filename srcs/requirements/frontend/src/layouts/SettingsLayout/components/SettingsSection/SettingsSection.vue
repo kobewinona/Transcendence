@@ -3,26 +3,14 @@
     <SectionTitle :title="title" />
     <ul class="settings-section__list">
       <li v-for="field in fields" :key="field?.key" class="settings-section__list-item">
-        <p>{{ t(field.label) }}</p>
-        <CarouselSelect
-          :name="field.name"
-          :default-value="field?.defaultValue"
-          option-class-name="settings-section__option"
-          :options="field.options"
-          @on-change="handleChange"
-        />
+        <SectionField :name="field.name" :label="field.label" :options="field.options" />
       </li>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { CarouselSelect } from 'components';
-import { useI18n } from 'vue-i18n';
-
-import { SectionTitle } from './components';
-
-const { t } = useI18n();
+import { SectionField, SectionTitle } from './components';
 
 const { fields } = defineProps({
   title: {
@@ -34,12 +22,6 @@ const { fields } = defineProps({
     required: true,
   },
 });
-
-const emit = defineEmits(['on-change']);
-
-const handleChange = (name, newValue) => {
-  emit('on-change', name, newValue);
-};
 </script>
 
 <style scoped>

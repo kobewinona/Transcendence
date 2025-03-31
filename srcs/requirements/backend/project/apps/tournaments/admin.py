@@ -1,3 +1,16 @@
 from django.contrib import admin
+from project.apps.tournaments.models import Tournament
 
-# Register your models here.
+
+@admin.register(Tournament)
+class TournamentAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "host",
+        "status",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = ("name", "host__email")
+    list_filter = ("status",)
+    ordering = ("-created_at",)

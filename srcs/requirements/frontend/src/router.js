@@ -41,12 +41,14 @@ router.beforeEach((to, from, next) => {
     return next('/');
   }
 
+  // noinspection JSUnresolvedReference
   if (to.meta.requiresAuth && !auth.isAuthorized) {
     return next('/signin');
   } else if (to.path === '/otp' && !email) {
     next('/signin');
   }
 
+  // noinspection JSUnresolvedReference
   if (to.meta.guestOnly && auth.isAuthorized) {
     return next('/', { replace: true });
   }

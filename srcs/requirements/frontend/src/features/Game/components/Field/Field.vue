@@ -1,50 +1,24 @@
 <template>
   <div class="field">
-    <transition name="grow" mode="out-in">
-      <div
-        v-if="winner !== undefined && winner !== 0"
-        :class="[
-          'field__winner',
-          {
-            field__winner_left: winner === 1,
-            field__winner_right: winner === 2,
-          },
-        ]"
-      >
-        <span
-          :class="[
-            'field__winner-side',
-            {
-              'field__winner-side_left': winner === 1,
-              'field__winner-side_right': winner === 2,
-            },
-          ]"
-          >{{ winner === 1 ? t('game.left_side') : t('game.right_side') }}</span
-        >
-        <span class="field__winner-badge">{{ t('game.won') }}</span>
-      </div>
-    </transition>
+    <Winner :winner="winner" />
     <div class="field__void-boundary">
       <div class="field__void-boundary-shadow field__void-boundary-shadow_left" />
       <div class="field__void-boundary-shadow field__void-boundary-shadow_right" />
     </div>
-    <div class="field__background" :style="{ transform: fieldTransform }">
+    <div :style="{ transform: fieldTransform }" class="field__background">
       <BackgroundScore v-if="showScore" />
     </div>
-    <div class="field__line field__line_left" :style="{ transform: lineTransform }" />
-    <div class="field__center" :style="{ transform: centerTransform }" />
-    <div class="field__line field__line_right" :style="{ transform: lineTransform }" />
+    <div :style="{ transform: lineTransform }" class="field__line field__line_left" />
+    <div :style="{ transform: centerTransform }" class="field__center" />
+    <div :style="{ transform: lineTransform }" class="field__line field__line_right" />
   </div>
 </template>
 
 <script setup>
 import { useGameSocketInject } from 'entities/Game/composables';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-import { BackgroundScore } from './components';
-
-const { t } = useI18n();
+import { BackgroundScore, Winner } from './components';
 
 const gameSocket = useGameSocketInject();
 
@@ -103,7 +77,7 @@ const lineTransform = computed(() => {
   height: 100%;
 
   background: linear-gradient(to right, var(--light-color) 50%, var(--dark-color) 50%);
-  border-radius: 12px;
+  border-radius: 14px;
 }
 
 .field::after {
@@ -120,50 +94,6 @@ const lineTransform = computed(() => {
   box-shadow: inset 40px 40px 90px var(--dark-color-opacity-50);
 }
 
-.field__winner {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(1);
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-
-  width: 150px;
-  height: 150px;
-  padding: var(--big-space);
-
-  border-radius: 50%;
-}
-
-.field__winner_left {
-  background: linear-gradient(to bottom, var(--light-color) 50%, var(--primary-color) 50%);
-}
-
-.field__winner_right {
-  background: linear-gradient(to bottom, var(--dark-color) 50%, var(--primary-color) 50%);
-}
-
-.field__winner-side {
-  text-align: center;
-  white-space: nowrap;
-}
-
-.field__winner-side_left {
-  color: var(--dark-color);
-}
-
-.field__winner-side_right {
-  color: var(--light-color);
-}
-
-.field__winner-badge {
-  text-transform: uppercase;
-}
-
 .field__void-boundary {
   position: absolute;
   top: 0;
@@ -178,8 +108,8 @@ const lineTransform = computed(() => {
 
 .field__void-boundary-shadow {
   position: absolute;
-  z-index: 2;
-  width: 7%;
+  z-index: 5;
+  width: 5%;
   height: 100%;
 }
 
@@ -215,9 +145,10 @@ const lineTransform = computed(() => {
   transform: translate(-50%, -50%);
 
   width: 120px;
-  height: 120px;
 
   /* noinspection CssNonIntegerLengthInPixels */
+  height: 120px;
+
   border: 0.5px solid var(--light-color-opacity-50);
   border-radius: 50%;
   mix-blend-mode: difference;
@@ -231,10 +162,10 @@ const lineTransform = computed(() => {
   top: 0;
   transform: translate(-50%, -50%) scale(4);
 
-  /* noinspection CssNonIntegerLengthInPixels */
   width: 0.5px;
   height: 100%;
 
+  /* noinspection CssNonIntegerLengthInPixels */
   background-color: var(--light-color-opacity-50);
   mix-blend-mode: difference;
 

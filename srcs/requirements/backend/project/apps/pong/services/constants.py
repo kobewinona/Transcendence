@@ -1,9 +1,12 @@
 GAME_STATE_UPDATE_INTERVAL = 0.0167  # 60 updates per second (1 / 60)
+GAME_STATE_MESSAGE_TYPE = 1
+GAME_UPDATE_MESSAGE_TYPE = 2
+GAME_ERROR_MESSAGE_TYPE = 3
 GAME_STATUS_IDLE = 1  # no game is running
 GAME_STATUS_INIT = 2  # initializing new game
-GAME_STATUS_COUNTDOWN = 3  # started countdown to new game
 GAME_STATUS_IN_PROGRESS = 4  # game in progress
 GAME_STATUS_ENDED = 5  # game ended
+GAME_STATUS_PAUSED = 6  # game loop is on pause
 GAME_COUNTDOWN_DURATION = 3
 DEMO_GAME_MODE = "demo"
 QUICK_START_GAME_MODE = "quick_start"

@@ -1,96 +1,90 @@
 <template>
-  <div
-    class="static_circle"
-    :style="{
-      '--size-positive': `${size}px`,
-      '--size-negative': `-${size}px`,
-      width: `${size}px`,
-      height: `${size}px`,
-      backgroundColor: currentColor,
-    }"
-  >
-    <div
-      class="moving-circle"
-      :style="{
-        width: `${movingCircleSize}px`,
-        height: `${movingCircleSize}px`,
-      }"
-      @animationiteration="onAnimationIteration"
-    />
-  </div>
+  <span :class="['loader-wrapper', `loader-wrapper_size_${size}`]">
+    <transition name="fade-scale">
+      <span v-if="isActive">
+        <span class="loader" />
+      </span>
+    </transition>
+  </span>
 </template>
 
 <script setup>
-import { computed, onUnmounted, ref } from 'vue';
-
-const { size } = defineProps({
-  className: {
-    type: String,
-    default: '',
+defineProps({
+  isActive: {
+    type: Boolean,
+    required: true,
   },
   size: {
-    type: Number,
-    default: 40,
+    type: String,
+    default: 'small',
+    validator: (value) => value === 'small' || value === 'middle',
   },
 });
-
-const movingCircleSize = computed(() => size * 1.1);
-
-const colors = ['var(--primary-color)', 'var(--secondary-color)'];
-const colorIndex = ref(0);
-const currentColor = ref(colors[colorIndex.value]);
-
-const iterationTimeoutId = ref(null);
-
-const onAnimationIteration = () => {
-  clearTimeout(iterationTimeoutId.value);
-
-  iterationTimeoutId.value = setTimeout(() => {
-    colorIndex.value = (colorIndex.value + 1) % colors.length;
-    currentColor.value = colors[colorIndex.value];
-  }, 750);
-};
-
-onUnmounted(() => clearTimeout(iterationTimeoutId.value));
 </script>
 
+<!--suppress CssUnusedSymbol -->
 <style scoped>
-@keyframes moving {
+@keyframes spin {
   0% {
-    transform: translate(var(--size-negative), -2px);
-  }
-
-  50% {
-    transform: translate(-2px, -2px);
+    transform: rotate(0deg);
   }
 
   100% {
-    transform: translate(var(--size-positive), -2px);
+    transform: rotate(360deg);
   }
 }
 
-.static_circle {
-  --size-positive: 0;
-  --size-negative: 0;
+.loader-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  position: relative;
+  margin-right: var(--smaller-space);
 
-  overflow: hidden;
-
-  padding: 2px;
-
-  border-radius: 50%;
-  mix-blend-mode: hard-light;
+  transition:
+    width 0.2s ease-in-out,
+    height 0.2s ease-in-out;
 }
 
-.moving-circle {
-  position: absolute;
-  top: 0;
-  left: 0;
+.loader-wrapper_size_small {
+  width: 1.2em;
+  height: 1.2rem;
+}
 
-  background-color: var(--dark-color);
+.loader-wrapper_size_middle {
+  width: 1.8em;
+  height: 1.8rem;
+}
+
+.loader-wrapper:empty {
+  width: 0;
+  margin-right: 0;
+}
+
+.loader {
+  display: flex;
+
+  width: 1em;
+  height: 1em;
+
+  border: 2px solid transparent;
+  border-top-color: currentcolor;
   border-radius: 50%;
 
-  animation: moving 1.5s ease-in-out infinite;
+  animation: spin 0.6s linear infinite;
+}
+
+.fade-scale-enter-active {
+  transition: opacity 0.4s ease-in-out;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+}
+
+.fade-scale-enter-to,
+.fade-scale-leave-from {
+  opacity: 1;
 }
 </style>

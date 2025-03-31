@@ -1,11 +1,12 @@
 import {
   CONTROLLERS_INPUT_NAME,
   DEMO_DEFAULT_GAME_SETTINGS,
-  GAME_STATE_MESSAGE_TYPE,
-  GAME_STATUS_IDLE,
-  GAME_UPDATE_MESSAGE_TYPE,
+  NAME_INPUT_NAME,
+  SIDE_INPUT_NAME,
 } from 'entities/Game/config/constants.js';
-import { convertObjectKeys, toSnakeCase, useWebSocket } from 'shared/lib';
+import { isPlainObject } from 'lodash';
+import { useWebSocket } from 'shared/composables';
+import { convertObjectKeys, toSnakeCase } from 'shared/lib';
 import { inject, onUnmounted, provide, ref } from 'vue';
 
 const useGameSocket = (url) => {
@@ -13,7 +14,6 @@ const useGameSocket = (url) => {
 
   // Game State
   const status = ref(0);
-  const countdown = ref(0);
   const leftScore = ref(0);
   const rightScore = ref(0);
   const isDeuce = ref(false);
@@ -36,91 +36,79 @@ const useGameSocket = (url) => {
   const paddlePositions = ref([]);
   const paddleSpeeds = ref([]);
 
+  const gameSettings = ref(DEMO_DEFAULT_GAME_SETTINGS);
+
+  const error = ref('');
+
   const actions = {};
 
-  function handleMessage(dataView) {
-    const messageType = dataView.getUint8(0);
+  function handleMessage(data) {
+    if (isPlainObject(data)) {
+      const bindings = {
+        error,
+        status,
+        leftScore,
+        rightScore,
+        isDeuce,
+        isLeftAdvantage,
+        isRightAdvantage,
+        winner,
+      };
 
-    if (messageType === GAME_STATE_MESSAGE_TYPE) {
-      let offset = 1;
-
-      const minStatusStateSize = 1 + 4 * 4 + 3 + 4; // B, i i i i B B B B
-      if (dataView.byteLength < minStatusStateSize) {
-        console.error(
-          '❌ Invalid GAME_STATE_MESSAGE_TYPE: Insufficient data length',
-          dataView.byteLength
-        );
-        return;
-      }
-
-      status.value = dataView.getInt32(offset, true);
-      offset += 4;
-      countdown.value = dataView.getInt32(offset, true);
-      offset += 4;
-      leftScore.value = dataView.getInt32(offset, true);
-      offset += 4;
-      rightScore.value = dataView.getInt32(offset, true);
-      offset += 4;
-      isDeuce.value = Boolean(dataView.getUint8(offset));
-      offset += 1;
-      isLeftAdvantage.value = Boolean(dataView.getUint8(offset));
-      offset += 1;
-      isRightAdvantage.value = Boolean(dataView.getUint8(offset));
-      offset += 1;
-      winner.value = dataView.getInt32(offset, true);
-
-      if (status.value === GAME_STATUS_IDLE) {
-        actions.startGame(DEMO_DEFAULT_GAME_SETTINGS);
+      for (const [key, ref] of Object.entries(bindings)) {
+        if (data?.[key] !== undefined) {
+          ref.value = data[key];
+        }
       }
     }
 
-    if (messageType === GAME_UPDATE_MESSAGE_TYPE) {
-      let offset = 1;
+    if (data instanceof DataView) {
+      let offset = 0;
 
-      const minBallStateSize = 1 + 4 * 4 + 1 + 4 + 1; // B, f f f f B f B
-      if (dataView.byteLength < minBallStateSize) {
+      const minBallStateSize = 4 * 4 + 1 + 4 + 1;
+      if (data.byteLength < minBallStateSize) {
         console.error(
           '❌ Invalid GAME_UPDATE_MESSAGE_TYPE: Payload too short for ball state',
-          dataView.byteLength
+          data.byteLength
         );
         return;
       }
 
       // Ball State
-      ballPositionX.value = dataView.getFloat32(offset, true);
+      ballPositionX.value = data.getFloat32(offset, true);
       offset += 4;
-      ballPositionY.value = dataView.getFloat32(offset, true);
+      ballPositionY.value = data.getFloat32(offset, true);
       offset += 4;
-      ballVelocityX.value = dataView.getFloat32(offset, true);
+      ballVelocityX.value = data.getFloat32(offset, true);
       offset += 4;
-      ballVelocityY.value = dataView.getFloat32(offset, true);
+      ballVelocityY.value = data.getFloat32(offset, true);
       offset += 4;
-      isBallOutOfBounds.value = dataView.getUint8(offset) === 1;
+      isBallOutOfBounds.value = data.getUint8(offset) === 1;
       offset += 1;
-      ballCurve.value = dataView.getFloat32(offset, true);
+      ballCurve.value = data.getFloat32(offset, true);
       offset += 4;
-      ballBouncedOffSurface.value = dataView.getUint8(offset);
+      ballBouncedOffSurface.value = data.getUint8(offset);
       offset += 1;
 
       const paddleDataSize = 4 * 4;
       const expectedSize = minBallStateSize + paddleNames.value.length * paddleDataSize;
 
-      if (dataView.byteLength < expectedSize) {
+      if (data.byteLength < expectedSize) {
         console.error(
-          `❌ Incomplete paddle data: Expected ${expectedSize}, got ${dataView.byteLength}`
+          `❌ Incomplete paddle data: Expected ${expectedSize}, got ${data.byteLength}`
         );
         return;
       }
 
       // Paddle States
       for (let i = 0; i < paddleNames.value.length; i++) {
-        paddleWidths.value[i] = dataView.getFloat32(offset, true);
+        paddleWidths.value[i] = data.getFloat32(offset, true);
         offset += 4;
-        paddleHeights.value[i] = dataView.getFloat32(offset, true);
+        paddleHeights.value[i] = data.getFloat32(offset, true);
         offset += 4;
-        paddlePositions.value[i] = dataView.getFloat32(offset, true);
+        paddlePositions.value[i] = data.getFloat32(offset, true);
         offset += 4;
-        paddleSpeeds.value[i] = dataView.getFloat32(offset, true);
+        paddleSpeeds.value[i] = data.getFloat32(offset, true);
         offset += 4;
       }
     }
@@ -139,16 +127,20 @@ const useGameSocket = (url) => {
   function startGame(settings) {
     if (!settings) return;
 
-    const sanitizedSettings = {
-      ...settings,
-      [CONTROLLERS_INPUT_NAME]: settings[CONTROLLERS_INPUT_NAME]?.filter(
-        (controller) => controller.side !== undefined && controller.side !== null
-      ),
+    gameSettings.value = settings;
+    paddleNames.value = settings[CONTROLLERS_INPUT_NAME]?.map(({ name }) => name);
+
+    const message = {
+      action: 'start',
+      data: {
+        ...settings,
+        [CONTROLLERS_INPUT_NAME]: settings[CONTROLLERS_INPUT_NAME].map(
+          ({ [SIDE_INPUT_NAME]: side, [NAME_INPUT_NAME]: name }) => ({ side, name })
+        ),
+      },
     };
 
-    paddleNames.value = sanitizedSettings[CONTROLLERS_INPUT_NAME]?.map(({ name }) => name);
-
-    sendMessage({ action: 'start', data: sanitizedSettings });
+    sendMessage(message);
   }
 
   function stopGame() {
@@ -159,8 +151,8 @@ const useGameSocket = (url) => {
     sendMessage({ action: 'pause' });
   }
 
-  function resetGame() {
-    sendMessage({ action: 'reset' });
+  function resumeGame() {
+    sendMessage({ action: 'resume' });
   }
 
   function updatePaddlePosition(data) {
@@ -183,7 +175,7 @@ const useGameSocket = (url) => {
     startGame,
     stopGame,
     pauseGame,
-    resetGame,
+    resumeGame,
     updatePaddlePosition,
     updateGameDimensions,
   });
@@ -214,6 +206,8 @@ const useGameSocket = (url) => {
     paddlePositions,
     paddleSpeeds,
     actions,
+    gameSettings,
+    error,
     ...rest,
   };
 };

@@ -55,7 +55,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = APP_ENV_MODE == "production"
 CSRF_COOKIE_SECURE = APP_ENV_MODE == "production"
 
-ALLOWED_HOSTS = ["backend", "localhost"]
+ALLOWED_HOSTS = ["backend", "localhost", INTRA_URL]
 
 # -----------------------------------------------
 # 🌍 CORS & CSRF CONFIGURATION
@@ -76,6 +76,7 @@ CSP_CONNECT_SRC = (
     "'self'",
     "http://localhost:8001",  # Backend API
     APP_URL,  # Allow frontend connections
+    INTRA_URL,
     "wss://localhost" if APP_ENV_MODE == "production" else "ws://localhost:8000",
 )
 
@@ -84,6 +85,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost",
     "https://localhost",
     APP_URL,
+    INTRA_URL,
 ]
 
 # -----------------------------------------------

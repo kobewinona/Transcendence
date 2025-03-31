@@ -15,7 +15,12 @@
         <div class="score__container">
           <div class="score__scoreboard">
             <span class="score__score">{{ leftScore }}</span>
-            <div class="score__divider" />
+            <component
+              :is="svgComponents['TrophyIcon']"
+              v-if="mode === TOURNAMENT_GAME_MODE"
+              class="score__divider-icon"
+            />
+            <div v-else class="score__divider" />
             <span class="score__score">{{ rightScore }}</span>
           </div>
           <span v-if="isDeuce" class="score__deuce">{{ t('game.deuce') }}</span>
@@ -34,18 +39,13 @@ import {
   DEMO_GAME_MODE,
   GAME_STATUS_IN_PROGRESS,
   QUICK_START_GAME_MODE,
+  TOURNAMENT_GAME_MODE,
 } from 'entities/Game/config/constants.js';
+import { svgComponents } from 'shared/lib/index.js';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-
-const { mode } = defineProps({
-  mode: {
-    type: String,
-    required: true,
-  },
-});
 
 const gameSocket = useGameSocketInject();
 
@@ -54,6 +54,7 @@ const positionY = computed(() => gameSocket.ballPositionY.value || 50);
 
 const isActive = computed(() => gameSocket.status.value === GAME_STATUS_IN_PROGRESS);
 
+const mode = computed(() => gameSocket.gameSettings.value.mode);
 const winner = computed(() => gameSocket.winner.value);
 const leftScore = computed(() => gameSocket.leftScore.value);
 const rightScore = computed(() => gameSocket.rightScore.value);
@@ -126,13 +127,23 @@ onUnmounted(() => {
   display: flex;
   flex-direction: row;
   column-gap: var(--regular-space);
+  align-items: center;
 }
 
 .score__score {
   min-width: 60px;
+
+  font-family: Silkscreen, Overpass, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
+}
+
+.score__divider-icon {
+  width: 34px;
+  height: 34px;
+  mix-blend-mode: exclusion;
+  fill: var(--light-color);
 }
 
 .score__divider {

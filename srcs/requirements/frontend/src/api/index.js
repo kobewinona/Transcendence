@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { ACCESS_TOKEN_STORAGE_KEY, API_HOST } from 'config/constants.js';
-import authApi from 'shared/api/Auth';
 import { auth } from 'store/auth.js';
 
 const baseURL = `${API_HOST}/api/`;
@@ -35,9 +34,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       if (!isRefreshing) {
         isRefreshing = true;
-        refreshPromise = authApi
-          .refreshTokens()
+        refreshPromise = axios
+          .post(`${baseURL}refresh_tokens/`, {}, { withCredentials: true })
           .then((refreshResponse) => {
+            // noinspection JSUnresolvedReference
             const newAccessToken = refreshResponse?.data?.access_token;
 
             if (newAccessToken) {

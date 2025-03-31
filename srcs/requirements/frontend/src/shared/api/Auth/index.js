@@ -10,9 +10,6 @@ export default {
   signIn({ data }) {
     return api.post('signin/', data);
   },
-  refreshTokens() {
-    return api.post('refresh_tokens/', {}, { withCredentials: true });
-  },
   signOut() {
     return api.post('signout/', {}, { withCredentials: true });
   },

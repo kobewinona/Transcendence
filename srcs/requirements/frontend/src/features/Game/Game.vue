@@ -1,5 +1,5 @@
 <template>
-  <Score :mode="settings[MODE_INPUT_NAME]" />
+  <Score />
   <div class="game">
     <Field
       :show-score="
@@ -58,6 +58,8 @@
       </component>
     </div>
   </div>
+
+  <GamePauseModalProvider ref="gamePauseModalRef" />
 </template>
 
 <script setup>
@@ -74,30 +76,74 @@ import {
   CONTROLS_INPUT_NAME,
   DEMO_DEFAULT_GAME_SETTINGS,
   DEMO_GAME_MODE,
+  GAME_STATUS_IDLE,
+  GAME_STATUS_IN_PROGRESS,
   MODE_INPUT_NAME,
   QUICK_START_GAME_MODE,
 } from 'entities/Game/config/constants.js';
-import { computed, onUnmounted, ref } from 'vue';
+import { menu } from 'store/menu.js';
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { Ball, Field, Paddle, Score, withAiControl, withPlayerControl } from './components';
+import {
+  Ball,
+  Field,
+  GamePauseModalProvider,
+  Paddle,
+  Score,
+  withAiControl,
+  withPlayerControl,
+} from './components';
 
+const showErrorModal = inject('showErrorModal');
+
+const gamePauseModalRef = ref(null);
 const gameContainerRef = ref(null);
 const gameSocket = useGameSocketInject();
-
-const { settings } = defineProps({
-  settings: {
-    type: Object,
-    default: () => ({ ...DEMO_DEFAULT_GAME_SETTINGS }),
-  },
-});
-
 provideGameDimensions(gameContainerRef, gameSocket.actions.updateGameDimensions);
 
-const controllers = computed(() => settings[CONTROLLERS_INPUT_NAME]);
+const settings = computed(() => gameSocket.gameSettings.value);
+const controllers = computed(() => gameSocket.gameSettings.value[CONTROLLERS_INPUT_NAME]);
+const status = computed(() => gameSocket.status.value);
 const winner = computed(() => gameSocket.winner.value);
+
+const handleKeyDown = (event) => {
+  if (
+    event.code === 'Escape' &&
+    settings.value.mode !== DEMO_GAME_MODE &&
+    status.value === GAME_STATUS_IN_PROGRESS
+  ) {
+    // noinspection JSUnresolvedReference
+    gamePauseModalRef.value?.showGamePauseModal();
+  }
+};
+
+watch(
+  () => gameSocket.status.value,
+  (newStatus) => {
+    if (newStatus === GAME_STATUS_IDLE) {
+      gameSocket.actions.startGame(DEMO_DEFAULT_GAME_SETTINGS);
+    }
+
+    if (settings.value.mode === DEMO_GAME_MODE) return;
+
+    if (newStatus === GAME_STATUS_IN_PROGRESS) {
+      menu.close();
+    }
+  }
+);
+
+watch(
+  () => gameSocket.error.value,
+  (error) => showErrorModal(null, error)
+);
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+});
 
 onUnmounted(() => {
   gameSocket.actions.closeGameSocket();
+  window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 

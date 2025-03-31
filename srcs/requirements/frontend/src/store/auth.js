@@ -1,3 +1,5 @@
+import { menu } from './menu.js';
+
 export const auth = {
   isAuthorized: Boolean(localStorage.getItem('access_token')),
   login(token) {
@@ -5,6 +7,7 @@ export const auth = {
     this.isAuthorized = true;
   },
   logout() {
+    menu.reset();
     localStorage.removeItem('access_token');
     this.isAuthorized = false;
   },

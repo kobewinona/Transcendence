@@ -17,9 +17,7 @@
             @keydown.backspace="handleBackspace(index)"
           />
         </div>
-        <div :class="{ otp__loader: true, otp__loader_visible: isLoading }">
-          <Loader :size="40" />
-        </div>
+        <Loader :is-active="isLoading" size="middle" />
       </div>
 
       <span class="otp__link">
@@ -35,6 +33,7 @@ import { AuthLayout, MainBodyLayout } from 'layouts';
 import api from 'shared/api/Auth';
 import { Loader } from 'shared/components';
 import { useMutation } from 'shared/composables';
+import { tryParseAnyError } from 'shared/lib';
 import { auth } from 'store/auth.js';
 import { computed, inject, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -50,18 +49,19 @@ const otpRefs = ref([]);
 
 const isOtpComplete = computed(() => otp.value.every((digit) => digit !== ''));
 
-const { mutate: signIn, isLoading } = useMutation(api.signIn, {
-  onSuccess: (res) => {
-    const { access_token: token } = res?.data || {};
-    auth.login(token);
-    sessionStorage.removeItem(EMAIL_STORAGE_KEY);
-    notify(t('success', 'success'));
-    router.push('/');
-  },
-  onError: (error) => {
-    const errorMessage =
-      error?.response?.data?.message || error?.response?.statusText || t('unknown_error');
-    showErrorModal(error.status, errorMessage);
+const { mutate: signIn, isLoading } = useMutation({
+  fetchFn: api.signIn,
+  options: {
+    onSuccess: (res) => {
+      const { access_token: token } = res?.data || {};
+      auth.login(token);
+      sessionStorage.removeItem(EMAIL_STORAGE_KEY);
+      notify(t('success', 'success'));
+      router.push('/');
+    },
+    onError: (error) => {
+      showErrorModal(error.status, tryParseAnyError(error));
+    },
   },
 });
 
@@ -159,14 +159,6 @@ onMounted(() => {
 .otp__input:focus-visible,
 .otp__input:focus {
   outline: 4px solid var(--secondary-color);
-}
-
-.otp__loader {
-  visibility: hidden;
-}
-
-.otp__loader_visible {
-  visibility: visible;
 }
 
 .otp__link {

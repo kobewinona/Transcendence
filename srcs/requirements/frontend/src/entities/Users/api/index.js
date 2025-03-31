@@ -1,7 +1,7 @@
 import api from 'api';
 
 export default {
-  getUserInfo() {
-    return api.get('users/me');
+  getUserInfo({ params }) {
+    return api.get('users/me', { params });
   },
 };

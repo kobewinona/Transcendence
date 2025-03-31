@@ -1,0 +1,15 @@
+@font-face {
+  font-family: Silkscreen;
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+  src: url("Silkscreen-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: Silkscreen;
+  font-weight: 700;
+  font-style: normal;
+  font-display: optional;
+  src: url("Silkscreen-Bold.ttf") format("truetype");
+}

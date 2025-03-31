@@ -1,14 +1,26 @@
 <template>
   <MainBodyLayout>
     <AuthLayout :title="t('auth.signup.title')" class-name="auth-layout">
-      <MyForm
-        :errors="serverErrors"
-        :provide-key="SIGNUP_FORM_PROVIDE_KEY"
-        mode="onBlur"
-        @on-submit="handleSubmit"
-      >
+      <form class="signup-form__form" novalidate @submit="onSubmit">
         <div class="signup-form__fields">
-          <AuthFormFields :provide-key="SIGNUP_FORM_PROVIDE_KEY" />
+          <MyInput
+            :name="AUTH_NAMES.USERNAME"
+            type="text"
+            :label="t('auth.username.label')"
+            mode="eager"
+          />
+          <MyInput
+            :name="AUTH_NAMES.EMAIL"
+            type="email"
+            :label="t('auth.email.label')"
+            mode="eager"
+          />
+          <MyInput
+            :name="AUTH_NAMES.PASSWORD"
+            type="password"
+            :label="t('auth.password.label')"
+            mode="eager"
+          />
         </div>
         <div class="signup-form__controls">
           <MyButton
@@ -23,19 +35,23 @@
             <router-link to="/signin">{{ t('auth.signin.title') }}</router-link>
           </span>
         </div>
-      </MyForm>
+      </form>
     </AuthLayout>
   </MainBodyLayout>
 </template>
 
 <script setup>
-import { MyButton, MyForm } from 'components';
-import { SIGNUP_FORM_PROVIDE_KEY } from 'config/AuthForm/constants.js';
-import { AuthFormFields } from 'features';
+import { MyButton, MyInput } from 'components';
+import { AUTH_NAMES } from 'config/AuthForm/constants.js';
+import { EMAIL_STORAGE_KEY } from 'config/constants.js';
 import { AuthLayout, MainBodyLayout } from 'layouts';
+import { isPlainObject } from 'lodash';
 import api from 'shared/api/Auth';
 import { useMutation } from 'shared/composables';
-import { inject, reactive } from 'vue';
+import { parseValidationErrors, tryParseAnyError } from 'shared/lib';
+import { signupSchema } from 'shared/validation';
+import { useForm } from 'vee-validate';
+import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -45,32 +61,46 @@ const router = useRouter();
 const showErrorModal = inject('showErrorModal');
 const notify = inject('notify');
 
-const serverErrors = reactive({});
+const { handleSubmit, setErrors } = useForm({ validationSchema: signupSchema(t) });
 
-const { mutate: signUp, isLoading } = useMutation(api.signUp, {
-  onSuccess: () => {
-    notify(t('success'), 'success');
-    router.push('/signin');
-  },
-  onError: (error) => {
-    if (error.status === 400) {
-      serverErrors.value = error.response?.data || {};
-    } else {
-      const errorMessage =
-        error?.response?.data?.message || error?.response?.statusText || t('unknown_error');
-      showErrorModal(error.status, errorMessage);
-    }
+const { mutate: signUp, isLoading } = useMutation({
+  fetchFn: api.signUp,
+  options: {
+    onSuccess: () => {
+      notify(t('success'), 'success');
+      router.push('/signin');
+    },
+    onError: (error) => {
+      if (error.status === 400) {
+        const serverValidationErrors = parseValidationErrors(error.response?.data) || {};
+
+        if (serverValidationErrors && isPlainObject(serverValidationErrors)) {
+          // noinspection JSCheckFunctionSignatures
+          setErrors(serverValidationErrors);
+        } else {
+          showErrorModal(error.status, tryParseAnyError(error));
+        }
+      } else {
+        showErrorModal(error.status, tryParseAnyError(error));
+      }
+
+      sessionStorage.removeItem(EMAIL_STORAGE_KEY);
+    },
   },
 });
 
-const handleSubmit = (formData) => {
+const onSubmit = handleSubmit((formData) => {
   signUp({ data: formData });
-};
+});
 </script>
 
 <style scoped>
 ::v-deep(.auth-layout) {
   height: 80%;
+}
+
+.signup-form__form {
+  display: contents;
 }
 
 .signup-form__fields {

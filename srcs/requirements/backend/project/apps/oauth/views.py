@@ -5,7 +5,7 @@ import urllib.parse
 import pyotp
 import requests
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.core.cache import cache
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
@@ -19,14 +19,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .constants import REDIRECT_URI, TOKEN_ENDPOINT
 from .serializers import UserSerializer, OTPRequestSerializer, OTPVerifySerializer
 
 from project.settings import secrets_backend
 
 User = get_user_model()
+REDIRECT_URI = os.getenv("REDIRECT_URI")
 resend = secrets_backend.get("RESEND_API_KEY")
-# resend = os.environ.get("RESEND_API_KEY")
 logger = logging.getLogger("auth_logs")
 
 
@@ -84,22 +83,23 @@ class GetOTP(APIView):
             return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
 
-        try:
-            user = User.objects.get(email=email)
-            otp = generate_otp()
-            cache.set(f"otp_{email}", otp, timeout=300)  # caching duration in seconds
+        user = authenticate(request, username=email, password=password)
 
-            send_email(user.email, user.username, otp)
-
+        if user is None:
             return JsonResponse(
-                {"otp": otp}, status=status.HTTP_200_OK
-            )  # TODO remove res body after development
-        except User.DoesNotExist:
-            return JsonResponse(
-                {"detail": "User with this email does not exist."},
+                {"error": "Invalid email or password."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        otp = generate_otp()
+        cache.set(f"otp_{email}", otp, timeout=300)  # cache for 5 minutes
+        send_email(user.email, user.username, otp)
+
+        return JsonResponse(
+            {"otp": otp}, status=status.HTTP_200_OK
+        )  # TODO: remove otp from response after development
 
 
 class SignIn(APIView):
@@ -194,11 +194,13 @@ class SignInIntraCallback(APIView):
         if not code:
             return HttpResponseBadRequest("Authorization code missing")
 
+        client_id = secrets_backend.get("CLIENT_ID")
+        client_secret = secrets_backend.get("CLIENT_SECRET")
+        logger.debug(f"client_id: { client_id }")
+        logger.debug(f"client_secret: { client_secret }")
         data = {
             "client_id": secrets_backend.get("CLIENT_ID"),
             "client_secret": secrets_backend.get("CLIENT_SECRET"),
-            # "client_id": os.getenv("CLIENT_ID"),
-            # "client_secret": os.getenv("CLIENT_SECRET"),
             "redirect_uri": REDIRECT_URI,
             "grant_type": "authorization_code",
             "code": code,
@@ -207,7 +209,8 @@ class SignInIntraCallback(APIView):
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         try:
-            response = requests.post(TOKEN_ENDPOINT, data=data, headers=headers)
+            token_url = f"{settings.INTRA_URL}/oauth/token"
+            response = requests.post(token_url, data=data, headers=headers)
             response.raise_for_status()
             token_data = response.json()
             logger.debug(f"ⓘ Intra Token_data: { token_data }")

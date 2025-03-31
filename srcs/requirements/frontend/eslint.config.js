@@ -23,7 +23,7 @@ export default [
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'comma-dangle': ['error', 'only-multiline'],
-      camelcase: 'warn',
+      camelcase: ["warn", { properties: "never", ignoreDestructuring: false, }],
       'vue/attributes-order': [
         'error',
         {

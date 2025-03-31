@@ -1,18 +1,16 @@
 <template>
-  <Teleport to="body">
-    <MyModal :is-open="modal.isOpen" @close="closeModal">
-      <div class="error-modal">
-        <component
-          :is="svgComponents['RejectedIcon']"
-          v-if="isVueComponent(svgComponents['RejectedIcon'])"
-          class="error-modal__icon"
-        />
-        <p class="error-modal__title">{{ modal.title }}</p>
-        <div class="error-modal__divider" />
-        <p class="error-modal__message">{{ modal.message }}</p>
-      </div>
-    </MyModal>
-  </Teleport>
+  <MyModal :is-open="modal.isOpen" @close="closeModal">
+    <div class="error-modal">
+      <component
+        :is="svgComponents['RejectedIcon']"
+        v-if="isVueComponent(svgComponents['RejectedIcon'])"
+        class="error-modal__icon"
+      />
+      <p class="error-modal__title">{{ modal.title }}</p>
+      <div class="error-modal__divider" />
+      <p class="error-modal__message">{{ modal.message }}</p>
+    </div>
+  </MyModal>
 </template>
 
 <script setup>

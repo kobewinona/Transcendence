@@ -1,5 +1,5 @@
 <template>
-  <div :class="[className, 'settings-layout']">
+  <div :class="[className, 'settings-layout']" :style="{ width }">
     <slot />
   </div>
 </template>
@@ -10,16 +10,18 @@ defineProps({
     type: String,
     default: '',
   },
+  width: {
+    type: String,
+    default: '70%',
+  },
 });
 </script>
 
 <style scoped>
 .settings-layout {
   overflow: auto;
-
-  width: 70%;
   height: 100%;
+  min-height: 0;
   margin: 0 auto;
-  padding: var(--big-space);
 }
 </style>

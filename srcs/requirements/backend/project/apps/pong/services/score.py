@@ -9,6 +9,7 @@ logger = logging.getLogger("game_logs")
 
 class Score:
     def __init__(self, end_score=11, is_deuce_on=True):
+        logger.debug(f"end_score: { end_score }")
         self.end_score = end_score
         self.deuce_score = end_score - 1
         self.is_deuce_on = is_deuce_on

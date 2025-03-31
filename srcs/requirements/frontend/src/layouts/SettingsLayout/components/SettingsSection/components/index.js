@@ -1,3 +1,4 @@
+import SectionField from './SectionField/SectionField.vue';
 import SectionTitle from './SectionTitle/SectionTitle.vue';
 
-export { SectionTitle };
+export { SectionField, SectionTitle };

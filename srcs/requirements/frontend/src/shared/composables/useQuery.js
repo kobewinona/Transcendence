@@ -1,11 +1,12 @@
 import { ref, watchEffect } from 'vue';
 
-function useQuery(fetchFn, options = {}) {
+function useQuery({ fetchFn, params = {}, options = {} }) {
   const {
     enabled = true,
     select = (res) => res,
     onSuccess = () => {},
     onError = () => {},
+    onSettled = () => {},
   } = options;
 
   const data = ref(null);
@@ -21,7 +22,7 @@ function useQuery(fetchFn, options = {}) {
     const startTime = new Date();
 
     try {
-      const result = await fetchFn();
+      const result = await fetchFn({ params });
       data.value = select(result);
       onSuccess(result);
     } catch (err) {
@@ -35,6 +36,8 @@ function useQuery(fetchFn, options = {}) {
       setTimeout(() => {
         isLoading.value = false;
       }, remainingTime);
+
+      onSettled();
     }
   };
 

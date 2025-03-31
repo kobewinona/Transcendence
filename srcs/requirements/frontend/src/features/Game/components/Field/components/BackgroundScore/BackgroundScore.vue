@@ -43,7 +43,6 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 
 const gameSocket = useGameSocketInject();
 
-// TODO add advantage animation
 const winner = computed(() => gameSocket.winner.value);
 const leftScore = computed(() => gameSocket.leftScore.value);
 const isLeftAdvantage = computed(() => gameSocket.isLeftAdvantage.value);
@@ -217,8 +216,10 @@ onUnmounted(() => {
 
   width: 25%;
 
+  font-family: Silkscreen, Overpass, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-size: 2rem;
   font-weight: 700;
+  letter-spacing: -6px;
 
   opacity: 0.8;
   mix-blend-mode: difference;

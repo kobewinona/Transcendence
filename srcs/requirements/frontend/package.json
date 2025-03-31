@@ -11,13 +11,17 @@
     "lint:css": "stylelint \"**/*.{vue,css,scss}\" --fix"
   },
   "dependencies": {
+    "@vee-validate/rules": "^4.15.0",
     "axios": "^1.8.2",
+    "dayjs": "^1.11.13",
     "lodash": "^4.17.21",
+    "nanoid": "^5.1.5",
     "vee-validate": "^4.15.0",
     "vue": "^3.5.13",
     "vue-country-flag": "^2.3.2",
     "vue-i18n": "^11.0.1",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@dzangolab/vue-country-flag-icon": "^0.3.0",

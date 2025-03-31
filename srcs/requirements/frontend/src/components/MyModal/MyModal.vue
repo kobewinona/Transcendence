@@ -1,8 +1,14 @@
 <template>
   <Teleport to="body">
     <transition name="fade" mode="in-out">
-      <div v-if="isOpen" class="modal-backdrop" @click.self="close">
-        <div class="modal-content">
+      <div v-if="isOpen" class="modal" @click.self="close">
+        <div
+          :class="[
+            'modal-content',
+            `modal-content_color_${color}`,
+            `modal-content_layout_${layout}`,
+          ]"
+        >
           <slot></slot>
         </div>
       </div>
@@ -12,7 +18,20 @@
 
 <script setup>
 defineProps({
-  isOpen: Boolean,
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
+  layout: {
+    type: String,
+    default: 'default',
+    validator: (value) => value === 'default' || value === 'full',
+  },
+  color: {
+    type: String,
+    default: 'light',
+    validator: (value) => value === 'light' || value === 'dark',
+  },
 });
 
 const emit = defineEmits(['close']);
@@ -24,7 +43,7 @@ const close = () => {
 
 <!--suppress CssUnusedSymbol -->
 <style scoped>
-.modal-backdrop {
+.modal {
   position: fixed;
   z-index: 1000;
   inset: 0;
@@ -33,7 +52,7 @@ const close = () => {
   align-items: center;
   justify-content: center;
 
-  background: rgb(0 0 0 / 0.5);
+  background: var(--dark-color-opacity-50);
 }
 
 .modal-content {
@@ -41,13 +60,27 @@ const close = () => {
 
   min-width: 300px;
   max-width: 40%;
-  padding: 20px;
 
-  color: var(--dark-color);
-
-  background-color: var(--light-color);
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+}
+
+.modal-content_layout_default {
+  padding: var(--big-space);
+}
+
+.modal-content_layout_full {
+  padding: 0;
+}
+
+.modal-content_color_light {
+  color: var(--dark-color);
+  background-color: var(--light-color);
+}
+
+.modal-content_color_dark {
+  color: var(--light-color);
+  background-color: var(--dark-color);
 }
 
 .modal-close {
