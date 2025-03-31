@@ -243,6 +243,18 @@ services:
     networks:
       - monitoring_network
 
+  apache_exporter:
+    image: bitnami/apache-exporter
+    container_name: apache_exporter
+    restart: always
+    expose:
+      - "9117"
+    command:
+      - --scrape_uri=http://apache:80/server-status?auto
+    networks:
+      - monitoring_network
+      - ft_transcendence
+
 networks:
   vault_network:
     name: vault_network

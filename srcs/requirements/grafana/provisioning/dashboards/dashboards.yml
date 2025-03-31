@@ -1,11 +1,29 @@
 apiVersion: 1
 
 providers:
-  - name: "default"
+  - name: "Node Exporter"
     orgId: 1
-    folder: ""
+    folder: "Node Exporter"
     type: file
     disableDeletion: false
     editable: true
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /etc/grafana/provisioning/dashboards/node_exporter
+
+  - name: "Apache Exporter"
+    orgId: 1
+    folder: "Apache"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/apache
+
+  - name: "Alertmanager"
+    orgId: 1
+    folder: "Alertmanager"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/alertmanager
