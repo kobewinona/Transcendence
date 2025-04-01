@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.authors="Dima, Wolf, Jeremy"
 RUN getent passwd apache || useradd -r -M -s /sbin/nologin apache
 
 # Install required utilities and clean unnecessary files
-RUN apt-get update && apt-get install -y apache2-utils && \
+RUN apt-get update && apt-get install -y apache2-utils procps inotify-tools && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy main Apache configuration files
@@ -41,10 +41,15 @@ RUN mkdir -p /usr/local/apache2/run /etc/modsecurity.d /opt/owasp-crs /var/log &
 RUN echo '#!/bin/sh\nexit 0' > /usr/local/bin/generate-certificate && chmod +x /usr/local/bin/generate-certificate
 
 # Switch to non-root user for security
-USER apache
 
 # Expose necessary ports
-EXPOSE 80 443
-    
+EXPOSE 8080 8443
+
 # Start Apache in foreground
-CMD ["httpd-foreground"]
+# CMD ["httpd-foreground"]
+
+COPY tools/watch_and_reload.sh /usr/local/bin/watch_and_reload.sh
+RUN chmod +x /usr/local/bin/watch_and_reload.sh
+USER apache
+
+CMD ["/bin/sh", "-c", "httpd-foreground & /usr/local/bin/watch_and_reload.sh"]
