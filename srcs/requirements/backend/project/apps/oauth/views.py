@@ -5,6 +5,7 @@ import urllib.parse
 import pyotp
 import requests
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model, authenticate
 from django.core.cache import cache
 from django.http import HttpResponseBadRequest
@@ -183,6 +184,24 @@ class RefreshTokens(APIView):
             return JsonResponse(
                 {"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED
             )
+
+
+class SignInIntra(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        client_id = secrets_backend.get("CLIENT_ID")
+
+        params = urllib.parse.urlencode(
+            {
+                "client_id": client_id,
+                "redirect_uri": REDIRECT_URI,
+                "response_type": "code",
+            }
+        )
+
+        auth_url = f"https://api.intra.42.fr/oauth/authorize?{params}"
+        return HttpResponseRedirect(auth_url)
 
 
 class SignInIntraCallback(APIView):

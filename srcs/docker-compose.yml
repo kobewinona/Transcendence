@@ -58,7 +58,6 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
       - vault_backend_env:/usr/src/app/vault/secrets/backend
       - vault_postgre_env:/usr/src/app/vault/secrets/postgres
     healthcheck:
