@@ -16,8 +16,8 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 # Run the container as the non-root user 'nginx' for better security
 USER nginx
 
-# Expose port 8080 for internal access
-EXPOSE 8080
+# Expose port 8081 for internal access
+EXPOSE 8081
 
 # Start Nginx in the foreground (prevent daemonizing)
 CMD ["nginx", "-g", "daemon off;"]
