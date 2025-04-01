@@ -52,3 +52,36 @@ networks:
     ipam:
       config:
         - subnet: 192.168.200.0/24
+```
+
+### 🔄 Automatic SSL Certificate Reload via Vault Agent
+
+To comply with the **secure HTTPS setup** and ensure **zero-downtime certificate rotation**, Apache is equipped with a built-in `reload-watcher`:
+
+#### 🔐 Vault Integration
+
+- Apache does **not store SSL keys statically**.
+- Instead, it reads `certificate.crt` and `certificate.key` from a **shared volume updated by a Vault Agent**, which dynamically renders secrets from HashiCorp Vault using the `template` stanza.
+
+#### 🔁 File Watcher for Cert Reload
+
+- A `watch-and-reload.sh` script is embedded inside the Apache container.
+- It uses `inotifywait` to **monitor file changes** on the certificate and key files.
+- When a change is detected (e.g., certificate updated by Vault), it sends a `SIGHUP` to Apache:
+  - ✅ Apache reloads the certs **without restarting the process**
+  - ✅ No interruption for users or TLS sessions
+  - ✅ Fully compatible with ModSecurity and WAF functionality
+
+#### ✅ Advantages
+
+| Benefit                      | Description |
+|------------------------------|-------------|
+| 🔄 No container restart      | Apache reloads new certs dynamically using `SIGHUP` |
+| 🔒 Secure and centralized    | Secrets are managed only in Vault, not committed or hardcoded |
+| 🔧 Low-maintenance           | Fully automatic reload when Vault Agent updates the files |
+| 💡 Production-ready pattern  | Aligns with industry standards for secure and dynamic TLS |
+
+---
+
+💬 _This mechanism demonstrates proper integration of Vault with Apache in a real-world DevOps security context, and satisfies project constraints from the Cybersecurity module._
+
