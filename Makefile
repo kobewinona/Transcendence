@@ -26,7 +26,7 @@ stop:
 run: stop setup
 	@echo "Running the services for ft_transcendence..."
 	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) up --build -d && \
-	echo "Services are up and running.\n\nThe app is accessible in a browser at https://localhost\n\n" || echo "Error: Unable to run the services."
+	echo "Services are up and running.\n\nThe app is accessible in a browser at https://localhost:8443\n\n" || echo "Error: Unable to run the services."
 
 dev: stop setup
 	@echo "Running development mode..."

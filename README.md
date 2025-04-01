@@ -113,7 +113,7 @@ make
 
 Then access:
 
-- Application: `https://localhost`
+- Application: `https://localhost:8443`
 - Grafana: `https://monitoring.localhost`
 
 ---
@@ -162,6 +162,6 @@ This project uses four isolated Docker networks to separate responsibilities and
 
 Project created as part of the `ft_transcendence` evaluation at 42.
 
-- Dima
+- Dima (https://github.com/kobewinona)
 - Jeremy (https://github.com/Hotaruban)
 - Wolf

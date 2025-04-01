@@ -8,8 +8,8 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:8080"
+      - "8443:8443"
     depends_on:
        - nginx
     networks:
@@ -93,7 +93,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     expose:
-      - "8080"
+      - "8081"
     volumes:
       - frontend_build:/usr/share/nginx/html
     networks:

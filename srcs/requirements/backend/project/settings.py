@@ -16,6 +16,7 @@ from project.load_env_file import load_env_file
 BASE_DIR = Path(__file__).resolve().parent.parent
 APP_ENV_MODE = os.getenv("APP_ENV_MODE", "production")  # "development" or "production"
 APP_URL = os.getenv("APP_URL")  # Frontend URL
+WSS_URL = os.getenv("WSS_URL")  # Frontend Socekt URL
 INTRA_URL = "https://api.intra.42.fr"
 AUTH_USER_MODEL = "users.CustomUser"
 
@@ -74,16 +75,13 @@ CORS_ALLOW_HEADERS = [
 # Content Security Policy (CSP)
 CSP_CONNECT_SRC = (
     "'self'",
-    "http://localhost:8001",  # Backend API
     APP_URL,  # Allow frontend connections
+	WSS_URL,  # Allow frontend socket connections
     INTRA_URL,
-    "wss://localhost" if APP_ENV_MODE == "production" else "ws://localhost:8000",
 )
 
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost",
-    "https://localhost",
     APP_URL,
     INTRA_URL,
 ]
