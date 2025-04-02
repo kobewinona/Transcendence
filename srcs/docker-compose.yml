@@ -32,7 +32,8 @@ services:
     networks:
       - database_network
     depends_on:
-      - vault-agent
+      vault-agent:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
@@ -60,7 +61,7 @@ services:
     volumes:
       - ./requirements/backend/tools/entrypoint.sh:/usr/src/app/entrypoint.sh
       - vault_backend_env:/usr/src/app/vault/secrets/backend
-      - vault_postgre_env:/usr/src/app/vault/secrets/postgres
+      - vault_postgre_backend:/usr/src/app/vault/secrets/postgres
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m
@@ -170,6 +171,7 @@ services:
       - vault_agent_auth:/vault/auth
       - vault_certs:/vault/certs
       - vault_postgre_env:/vault/postgres
+      - vault_postgre_backend:/vault/postgres_backend
       - vault_backend_env:/vault/backend
       - vault_grafana_env:/vault/grafana
     depends_on:
@@ -283,6 +285,8 @@ volumes:
   vault_certs:
   vault_agent_auth:
   vault_postgre_env:
+  vault_postgre_backend:
+  vault_postgre_exporter:
   vault_backend_env:
   vault_grafana_env:
   grafana_data:

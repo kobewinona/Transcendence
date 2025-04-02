@@ -47,12 +47,31 @@ EOF
 }
 
 template {
+  source      = "/vault/config/templates/init-users.sql.ctmpl"
+  destination = "/vault/postgres/init-users.sql"
+  perms       = "0644"
+}
+
+template {
   destination = "/vault/postgres/.env.db"
   contents = <<EOF
-{{ with secret "secret/data/postgres" }}
+{{ with secret "secret/data/postgres/admin" }}
 POSTGRES_DB={{ .Data.data.POSTGRES_DB }}
 POSTGRES_USER={{ .Data.data.POSTGRES_USER }}
 POSTGRES_PASSWORD={{ .Data.data.POSTGRES_PASSWORD }}
+{{ end }}
+EOF
+}
+
+template {
+  destination = "/vault/postgres_backend/.env.db"
+  contents = <<EOF
+{{ with secret "secret/data/postgres/admin" }}
+POSTGRES_DB={{ .Data.data.POSTGRES_DB }}
+{{ end }}
+{{ with secret "secret/postgres/backend" }}
+POSTGRES_USER={{ .Data.data.BACKEND_USER }}
+POSTGRES_PASSWORD={{ .Data.data.BACKEND_PASSWORD }}
 {{ end }}
 EOF
 }

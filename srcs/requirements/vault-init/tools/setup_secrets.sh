@@ -3,6 +3,8 @@
 VAULT_ADDR="http://vault:8200"
 SSL_DIR="/vault-init/ssl"
 POSTGRES_ENV_FILE="/vault-init/postgres/.env.db"
+POSTGRES_BACKEND="/vault-init/postgres/.env.backend"
+POSTGRES_EXPORTER="/vault-init/postgres/.env.exporter"
 API_ENV_FILE="/vault-init/api/.env.key"
 GRAFANA_ENV_FILE="/vault-init/grafana/.env.grafana"
 VAULT_TOKEN_FILE="/vault-init/unseal/vault-init-token.txt"
@@ -102,9 +104,31 @@ if [ ! -f "$POSTGRES_ENV_FILE" ]; then
   echo "⚠️ Postgres .env.db file not found at $POSTGRES_ENV_FILE"
 else
   echo "📄 Reading $POSTGRES_ENV_FILE..."
-  update_kv_secret_if_changed secret/postgres "$POSTGRES_ENV_FILE"
+  update_kv_secret_if_changed secret/postgres/admin "$POSTGRES_ENV_FILE"
 
   echo "✅ Postgres secrets stored in Vault!"
+fi
+
+echo "🔑 Storing Postgres backend credentials in Vault..."
+
+if [ ! -f "$POSTGRES_BACKEND" ]; then
+  echo "⚠️ Postgres .env.backend file not found at $POSTGRES_BACKEND"
+else
+  echo "📄 Reading $POSTGRES_BACKEND..."
+  update_kv_secret_if_changed secret/postgres/backend "$POSTGRES_BACKEND"
+
+  echo "✅ Postgres backend secrets stored in Vault!"
+fi
+
+echo "🔑 Storing Postgres exporter credentials in Vault..."
+
+if [ ! -f "$POSTGRES_EXPORTER" ]; then
+  echo "⚠️ Postgres .env.exporter file not found at $POSTGRES_EXPORTER"
+else
+  echo "📄 Reading $POSTGRES_EXPORTER..."
+  update_kv_secret_if_changed secret/postgres/exporter "$POSTGRES_EXPORTER"
+
+  echo "✅ Postgres exporter secrets stored in Vault!"
 fi
 
 # Add backend API keys to Vault

@@ -80,11 +80,27 @@ path "secret/metadata/ssl/*" {
   capabilities = ["list"]
 }
 
-path "secret/data/postgres" {
+path "secret/data/postgres/admin" {
   capabilities = ["read"]
 }
 
-path "secret/metadata/postgres" {
+path "secret/metadata/postgres/admin" {
+  capabilities = ["list"]
+}
+
+path "secret/data/postgres/backend" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/postgres/backend" {
+  capabilities = ["list"]
+}
+
+path "secret/data/postgres/exporter" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/postgres/exporter" {
   capabilities = ["list"]
 }
 
