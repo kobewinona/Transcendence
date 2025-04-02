@@ -28,9 +28,6 @@ class UserInfo(APIView):
 
         headers = {"Authorization": f"Bearer {access_token}"}
 
-        logger.debug(f"headers: { headers }")
-        logger.debug(f"intra_user_url: { intra_user_url }")
-
         try:
             response = requests.get(intra_user_url, headers=headers)
             response.raise_for_status()
@@ -39,15 +36,12 @@ class UserInfo(APIView):
             raise AuthenticationFailed("Failed to retrieve user info from Intra.")
 
     def get(self, request):
-        logger.debug(f"request: { request }")
         access_token = request.headers.get("Authorization", "").strip()
-        logger.debug(f"access_token: { access_token }")
 
         if not access_token:
             raise AuthenticationFailed("No access token provided.")
 
         auth_provider = get_auth_provider(access_token)
-        logger.debug(f"auth_provider: { auth_provider }")
 
         if auth_provider == "internal":
             user = request.user

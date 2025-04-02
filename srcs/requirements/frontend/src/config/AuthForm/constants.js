@@ -3,5 +3,3 @@ export const AUTH_NAMES = {
   EMAIL: 'email',
   PASSWORD: 'password',
 };
-
-export const USERNAME_MIN_LENGTH = 2;

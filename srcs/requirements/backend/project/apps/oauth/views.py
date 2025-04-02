@@ -98,10 +98,6 @@ class GetOTP(APIView):
         cache.set(f"otp_{email}", otp, timeout=300)  # cache for 5 minutes
         send_email(user.email, user.username, otp)
 
-        return JsonResponse(
-            {"otp": otp}, status=status.HTTP_200_OK
-        )  # TODO: remove otp from response after development
-
 
 class SignIn(APIView):
     permission_classes = [AllowAny]
@@ -215,8 +211,6 @@ class SignInIntraCallback(APIView):
 
         client_id = secrets_backend.get("CLIENT_ID")
         client_secret = secrets_backend.get("CLIENT_SECRET")
-        logger.debug(f"client_id: { client_id }")
-        logger.debug(f"client_secret: { client_secret }")
         data = {
             "client_id": secrets_backend.get("CLIENT_ID"),
             "client_secret": secrets_backend.get("CLIENT_SECRET"),

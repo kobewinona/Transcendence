@@ -61,10 +61,9 @@
 
 <script setup>
 import { MyButton } from 'components';
+import { PlayerCard } from 'entities/Tournaments/components';
 import { TOURNAMENT_NAMES } from 'entities/Tournaments/config/constants.js';
 import { svgComponents } from 'shared/lib/index.js';
-
-import { PlayerCard } from './components';
 
 const { finalBracketIndex, bracketsStack } = defineProps({
   bracketsStack: {
@@ -95,6 +94,7 @@ const startGame = (pair) => {
   top: 0;
   left: 0;
 
+  overflow: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--big-space) 180px;

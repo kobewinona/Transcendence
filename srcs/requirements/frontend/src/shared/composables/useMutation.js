@@ -1,7 +1,12 @@
 import { ref } from 'vue';
 
 function useMutation({ fetchFn, options = {} }) {
-  const { enabled = true, onSuccess = () => {}, onError = () => {} } = options;
+  const {
+    enabled = true,
+    onSuccess = () => {},
+    onError = () => {},
+    onSettled = () => {},
+  } = options;
 
   const isLoading = ref(false);
   const isError = ref(false);
@@ -27,6 +32,8 @@ function useMutation({ fetchFn, options = {} }) {
       setTimeout(() => {
         isLoading.value = false;
       }, remainingTime);
+
+      onSettled();
     }
   };
 

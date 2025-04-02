@@ -16,12 +16,10 @@ User = get_user_model()
 class JWTOrIntraAuthentication(BaseAuthentication):
     def authenticate(self, request):
         auth_header = request.headers.get("Authorization", "").strip()
-        logger.debug(f"auth_header: { auth_header }")
         if not auth_header.startswith("Bearer "):
             return None
 
         access_token = auth_header.replace("Bearer ", "")
-        logger.debug(f"access_token: { access_token }")
 
         auth_provider = get_auth_provider(access_token)
 

@@ -7,11 +7,13 @@
       </MyButton>
     </div>
     <div class="tournament-in-progress__body">
-      <StageBrackets
-        :brackets-stack="bracketsStack"
-        :final-bracket-index="sortedBracketsStageNames.length - 1"
-        @start-game="startGame"
-      />
+      <ScrollLayout>
+        <StageBrackets
+          :brackets-stack="bracketsStack"
+          :final-bracket-index="sortedBracketsStageNames.length - 1"
+          @start-game="startGame"
+        />
+      </ScrollLayout>
       <StageSelect
         :brackets-stage-names="sortedBracketsStageNames"
         :final-bracket="brackets['Final'][0]"
@@ -25,6 +27,8 @@
 
 <script setup>
 import { MyButton } from 'components';
+import { CONTROL_KEYS } from 'entities/Controller/config/constants.js';
+import { useGameSocketInject } from 'entities/Game/composables';
 import {
   BALL_DESIGN_INPUT_NAME,
   CONTROLLED_BY_AI,
@@ -41,23 +45,20 @@ import {
   TOURNAMENT_ID,
 } from 'entities/Game/config/constants.js';
 import tournamentApi from 'entities/Tournaments/api';
-import { TOURNAMENT_NAMES } from 'entities/Tournaments/config/constants.js';
-import { ABANDONDED_STATUS_NAME } from 'entities/Tournaments/config/constants.js';
+import { ABANDONED_STATUS_NAME, TOURNAMENT_NAMES } from 'entities/Tournaments/config/constants.js';
+import { ScrollLayout } from 'layouts';
 import { useMutation } from 'shared/composables';
 import { tryParseAnyError } from 'shared/lib';
 import { menu } from 'store/menu.js';
-import { inject } from 'vue';
+import { inject, reactive, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+import { StageBrackets, StageSelect } from './components';
 
 const { t } = useI18n();
 const showErrorModal = inject('showErrorModal');
 const showConfirmModal = inject('showConfirmModal');
 const notify = inject('notify');
-import { CONTROL_KEYS } from 'entities/Controller/config/constants.js';
-import { useGameSocketInject } from 'entities/Game/composables';
-import { reactive, toRaw } from 'vue';
-
-import { StageBrackets, StageSelect } from './components';
 
 const gameSocket = useGameSocketInject();
 
@@ -102,7 +103,8 @@ const handleAbandonTournament = () => {
   showConfirmModal({
     message: t('tournament.tabs.current.current_tournament.abandon_message.text'),
     confirmText: t('tournament.tabs.current.current_tournament.abandon_button.text'),
-    onConfirm: () => onUpdateTournament({ data: { status: ABANDONDED_STATUS_NAME } }),
+    onConfirm: () =>
+      onUpdateTournament({ id: tournament.id, data: { status: ABANDONED_STATUS_NAME } }),
   });
 };
 
@@ -177,6 +179,7 @@ const startGame = (pair) => {
 
 .tournament-in-progress__body {
   position: relative;
+  overflow: hidden;
   width: 100%;
   height: 100%;
 }

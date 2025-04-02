@@ -7,13 +7,11 @@ import {
 } from 'entities/Game/config/constants.js';
 import { nanoid } from 'nanoid';
 
-export const NEW_TOURNAMENT_FORM_PROVIDER_KEY = 'new_tournament_form';
-
 export const CURRENT_TAB_NAME = 'current';
 export const HISTORY_TAB_NAME = 'history';
 
 export const IN_PROGRESS_STATUS_NAME = 'in_progress';
-export const ABANDONDED_STATUS_NAME = 'abandoned';
+export const ABANDONED_STATUS_NAME = 'abandoned';
 export const FINISHED_STATUS_NAME = 'finished';
 
 export const TOURNAMENT_TABS = [

@@ -119,20 +119,20 @@ const handleClick = () => {
 }
 
 .button {
-  height: 44px;
-
-  color: var(--light-color);
-
-  font-size: 1.2rem;
-  font-weight: 600;
   cursor: pointer;
-  display: flex;
 
   position: relative;
 
+  display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  height: 44px;
+
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--light-color);
 
   border: none;
   border-radius: 12px;
@@ -179,8 +179,8 @@ const handleClick = () => {
 }
 
 .button_variant_ghost {
-  background-color: transparent;
   padding: 0 !important;
+  background-color: transparent;
 }
 
 .button_size_large {
@@ -190,38 +190,38 @@ const handleClick = () => {
 
 .button_size_middle {
   height: 32px;
-  font-size: 1rem;
   padding: var(--small-space) var(--smaller-space);
+  font-size: 1rem;
 }
 
 .button_size_small {
   height: 28px;
-  font-size: 0.85rem;
   padding: var(--small-space) var(--small-space);
+  font-size: 0.85rem;
 }
 
 .button:hover:not(.button:disabled) {
-  transition: filter 0.2s ease-in-out;
   filter: brightness(0.8);
+  transition: filter 0.2s ease-in-out;
 }
 
 .button_clicked::after {
+  pointer-events: none;
   content: '';
-  background: var(--light-color-opacity-50);
 
   position: absolute;
+  inset: 0;
+
+  background: var(--light-color-opacity-50);
   border-radius: inherit;
 
   animation: press-fade 300ms ease;
-  pointer-events: none;
-
-  inset: 0;
 }
 
 .button:disabled {
   cursor: not-allowed;
-  transition: filter 0.2s ease-in-out;
   filter: saturate(0.4);
+  transition: filter 0.2s ease-in-out;
 }
 
 button:disabled .icon {
@@ -233,7 +233,7 @@ button:disabled .icon {
   width: 100%;
   height: 100%;
   margin-right: var(--smaller-space);
-  fill: var(--light-color);
+  fill: currentcolor;
 }
 
 .button__icon_alone {
@@ -255,11 +255,11 @@ button:disabled .icon {
 }
 
 .button__text {
-  white-space: nowrap;
   display: flex;
   flex-direction: row;
   column-gap: var(--smaller-space);
-
   align-items: center;
+
+  white-space: nowrap;
 }
 </style>

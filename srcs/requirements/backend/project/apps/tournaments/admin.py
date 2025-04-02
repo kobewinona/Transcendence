@@ -6,6 +6,8 @@ from project.apps.tournaments.models import Tournament
 class TournamentAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "winner",
+        "notified",
         "host",
         "status",
         "created_at",

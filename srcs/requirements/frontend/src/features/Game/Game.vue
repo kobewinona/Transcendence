@@ -11,8 +11,8 @@
       <Ball
         v-if="winner === 0"
         :color="settings[BALL_DESIGN_INPUT_NAME][BALL_COLOR_INPUT_NAME]"
-        :skin-type="settings[BALL_DESIGN_INPUT_NAME][BALL_SKIN_TYPE_INPUT_NAME]"
         :skin="settings[BALL_DESIGN_INPUT_NAME][BALL_SKIN_INPUT_NAME]"
+        :skin-type="settings[BALL_DESIGN_INPUT_NAME][BALL_SKIN_TYPE_INPUT_NAME]"
       />
       <component
         :is="
@@ -22,17 +22,17 @@
         "
         v-for="(controller, index) in controllers || []"
         :key="index"
-        :name="controller.name"
-        :index="index"
-        :side="controller.side"
         :controls="controller[CONTROLS_INPUT_NAME]"
+        :index="index"
+        :name="controller.name"
+        :side="controller.side"
       >
         <Paddle
           v-if="controller.side === 'left' && winner !== 2"
-          :name="controller.name"
-          :side="controller.side"
-          :paddle-index="index"
           :has-more-than-two-players="controllers.length > 2"
+          :name="controller.name"
+          :paddle-index="index"
+          :side="controller.side"
         />
       </component>
       <component
@@ -43,17 +43,17 @@
         "
         v-for="(controller, index) in controllers || []"
         :key="index"
-        :name="controller.name"
-        :index="index"
-        :side="controller.side"
         :controls="controller[CONTROLS_INPUT_NAME]"
+        :index="index"
+        :name="controller.name"
+        :side="controller.side"
       >
         <Paddle
           v-if="controller.side === 'right' && winner !== 1"
-          :name="controller.name"
-          :side="controller.side"
-          :paddle-index="index"
           :has-more-than-two-players="controllers.length > 2"
+          :name="controller.name"
+          :paddle-index="index"
+          :side="controller.side"
         />
       </component>
     </div>

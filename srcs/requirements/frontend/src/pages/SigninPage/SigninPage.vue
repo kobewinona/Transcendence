@@ -113,19 +113,19 @@ const handleIntraSignClick = () => {
 }
 
 .signin-form__fields {
-  width: 100%;
-  height: 100%;
   display: flex;
-
   flex-direction: column;
   row-gap: var(--smaller-space);
+
+  width: 100%;
+  height: 100%;
 }
 
 .signin-form__controls {
-  width: 100%;
   display: flex;
   flex-direction: column;
   row-gap: var(--small-space);
+  width: 100%;
 }
 
 ::v-deep(.signin-form__button) {
@@ -133,30 +133,30 @@ const handleIntraSignClick = () => {
 }
 
 .signin-form__redirect {
-  color: var(--light-color-opacity-90);
   font-size: 0.85rem;
+  color: var(--light-color-opacity-90);
   text-align: center;
 }
 
 .signin-form__intra-link {
-  height: 44px;
-  color: var(--dark-color);
-  background-color: var(--light-color);
   display: flex;
   flex-direction: row;
-
-  justify-content: center;
   column-gap: var(--small-space);
-
   align-items: center;
+  justify-content: center;
 
+  height: 44px;
   padding: var(--smaller-space);
+
+  color: var(--dark-color);
+
+  background-color: var(--light-color);
   border-radius: 12px;
 }
 
 .signin-form__intra-link:hover {
-  transition: filter 0.2s ease-in-out;
   filter: brightness(85%);
+  transition: filter 0.2s ease-in-out;
 }
 
 .signin-form__intra-logo {

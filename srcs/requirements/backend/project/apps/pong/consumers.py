@@ -4,8 +4,6 @@ import logging
 import struct
 
 from asgiref.sync import sync_to_async
-
-# from project.apps.tournaments.models import Tournament
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from .services import (
@@ -66,7 +64,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.handle_update_dimensions(data)
 
             elif action == "start":
-                logger.debug("event start received")
                 self.pause_event.set()
                 await self.handle_start(data)
 
@@ -98,11 +95,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         winner = score.get("winner")
         winner_name = self.players[winner][0]
 
-        logger.debug(f"winner_name: { winner_name }")
-        logger.debug(f"score: { score }")
-        logger.debug(f"tournament id: { self.tournament_id }")
-        logger.debug(f"players: { self.players }")
-
         await sync_to_async(update_bracket)(
             self.tournament_id,
             winner_name,
@@ -126,6 +118,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.set_game_status(GAME_STATUS_INIT)
 
         self.players = {1: [], 2: []}
+        self.tournament_id = None
         self.is_tournament_updated = False
 
         settings = data.get("data", {})
@@ -156,7 +149,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 logger.debug("✓ Score successfully set")
 
         except Exception as e:
-            logger.error(f"✕ Failed to initialize Score: { e }")
+            logger.error(f"✕ Failed to initialize Score: {e}")
             await self.set_game_status(GAME_STATUS_IDLE)
             await self.send(
                 text_data=json.dumps({"error": "Failed to initialize Score"})

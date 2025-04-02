@@ -83,8 +83,6 @@ const { mutate: onSignOut, isLoading } = useMutation({
 const handleSignOut = () => {
   onSignOut();
 };
-
-// onMounted(() => menu.hold());
 </script>
 
 <style scoped>
