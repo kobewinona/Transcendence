@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
                 queryset=User.objects.all(),
                 message="A user with that email already exists.",
             )
-        ]
+        ],
     )
 
     username = serializers.CharField(
@@ -25,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         error_messages={
             "required": "Username is required.",
             "min_length": "Username must be at least 2 characters long.",
-        }
+        },
     )
 
     password = serializers.CharField(
@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         error_messages={
             "required": "Password is required.",
             "min_length": "Password must be at least 6 characters long.",
-        }
+        },
     )
 
     class Meta:

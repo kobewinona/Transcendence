@@ -148,7 +148,6 @@ INSTALLED_APPS = [
     # Custom Project Apps
     "project.core",
     "project.apps.pong",
-    "project.apps.chat",
     "project.apps.oauth",
     "project.apps.users",
     "project.apps.tournaments",

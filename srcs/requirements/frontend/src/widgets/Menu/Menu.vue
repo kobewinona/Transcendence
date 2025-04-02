@@ -276,6 +276,7 @@ const pulsate = (el) => {
 
   font-size: 1.4rem;
   font-weight: 300;
+  text-align: left;
 
   opacity: 0;
 
