@@ -5,16 +5,16 @@ function createRules(t) {
   return {
     name: yup
       .string()
+      .required(
+        t('validation.required', {
+          field_name: t('tournament.tabs.current.new_tournament_form.tournament_name.label'),
+        })
+      )
       .min(
         2,
         t('validation.min_length', {
           field_name: t('tournament.tabs.current.new_tournament_form.tournament_name.label'),
           min_length: 2,
-        })
-      )
-      .required(
-        t('validation.required', {
-          field_name: t('tournament.tabs.current.new_tournament_form.tournament_name.label'),
         })
       ),
 

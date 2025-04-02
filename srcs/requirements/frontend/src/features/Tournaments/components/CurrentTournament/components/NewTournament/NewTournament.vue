@@ -8,10 +8,10 @@
         </h2>
 
         <MyInput
-          :name="TOURNAMENT_NAMES.NAME"
           :label="t('tournament.tabs.current.new_tournament_form.tournament_name.label')"
-          variant="ghost"
+          :name="TOURNAMENT_NAMES.NAME"
           mode="eager"
+          variant="ghost"
         />
 
         <Game width="100%" />
@@ -20,14 +20,21 @@
       <!--      Tournament Players List Section-->
       <div class="new-tournament__players">
         <div class="new-tournament__title-container">
-          <h2>
-            {{ t('tournament.tabs.current.new_tournament_form.players.title') }}
-          </h2>
+          <div class="new-tournament__title-inner-container">
+            <h2>
+              {{ t('tournament.tabs.current.new_tournament_form.players.title') }}
+            </h2>
+            <span
+              v-if="Boolean(players && players.length > 0)"
+              class="new-tournament__players-counter"
+              >{{ players.length }}</span
+            >
+          </div>
           <MyButton
-            type="button"
+            :icon="svgComponents['AddUserIcon']"
             color="light"
             size="middle"
-            :icon="svgComponents['AddUserIcon']"
+            type="button"
             @click="addPlayer"
             >{{
               t('tournament.tabs.current.new_tournament_form.players.add_player_button.text')
@@ -35,28 +42,28 @@
           >
         </div>
         <ScrollLayout>
-          <transition-group name="fade-list" tag="ul" class="new-tournament__players-list">
+          <transition-group class="new-tournament__players-list" name="fade-list" tag="ul">
             <li
               v-for="(player, index) in players"
               :key="player?.key"
               class="new-tournament__player"
             >
               <MyButton
-                class-name="new-tournament__remove-player-button"
-                type="button"
-                color="light"
+                :disabled="players.length <= 2"
                 :icon="svgComponents['RemoveUserIcon']"
                 aria-label="Remove player."
+                class-name="new-tournament__remove-player-button"
+                color="light"
                 tabindex="-1"
-                :disabled="players.length <= 2"
+                type="button"
                 @click="() => removePlayer(index)"
               />
               <MyInput
-                :name="`${TOURNAMENT_NAMES.PLAYERS}.${index}.${TOURNAMENT_NAMES.PLAYERS_NAME}`"
                 :label="t('tournament.tabs.current.new_tournament_form.players.player_name.label')"
                 :max-length="14"
-                variant="ghost"
+                :name="`${TOURNAMENT_NAMES.PLAYERS}.${index}.${TOURNAMENT_NAMES.PLAYERS_NAME}`"
                 mode="eager"
+                variant="ghost"
               />
             </li>
           </transition-group>
@@ -64,12 +71,9 @@
       </div>
     </div>
     <div class="new-tournament__controls">
-      <MyButton
-        type="submit"
-        color="secondary"
-        :loading="isCreatingTournament || isFetchingRandomNames"
-        >{{ t('tournament.tabs.current.new_tournament_form.submit_button.text') }}</MyButton
-      >
+      <MyButton :loading="isCreatingTournament" color="secondary" type="submit">{{
+        t('tournament.tabs.current.new_tournament_form.submit_button.text')
+      }}</MyButton>
     </div>
   </form>
 </template>
@@ -77,7 +81,6 @@
 <script setup>
 import { MyButton, MyInput } from 'components';
 import { Game } from 'entities/Game/components/GameSettings/components';
-import { CONTROLLED_BY_AI } from 'entities/Game/config/constants.js';
 import tournamentApi from 'entities/Tournaments/api';
 import {
   NEW_PLAYER_DEFAULT_VALUES,
@@ -86,8 +89,6 @@ import {
 } from 'entities/Tournaments/config/constants.js';
 import { ScrollLayout } from 'layouts';
 import { isPlainObject } from 'lodash';
-import { nanoid } from 'nanoid';
-import randomNameApi from 'shared/api/RandomName';
 import { useMutation } from 'shared/composables';
 import { parseValidationErrors, svgComponents, tryParseAnyError } from 'shared/lib';
 import { tournamentSchema } from 'shared/validation';
@@ -134,35 +135,6 @@ const { mutate: onCreateTournament, isLoading: isCreatingTournament } = useMutat
   },
 });
 
-const { mutate: onGetRandomNames, isLoading: isFetchingRandomNames } = useMutation({
-  fetchFn: randomNameApi.getRandomUser,
-  options: {
-    onSuccess: (res) => {
-      const randomUser = res?.data || {};
-      const { players: submittedPlayers, ...restValues } = values;
-      menu.hold();
-
-      onCreateTournament({
-        data: {
-          ...restValues,
-          [TOURNAMENT_NAMES.PLAYERS]: [
-            ...submittedPlayers,
-            {
-              key: nanoid(),
-              [TOURNAMENT_NAMES.PLAYERS_NAME]:
-                randomUser.username.charAt(0).toUpperCase() + randomUser.username.slice(1),
-              [TOURNAMENT_NAMES.PLAYERS_CONTROLLED_BY]: CONTROLLED_BY_AI.key,
-            },
-          ],
-        },
-      });
-    },
-    onError: (error) => {
-      showErrorModal(error.status, tryParseAnyError(error));
-    },
-  },
-});
-
 const addPlayer = () => {
   push(NEW_PLAYER_DEFAULT_VALUES);
 };
@@ -171,21 +143,30 @@ const removePlayer = (index) => {
   remove(index);
 };
 
-const invalidatePlayers = () => {
-  onGetRandomNames();
+const invalidatePlayers = (formData) => {
+  onCreateTournament({ data: formData });
 };
 
+function calculatePlayersShortage(playerCount) {
+  let nextPowerOfTwo = 2;
+  while (nextPowerOfTwo < playerCount) {
+    nextPowerOfTwo *= 2;
+  }
+
+  return nextPowerOfTwo - playerCount;
+}
+
 const onSubmit = handleSubmit((formData) => {
-  const playersShortage = formData.players.length % 2;
+  const playersShortage = calculatePlayersShortage(formData[TOURNAMENT_NAMES.PLAYERS].length);
 
   if (playersShortage > 0) {
     showConfirmModal({
       message: t('tournament.tabs.current.new_tournament_form.players.not_enough.title'),
       confirmText: t('ok'),
       comment: t('tournament.tabs.current.new_tournament_form.players.not_enough.comment', {
-        players_shortage: 1,
+        players_shortage: playersShortage,
       }),
-      onConfirm: () => invalidatePlayers(),
+      onConfirm: () => invalidatePlayers(formData),
     });
   } else {
     onCreateTournament({ data: formData });
@@ -282,6 +263,17 @@ watch(
   justify-content: space-between;
 
   border-bottom: 1px solid var(--light-color);
+}
+
+.new-tournament__title-inner-container {
+  display: flex;
+  flex-direction: row;
+  column-gap: var(--small-space);
+  align-items: baseline;
+}
+
+.new-tournament__players-counter {
+  color: var(--light-color-opacity-50);
 }
 
 .new-tournament__players-list {

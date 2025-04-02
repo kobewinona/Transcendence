@@ -1,8 +1,8 @@
 import logging
 import random
 
+import requests
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from project.apps.tournaments.models import Tournament
 from project.authentication import JWTOrIntraAuthentication
 from rest_framework import status
@@ -12,6 +12,42 @@ from rest_framework.views import APIView
 
 User = get_user_model()
 logger = logging.getLogger("tournaments_logs")
+
+API_RANDOMUSER_URL = "https://randomuser.me/api/"
+API_RANDOMUSER_BUFFER_MULTIPLIER = 2
+
+
+def get_next_power_of_two(n):
+    return 1 if n < 1 else 2 ** (n - 1).bit_length()
+
+
+def fetch_unique_random_names(existing_names, needed):
+    tries = 0
+    max_tries = 5
+    unique_names = set()
+    generated_players = []
+
+    while len(unique_names) < needed and tries < max_tries:
+        tries += 1
+        fetch_count = needed * API_RANDOMUSER_BUFFER_MULTIPLIER
+        res = requests.get(f"{API_RANDOMUSER_URL}?results={fetch_count}")
+        res.raise_for_status()
+
+        data = res.json()
+        logger.info(f"Random names data results: {data['results']}")
+        for user in data["results"]:
+            name = user["login"]["username"]
+            if name not in existing_names and name not in unique_names:
+                unique_names.add(name)
+                generated_players.append(
+                    {
+                        "name": name,
+                        "controlled_by": "ai",
+                        "key": user["login"]["uuid"],
+                    }
+                )
+
+    return generated_players[:needed]
 
 
 class UserTournaments(APIView):
@@ -28,41 +64,54 @@ class UserTournaments(APIView):
             )
 
         data = request.data
-        logger.debug(f"UserTournaments POST data: { data }")
-        tournament_name = data.get("name")
-        players = data.get("players", [])
-        game = data.get("game", {})
-        gameplay = data.get("gameplay", {})
+        logger.debug(f"UserTournaments POST data: {data}")
 
         errors = {}
 
+        tournament_name = data.get("name")
         if not tournament_name:
             errors["name"] = "Tournament name is required"
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
+        players = data.get("players", [])
         if not isinstance(players, list) or len(players) < 2:
-            errors["error"] = "At least two players are required"
+            return Response(
+                {"error": "At least two players are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         else:
-            seen_names = set()
-            player_errors = []
+            existing_names = {
+                p.get("name", "").strip() for p in players if p.get("name")
+            }
+            player_count = len(players)
+            target_count = get_next_power_of_two(player_count)
+            shortage = target_count - player_count
+
+            if shortage > 0:
+                new_players = fetch_unique_random_names(existing_names, shortage)
+                players.extend(new_players)
+
+            logger.info(f"updated players: {players}")
 
             for player in players:
-                player_error = {}
                 name = player.get("name", "").strip()
-
                 if not name:
-                    player_error["name"] = "Player name is required"
-                elif name in seen_names:
-                    player_error["name"] = "Player name must be unique"
-                else:
-                    seen_names.add(name)
+                    return Response(
+                        {"error": "Player name is required"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
-                player_errors.append(player_error)
+            names = [p.get("name", "").strip() for p in players]
+            if len(set(names)) < len(names):
+                return Response(
+                    {"error": "All player names must be unique."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-            if any(player_errors):
-                errors["players"] = player_errors
+        logger.debug(f"players: {players}")
 
-        if errors:
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        game = data.get("game", {})
+        gameplay = data.get("gameplay", {})
 
         tournament = Tournament.objects.create(
             name=tournament_name,
@@ -100,6 +149,7 @@ class UserTournaments(APIView):
             {
                 "id": str(t.id),
                 "winner": t.winner,
+                "notified": t.notified,
                 "name": t.name,
                 "host": {"id": t.host.id, "email": t.host.email},
                 "status": t.status,
@@ -115,20 +165,21 @@ class UserTournaments(APIView):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    def patch(self, request):
+    def patch(self, request, tournament_id):
         user = request.user
 
         try:
-            tournament = Tournament.objects.get(host=user, status="in_progress")
+            t = Tournament.objects.get(host=user, id=tournament_id)
         except Tournament.DoesNotExist:
             return Response(
-                {"error": "No active tournament found for this user."},
+                {"error": "No tournament found for this user."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         data = request.data
         status_update = data.get("status")
         winner_update = data.get("winner")
+        notified_update = data.get("notified")
 
         # Validate status
         valid_statuses = ["in_progress", "finished", "abandoned"]
@@ -148,19 +199,28 @@ class UserTournaments(APIView):
 
         # Apply updates
         if status_update:
-            tournament.status = status_update
+            t.status = status_update
         if winner_update:
-            tournament.winner = winner_update
+            t.winner = winner_update
+        if notified_update:
+            t.notified = notified_update
 
-        tournament.save()
+        t.save()
 
         return Response(
             {
-                "id": str(tournament.id),
-                "name": tournament.name,
-                "status": tournament.status,
-                "winner": tournament.winner,
-                "updated_at": tournament.updated_at.isoformat(),
+                "id": str(t.id),
+                "winner": t.winner,
+                "notified": t.notified,
+                "name": t.name,
+                "host": {"id": t.host.id, "email": t.host.email},
+                "status": t.status,
+                "players": t.players,
+                "game": t.game,
+                "gameplay": t.gameplay,
+                "brackets": t.brackets,
+                "created_at": t.created_at.isoformat(),
+                "updated_at": t.updated_at.isoformat(),
             },
             status=status.HTTP_200_OK,
         )
@@ -189,7 +249,7 @@ class UserTournaments(APIView):
                 return float("inf")
 
         sorted_stage_names = sorted(brackets.keys(), key=stage_sort_key)
-        logger.debug(f"sorted_stage_names: { sorted_stage_names }")
+        logger.debug(f"sorted_stage_names: {sorted_stage_names}")
 
         winner_stage = None
         winner_stage_index = None
@@ -227,10 +287,10 @@ class UserTournaments(APIView):
 
             logger.debug(f"✔ Updated match with winner and score: {updated_match}")
 
-        logger.debug(f"updated_brackets: { updated_brackets }")
-        logger.debug(f"winner_stage: { winner_stage }")
-        logger.debug(f"winner_stage_index: { winner_stage_index }")
-        logger.debug(f"next stage index: { winner_stage_index + 1 }")
+        logger.debug(f"updated_brackets: {updated_brackets}")
+        logger.debug(f"winner_stage: {winner_stage}")
+        logger.debug(f"winner_stage_index: {winner_stage_index}")
+        logger.debug(f"next stage index: {winner_stage_index + 1}")
 
         if winner_stage == "Final":
             tournament.winner = winner_name
@@ -238,7 +298,7 @@ class UserTournaments(APIView):
         else:
             logger.debug("adding winner to the next stage...")
             matches = brackets.get(sorted_stage_names[winner_stage_index + 1], [])
-            logger.debug(f"next stage matches: { matches }")
+            logger.debug(f"next stage matches: {matches}")
 
             # Find available slots (only one side is empty)
             available_slots = []
@@ -247,12 +307,10 @@ class UserTournaments(APIView):
                     available_slots.append((i, "left"))
                 if match.get("right") is None:
                     available_slots.append((i, "right"))
-            logger.debug(f"available_slots: { available_slots }")
+            logger.debug(f"available_slots: {available_slots}")
 
             if available_slots:
                 selected_index, side = random.choice(available_slots)
-                logger.debug(f"selected_index: { selected_index }")
-                logger.debug(f"side: { side }")
                 logger.debug(
                     f"✓ Selected random match index: {selected_index}, side: {side}"
                 )
@@ -265,7 +323,7 @@ class UserTournaments(APIView):
 
         tournament.brackets = updated_brackets
         tournament.save()
-        logger.info(f"✓ UPDATED BRACKETS: { updated_brackets }")
+        logger.info(f"✓ UPDATED BRACKETS: {updated_brackets}")
         return Response(
             {
                 "id": str(tournament.id),

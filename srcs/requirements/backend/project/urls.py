@@ -6,6 +6,7 @@ from project.apps.oauth.views import (
     GetOTP,
     SignIn,
     RefreshTokens,
+    SignInIntra,
     SignInIntraCallback,
     SignOut,
 )
@@ -24,6 +25,7 @@ urlpatterns = [
     path("api/signin/", SignIn.as_view(), name="signin"),
     path("api/signout/", SignOut.as_view(), name="signout"),
     path("api/refresh_tokens/", RefreshTokens.as_view(), name="refresh_tokens"),
+    path("api/signin_intra/", SignInIntra.as_view(), name="signin_intra"),
     path(
         "api/signin_intra/callback/",
         SignInIntraCallback.as_view(),

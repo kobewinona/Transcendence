@@ -1,5 +1,6 @@
 import { MenuLoader } from 'components';
 import { NewGame, Profile, QuickStart, Settings, Tournaments } from 'features';
+import { Congratulations } from 'features/Tournaments/components/CurrentTournament/components';
 import { svgComponents } from 'shared/lib';
 
 export const MENU_LAYER_KEYS = {
@@ -7,6 +8,7 @@ export const MENU_LAYER_KEYS = {
   QUICK_GAME: 'quick_game',
   NEW_GAME: 'new_game',
   TOURNAMENT: 'tournament',
+  TOURNAMENT_CONGRATS: 'tournament_congrats',
   PROFILE: 'profile',
   SETTINGS: 'settings',
   LOADING: 'loading',
@@ -64,6 +66,15 @@ export const TOURNAMENT_LAYER = () => ({
   maxPlayers: null,
 });
 
+export const TOURNAMENT_CONGRATULATIONS_LAYER = (props = {}) => ({
+  key: `${MENU_LAYER_KEYS.TOURNAMENT_CONGRATS}_${props?.tournament?.id}`,
+  title: null,
+  description: null,
+  content: Congratulations,
+  props,
+  icon: MENU_ICONS[MENU_LAYER_KEYS.TOURNAMENT],
+});
+
 export const PROFILE_LAYER = () => ({
   key: MENU_LAYER_KEYS.PROFILE,
   title: 'menu.items.item.profile.title',
@@ -83,13 +94,14 @@ export const SETTINGS_LAYER = () => ({
   iconSlideTo: 'right',
 });
 
-export const MENU_LAYERS = () => ({
-  [MENU_LAYER_KEYS.LOADING]: LOADING_LAYER(),
-  [MENU_LAYER_KEYS.QUICK_GAME]: QUICK_GAME_LAYER(),
-  [MENU_LAYER_KEYS.NEW_GAME]: NEW_GAME_LAYER(),
-  [MENU_LAYER_KEYS.TOURNAMENT]: TOURNAMENT_LAYER(),
-  [MENU_LAYER_KEYS.PROFILE]: PROFILE_LAYER(),
-  [MENU_LAYER_KEYS.SETTINGS]: SETTINGS_LAYER(),
+export const MENU_LAYERS = (props = {}) => ({
+  [MENU_LAYER_KEYS.LOADING]: LOADING_LAYER(props),
+  [MENU_LAYER_KEYS.QUICK_GAME]: QUICK_GAME_LAYER(props),
+  [MENU_LAYER_KEYS.NEW_GAME]: NEW_GAME_LAYER(props),
+  [MENU_LAYER_KEYS.TOURNAMENT]: TOURNAMENT_LAYER(props),
+  [MENU_LAYER_KEYS.TOURNAMENT_CONGRATS]: TOURNAMENT_CONGRATULATIONS_LAYER(props),
+  [MENU_LAYER_KEYS.PROFILE]: PROFILE_LAYER(props),
+  [MENU_LAYER_KEYS.SETTINGS]: SETTINGS_LAYER(props),
 });
 
 export const MENU_ITEMS = () => [

@@ -16,7 +16,7 @@ from project.load_env_file import load_env_file
 BASE_DIR = Path(__file__).resolve().parent.parent
 APP_ENV_MODE = os.getenv("APP_ENV_MODE", "production")  # "development" or "production"
 APP_URL = os.getenv("APP_URL")  # Frontend URL
-WSS_URL = os.getenv("WSS_URL")  # Frontend Socekt URL
+WSS_URL = os.getenv("WSS_URL")  # Frontend Socket URL
 INTRA_URL = "https://api.intra.42.fr"
 AUTH_USER_MODEL = "users.CustomUser"
 
@@ -76,7 +76,7 @@ CORS_ALLOW_HEADERS = [
 CSP_CONNECT_SRC = (
     "'self'",
     APP_URL,  # Allow frontend connections
-	WSS_URL,  # Allow frontend socket connections
+    WSS_URL,  # Allow frontend socket connections
     INTRA_URL,
 )
 
@@ -148,7 +148,6 @@ INSTALLED_APPS = [
     # Custom Project Apps
     "project.core",
     "project.apps.pong",
-    "project.apps.chat",
     "project.apps.oauth",
     "project.apps.users",
     "project.apps.tournaments",

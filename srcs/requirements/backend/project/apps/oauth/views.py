@@ -5,8 +5,10 @@ import urllib.parse
 import pyotp
 import requests
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model, authenticate
 from django.core.cache import cache
+from rest_framework.response import Response
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -97,9 +99,7 @@ class GetOTP(APIView):
         cache.set(f"otp_{email}", otp, timeout=300)  # cache for 5 minutes
         send_email(user.email, user.username, otp)
 
-        return JsonResponse(
-            {"otp": otp}, status=status.HTTP_200_OK
-        )  # TODO: remove otp from response after development
+        return Response(status=status.HTTP_200_OK)
 
 
 class SignIn(APIView):
@@ -185,6 +185,24 @@ class RefreshTokens(APIView):
             )
 
 
+class SignInIntra(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        client_id = secrets_backend.get("CLIENT_ID")
+
+        params = urllib.parse.urlencode(
+            {
+                "client_id": client_id,
+                "redirect_uri": REDIRECT_URI,
+                "response_type": "code",
+            }
+        )
+
+        auth_url = f"https://api.intra.42.fr/oauth/authorize?{params}"
+        return HttpResponseRedirect(auth_url)
+
+
 class SignInIntraCallback(APIView):
     permission_classes = [AllowAny]
 
@@ -194,10 +212,6 @@ class SignInIntraCallback(APIView):
         if not code:
             return HttpResponseBadRequest("Authorization code missing")
 
-        client_id = secrets_backend.get("CLIENT_ID")
-        client_secret = secrets_backend.get("CLIENT_SECRET")
-        logger.debug(f"client_id: { client_id }")
-        logger.debug(f"client_secret: { client_secret }")
         data = {
             "client_id": secrets_backend.get("CLIENT_ID"),
             "client_secret": secrets_backend.get("CLIENT_SECRET"),

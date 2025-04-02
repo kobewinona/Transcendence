@@ -72,8 +72,6 @@ export const BALL_COLOR_INPUT_NAME = 'color';
 export const BALL_SKIN_TYPE_INPUT_NAME = 'skin_type';
 export const BALL_SKIN_INPUT_NAME = 'skin';
 
-export const NEW_GAME_SETTINGS_FORM_PROVIDE_KEY = 'new_game_settings_form';
-
 export const COLORS = [
   '--primary-color',
   '--secondary-color',

@@ -155,6 +155,9 @@ This project uses four isolated Docker networks to separate responsibilities and
 - Vault & Vault Agent (Secrets Management)
 - Prometheus + Alertmanager (Monitoring + Alerting)
 - Grafana (Dashboards)
+- Django
+- Postgres sql
+- Vite + Vue 3
 
 ---
 

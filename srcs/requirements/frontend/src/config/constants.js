@@ -1,8 +1,6 @@
 export const API_HOST = import.meta.env.VITE_API_URL;
 export const WS_HOST = import.meta.env.VITE_WS_URL;
 
-export const AUTHORIZE_ENDPOINT = 'https://api.intra.42.fr/oauth/authorize';
-
 export const MS_PER_SEC = 1000;
 
 export const EMAIL_STORAGE_KEY = 'email';
@@ -38,6 +36,3 @@ export const VALID_INPUT_TYPES = [
   'submit',
   'reset',
 ];
-
-export const EMAIL_REG =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

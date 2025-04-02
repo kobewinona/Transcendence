@@ -7,7 +7,7 @@ export default {
   createTournament({ data }) {
     return api.post('tournaments/', data);
   },
-  updateTournament({ data }) {
-    return api.patch('tournaments/', data);
+  updateTournament({ id, data }) {
+    return api.patch(`tournaments/${id}`, data);
   },
 };

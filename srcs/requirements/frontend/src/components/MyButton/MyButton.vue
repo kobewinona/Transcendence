@@ -8,18 +8,24 @@
       `button_variant_${variant}`,
       { button_clicked: animate },
     ]"
+    :disabled="disabled"
     :tabindex="tabindex"
     :type="type"
     v-bind="attrs"
-    :disabled="disabled"
-    @click="handleClick"
     @animationend="animate = false"
+    @click="handleClick"
   >
     <component
       :is="icon"
       v-if="isVueComponent(icon) && !loading"
-      key="icon"
-      :class="['icon', { icon_alone: !hasDefaultSlot }, iconClassName]"
+      key="button__icon"
+      :class="['button__icon', { button__icon_alone: !hasDefaultSlot }, iconClassName]"
+    />
+    <img
+      v-else-if="typeof icon === 'string' && !loading"
+      :class="['button__img', { button__img_alone: !hasDefaultSlot }, iconClassName]"
+      :src="icon"
+      alt=""
     />
     <Loader :is-active="loading" />
     <span v-if="hasDefaultSlot" class="button__text">
@@ -73,7 +79,7 @@ const { icon, disabled } = defineProps({
     default: '',
   },
   icon: {
-    type: Object,
+    type: Object || String,
     default: null,
   },
   loading: {
@@ -223,14 +229,24 @@ button:disabled .icon {
   transition: opacity;
 }
 
-.icon {
+.button__icon {
   width: 100%;
   height: 100%;
   margin-right: var(--smaller-space);
-  fill: var(--light-color);
+  fill: currentcolor;
 }
 
-.icon_alone {
+.button__icon_alone {
+  margin-right: 0;
+}
+
+.button__img {
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  margin-right: var(--smaller-space);
+}
+
+.button__img_alone {
   margin-right: 0;
 }
 
@@ -239,6 +255,11 @@ button:disabled .icon {
 }
 
 .button__text {
+  display: flex;
+  flex-direction: row;
+  column-gap: var(--smaller-space);
+  align-items: center;
+
   white-space: nowrap;
 }
 </style>

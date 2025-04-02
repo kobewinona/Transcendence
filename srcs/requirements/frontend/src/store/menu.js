@@ -25,8 +25,8 @@ export const menu = reactive({
     }
   },
 
-  goTo(layerKey) {
-    this.stack.push(MENU_LAYERS()[layerKey]);
+  goTo(layerKey, props = {}) {
+    this.stack.push(MENU_LAYERS(props)[layerKey]);
   },
 
   goBack() {
@@ -78,7 +78,7 @@ export const menu = reactive({
   cleanupGhostLayers() {
     while (this.stack.length > 0) {
       const top = this.stack[this.stack.length - 1];
-      if (top.ghost) {
+      if (top?.ghost) {
         this.stack.pop();
       } else {
         break;

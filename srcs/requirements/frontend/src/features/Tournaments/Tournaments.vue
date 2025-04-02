@@ -25,7 +25,7 @@ import {
 import { useQuery } from 'shared/composables';
 import { isVueComponent, tryParseAnyError } from 'shared/lib';
 import { menu } from 'store/menu';
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 
 import { CurrentTournament, History } from './components';
 
@@ -65,6 +65,14 @@ const handleRefetch = () => {
   menu.hold();
   refetch();
 };
+
+watch(
+  () => tournaments,
+  (newTournaments) => {
+    console.log('newTournaments', newTournaments);
+  },
+  { deep: true }
+);
 </script>
 
 <!--suppress CssUnusedSymbol -->

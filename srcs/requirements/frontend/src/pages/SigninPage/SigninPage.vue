@@ -24,11 +24,15 @@
             type="submit"
             >{{ t('auth.signin.submit_button.text') }}
           </MyButton>
-          <a :href="intraOAuthUrl" class="signin-form__intra-link" @click="handleIntraSignClick">
-            <Loader :is-active="isLoadingIntraAuthPage" />
-            <img :src="logoPath" alt="Intra 42 logo" class="signin-form__intra-logo" />
+          <MyButton
+            :icon="logo42"
+            :loading="isLoadingIntraAuthPage"
+            color="light"
+            type="button"
+            @click="handleIntraSignClick"
+          >
             {{ t('auth.signin_intra.submit_button.text') }}
-          </a>
+          </MyButton>
           <span class="signin-form__redirect">
             {{ t('auth.signin.link_to_signup.text') }}
             <router-link to="/signup">{{ t('auth.signup.title') }}</router-link>
@@ -43,16 +47,15 @@
 import logo42 from 'assets/logo42.png';
 import { MyButton, MyInput } from 'components';
 import { AUTH_NAMES } from 'config/AuthForm/constants.js';
-import { AUTHORIZE_ENDPOINT, EMAIL_STORAGE_KEY } from 'config/constants.js';
+import { EMAIL_STORAGE_KEY } from 'config/constants.js';
 import { AuthLayout, MainBodyLayout } from 'layouts';
 import { isPlainObject } from 'lodash';
 import api from 'shared/api/Auth';
-import { Loader } from 'shared/components';
 import { useMutation } from 'shared/composables';
 import { parseValidationErrors, tryParseAnyError } from 'shared/lib';
 import { signinSchema } from 'shared/validation';
 import { useForm } from 'vee-validate';
-import { computed, inject, ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -61,20 +64,6 @@ const router = useRouter();
 const showErrorModal = inject('showErrorModal');
 
 const isLoadingIntraAuthPage = ref(false);
-
-const intraOAuthUrl = computed(() => {
-  const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
-  const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
-
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: REDIRECT_URI,
-    response_type: 'code',
-  });
-
-  return `${AUTHORIZE_ENDPOINT}?${params.toString()}`;
-});
-const logoPath = computed(() => (import.meta.env.DEV ? logo42 : '/logo42.png'));
 
 const { setErrors, handleSubmit } = useForm({
   validationSchema: signinSchema(t, { strictPassword: false }),
@@ -110,6 +99,7 @@ const onSubmit = handleSubmit((formData) => {
 
 const handleIntraSignClick = () => {
   isLoadingIntraAuthPage.value = true;
+  window.location.href = `${import.meta.env.VITE_API_URL}/api/signin_intra/`;
 };
 </script>
 

@@ -1,14 +1,11 @@
 import json
 import logging
 import random
-from django.conf import settings
 import uuid
 from typing import Optional
 
-
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.db import models
-
 
 logger = logging.getLogger("tournaments_logs")
 
@@ -41,6 +38,7 @@ class Tournament(models.Model):
     winner: Optional[models.CharField] = models.CharField(
         max_length=100, null=True, blank=True
     )
+    notified: models.BooleanField = models.BooleanField(default=False)
 
     created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_at: models.DateTimeField = models.DateTimeField(auto_now=True)
@@ -50,6 +48,7 @@ class Tournament(models.Model):
 
     def generate_brackets(self):
         players_list = self.players.copy()
+        auto_advance_ai_winners = []
 
         random.shuffle(players_list)
 
@@ -93,6 +92,30 @@ class Tournament(models.Model):
                     "score": {"left": 0, "right": 0},
                 }
 
+                if (
+                    left_player
+                    and right_player
+                    and left_player["controlled_by"]
+                    == right_player["controlled_by"]
+                    == "ai"
+                ):
+                    end_score = self.game.get("end_score", 6)
+
+                    winner = random.choice(["left", "right"])
+                    loser = "right" if winner == "left" else "left"
+
+                    match["winner"] = match[winner]
+                    match["score"][winner] = end_score
+                    match["score"][loser] = random.randint(0, end_score - 1)
+
+                    logger.debug(f"ⓘ Early win for ai: {match['winner']['name']}")
+                    auto_advance_ai_winners.append(
+                        {
+                            "winner_name": match[winner]["name"],
+                            "score_data": match["score"],
+                        }
+                    )
+
                 brackets[stage].append(match)
                 next_round.append(None)
 
@@ -103,7 +126,17 @@ class Tournament(models.Model):
         self.brackets = json.loads(json.dumps(brackets))
         self.save()
 
+        for data in auto_advance_ai_winners:
+            self.update_bracket(
+                tournament_id=self.id,
+                winner_name=data["winner_name"],
+                score_data=data["score_data"],
+            )
+
     def update_bracket(self, tournament_id, winner_name, score_data):
+        logger.info(
+            f"ⓘ UPDATING BRACKET | winner_name: {winner_name}: score_data: {score_data}"
+        )
         try:
             tournament = Tournament.objects.get(id=tournament_id)
         except Tournament.DoesNotExist:
@@ -112,6 +145,7 @@ class Tournament(models.Model):
 
         brackets = tournament.brackets
         updated_brackets = brackets.copy()
+        next_ai_winner = None
 
         def stage_sort_key(stage):
             if stage == "Final":
@@ -123,7 +157,6 @@ class Tournament(models.Model):
                 return float("inf")
 
         sorted_stage_names = sorted(brackets.keys(), key=stage_sort_key)
-        logger.debug(f"sorted_stage_names: { sorted_stage_names }")
 
         winner_stage = None
         winner_stage_index = None
@@ -133,6 +166,7 @@ class Tournament(models.Model):
         # Find latest stage where winner is present
         for stage_index, stage_name in enumerate(sorted_stage_names):
             matches = brackets.get(stage_name, [])
+            logger.debug(f"ⓘ Stage {stage_name} Matches: {matches}")
             for idx, match in enumerate(matches):
                 left = match.get("left")
                 right = match.get("right")
@@ -159,12 +193,12 @@ class Tournament(models.Model):
             updated_match["winner"] = winner_name
             updated_match["score"] = score_data
 
-            logger.debug(f"✔ Updated match with winner and score: {updated_match}")
+            logger.debug(f"✓ Updated match with winner and score: {updated_match}")
 
-        logger.debug(f"updated_brackets: { updated_brackets }")
-        logger.debug(f"winner_stage: { winner_stage }")
-        logger.debug(f"winner_stage_index: { winner_stage_index }")
-        logger.debug(f"next stage index: { winner_stage_index + 1 }")
+        logger.debug(f"updated_brackets: {updated_brackets}")
+        logger.debug(
+            f"winner_stage: {winner_stage}, winner_stage_index: {winner_stage_index}, next stage index: {winner_stage_index + 1}"
+        )
 
         if winner_stage == "Final":
             tournament.winner = winner_name
@@ -172,7 +206,7 @@ class Tournament(models.Model):
         else:
             logger.debug("adding winner to the next stage...")
             matches = brackets.get(sorted_stage_names[winner_stage_index + 1], [])
-            logger.debug(f"next stage matches: { matches }")
+            logger.debug(f"next stage matches: {matches}")
 
             # Find available slots (only one side is empty)
             available_slots = []
@@ -181,26 +215,61 @@ class Tournament(models.Model):
                     available_slots.append((i, "left"))
                 if match.get("right") is None:
                     available_slots.append((i, "right"))
-            logger.debug(f"available_slots: { available_slots }")
 
             if available_slots:
                 selected_index, side = random.choice(available_slots)
-                logger.debug(f"selected_index: { selected_index }")
-                logger.debug(f"side: { side }")
                 logger.debug(
-                    f"✓ Selected random match index: {selected_index}, side: {side}"
+                    f"✓ Selected random match stage: {winner_stage_index + 1}, index: {selected_index}, side: {side}, match: {updated_brackets[sorted_stage_names[winner_stage_index + 1]][selected_index]}"
                 )
                 winner_player = updated_brackets[winner_stage][winner_match_index][
                     winner_side
                 ]
-                logger.debug(f"winner_player: { winner_player }")
                 updated_brackets[sorted_stage_names[winner_stage_index + 1]][
                     selected_index
                 ][side] = winner_player
                 logger.debug("✓ Winner inserted into next stage")
+
+                opponent_side = "right" if side == "left" else "left"
+                opponent = updated_brackets[sorted_stage_names[winner_stage_index + 1]][
+                    selected_index
+                ][opponent_side]
+
+                if (
+                    opponent
+                    and opponent.get("controlled_by") == "ai"
+                    and winner_player.get("controlled_by") == "ai"
+                ):
+                    logger.debug(
+                        "AI vs AI detected in next stage, resolving automatically..."
+                    )
+
+                    end_score = tournament.game.get("end_score", 6)
+                    winner_side = random.choice([side, opponent_side])
+                    loser_side = opponent_side if winner_side == side else side
+                    next_match = updated_brackets[
+                        sorted_stage_names[winner_stage_index + 1]
+                    ][selected_index]
+                    actual_winner = next_match[winner_side]
+
+                    new_score_data = {side: 0, opponent_side: 0}
+                    new_score_data[winner_side] = end_score
+                    new_score_data[loser_side] = random.randint(0, end_score - 1)
+
+                    next_ai_winner = {
+                        "winner_name": actual_winner.get("name"),
+                        "score_data": new_score_data,
+                    }
             else:
                 logger.warning("⚠️ No available slots in next stage to insert winner")
 
         tournament.brackets = updated_brackets
         tournament.save()
-        logger.info(f"✓ UPDATED BRACKETS: { updated_brackets }")
+        logger.info(f"✓ UPDATED BRACKETS: {updated_brackets}")
+
+        logger.debug(f"next ai winner needs updating: {next_ai_winner}")
+        if next_ai_winner:
+            self.update_bracket(
+                tournament_id=tournament.id,
+                winner_name=next_ai_winner["winner_name"],
+                score_data=next_ai_winner["score_data"],
+            )

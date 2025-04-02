@@ -12,32 +12,32 @@
             <li
               v-for="item in row.items"
               :key="item.key"
-              class="menu__item"
               :class="{ menu__item_opened: menu.layerKey === item.key }"
+              class="menu__item"
             >
               <button class="menu__item-button" @click="() => selectMenuItem(item.key)">
                 <span class="menu__item-header">
                   <span class="menu__item-title">{{ t(item.title) }}</span>
                   <PlayersBadge
                     v-if="item.minPlayers"
-                    :min-players="item.minPlayers"
                     :max-players="item.maxPlayers"
+                    :min-players="item.minPlayers"
                   />
                 </span>
                 <span
-                  class="menu__item-description"
                   :class="{ 'menu__item-description_short': item.iconSlideTo === 'right' }"
+                  class="menu__item-description"
                 >
                   {{ t(item.description) }}
                 </span>
                 <component
                   :is="item.icon"
                   v-if="item.icon"
-                  class="menu__item-icon"
                   :class="{
                     'menu__item-icon_slide-bottom': item.iconSlideTo === 'bottom',
                     'menu__item-icon_slide-right': item.iconSlideTo === 'right',
                   }"
+                  class="menu__item-icon"
                 />
               </button>
             </li>
@@ -62,16 +62,16 @@
           zIndex: 91 + index,
           transitionDelay: `${layer.key === MENU_LAYER_KEYS.LOADING ? 0 : 0.2 + index * 0.2}s`,
         }"
-        class="menu__layer"
+        :class="{ menu__layer: true, 'menu__layer_no-title': !layer.title }"
       >
         <div v-if="layer.title" class="menu__later-header">
           <h2>{{ t(layer.title) }}</h2>
           <MyButton
+            :icon="svgComponents['DeclineIcon']"
+            aria-label="Close Menu."
             icon-class-name="menu__layer-close-btn-icon"
             type="button"
             variant="ghost"
-            :icon="svgComponents['DeclineIcon']"
-            aria-label="Close Menu."
             @click="() => menu.goBack()"
           />
         </div>
@@ -79,6 +79,7 @@
           :is="layer.content"
           v-if="layer.key === MENU_LAYER_KEYS.LOADING || shownLayers.has(layer.key)"
           :icon="layer.icon"
+          :props="layer.props"
         />
       </div>
     </transition-group>
@@ -230,8 +231,6 @@ const pulsate = (el) => {
 }
 
 .menu__item-button {
-  all: unset;
-
   cursor: pointer;
 
   position: relative;
@@ -245,6 +244,7 @@ const pulsate = (el) => {
   padding: var(--regular-space);
 
   background-color: var(--light-color-opacity-10);
+  border: none;
   border-radius: 12px;
 
   transition:
@@ -276,6 +276,7 @@ const pulsate = (el) => {
 
   font-size: 1.4rem;
   font-weight: 300;
+  text-align: left;
 
   opacity: 0;
 
@@ -330,6 +331,10 @@ const pulsate = (el) => {
 
   background-color: var(--dark-color-opacity-95);
   border-radius: 12px;
+}
+
+.menu__layer_no-title {
+  grid-template-rows: auto;
 }
 
 .menu__later-header {

@@ -53,6 +53,6 @@ const { fields } = defineProps({
 }
 
 ::v-deep(.settings-section__option) {
-  min-width: 100px;
+  width: 120px;
 }
 </style>
