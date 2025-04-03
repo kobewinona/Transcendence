@@ -52,8 +52,8 @@ services:
       context: ./requirements/backend
       dockerfile: Dockerfile
     restart: always
-    env_file:
-      - ./requirements/backend/.env.production
+    secrets:
+      - backend_env_file
     networks:
       - ft_transcendence
       - database_network
@@ -78,6 +78,9 @@ services:
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: https://localhost:8443
+        VITE_WS_URL: wss://localhost:8443
     restart: "no"
     networks:
       - ft_transcendence
@@ -300,3 +303,7 @@ volumes:
   vault_grafana_env:
   grafana_data:
   prometheus_data:
+
+secrets:
+  backend_env_file:
+    file: ../secrets/backend/.env.production
