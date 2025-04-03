@@ -57,9 +57,9 @@ services:
     networks:
       - ft_transcendence
       - database_network
-    ports:
-      - "8000:8000"
-      - "8001:8001"
+    expose:
+      - "8000"
+      - "8001"
     depends_on:
       postgres:
         condition: service_healthy
@@ -181,6 +181,7 @@ services:
       - vault_postgre_backend:/vault/postgres_backend
       - vault_backend_env:/vault/backend
       - vault_grafana_env:/vault/grafana
+      - vault_postgre_exporter:/vault/postgres_exporter
     depends_on:
       vault:
         condition: service_healthy
@@ -267,6 +268,24 @@ services:
       - ft_transcendence
     depends_on:
       apache:
+        condition: service_healthy
+
+  postgres_exporter:
+    image: custom-postgre-exporter
+    container_name: postgres_exporter
+    build:
+      context: ./requirements/postgres_exporter
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "9187"
+    networks:
+      - monitoring_network
+      - database_network
+    volumes:
+      - vault_postgre_exporter:/run/secrets/postgres_exporter
+    depends_on:
+      postgres:
         condition: service_healthy
 
 networks:

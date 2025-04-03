@@ -88,6 +88,12 @@ EOF
 }
 
 template {
+  source      = "/vault/config/templates/data-source-postgres.ctmpl"
+  destination = "/vault/postgres_exporter/.env.exporter"
+  perms       = "0644"
+}
+
+template {
   source      = "/vault/config/templates/grafana_ini.ctmpl"
   destination = "/vault/grafana/grafana.ini"
   perms       = "0644"

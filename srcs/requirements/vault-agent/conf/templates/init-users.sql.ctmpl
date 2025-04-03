@@ -31,5 +31,6 @@ CREATE USER {{ .Data.data.EXPORTER_USER }} WITH PASSWORD '{{ .Data.data.EXPORTER
         GRANT SELECT ON pg_stat_user_tables TO {{ $exporter }};
         GRANT SELECT ON pg_stat_activity TO {{ $exporter }};
         GRANT SELECT ON pg_stat_bgwriter TO {{ $exporter }};
+        GRANT EXECUTE ON FUNCTION pg_catalog.pg_ls_waldir() TO {{ $exporter }};
     {{ end }}
 {{ end }}

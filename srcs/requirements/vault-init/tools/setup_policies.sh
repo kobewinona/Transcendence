@@ -44,7 +44,7 @@ path "sys/mounts/kv" {
 }
 
 path "sys/mounts/secret" {
-  capabilities = ["create", "update", "read", "list"]
+  capabilities = ["create", "update", "read", "list", "delete"]
 }
 
 path "kv/*" {
