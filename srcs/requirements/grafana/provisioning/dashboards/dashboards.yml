@@ -19,6 +19,15 @@ providers:
     options:
       path: /etc/grafana/provisioning/dashboards/apache
 
+  - name: "Postgres Exporter"
+    orgId: 1
+    folder: "postgres"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/postgres
+
   - name: "Alertmanager"
     orgId: 1
     folder: "Alertmanager"

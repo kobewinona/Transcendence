@@ -4,6 +4,9 @@ FROM nginx:alpine-slim
 # Set metadata for the image (authors)
 LABEL org.opencontainers.image.authors="Dima, Wolf, Jeremy"
 
+# For healthcheck in docker compose
+RUN apk add --no-cache curl
+
 # Ensure necessary directories exist and set proper permissions for the nginx user
 RUN mkdir -p /tmp && chown -R nginx:nginx /tmp /var/cache/nginx /var/log/nginx
 
@@ -16,8 +19,8 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 # Run the container as the non-root user 'nginx' for better security
 USER nginx
 
-# Expose port 8080 for internal access
-EXPOSE 8080
+# Expose port 8081 for internal access
+EXPOSE 8081
 
 # Start Nginx in the foreground (prevent daemonizing)
 CMD ["nginx", "-g", "daemon off;"]

@@ -43,6 +43,10 @@ echo "🔧 Running setup_secrets.sh..."
 sh /vault-init/setup_secrets.sh
 
 
+# Optional: Cleanup secrets after bootstrap
+# Uncomment to enable in production context
+# rm -f "$UNSEAL_KEYS_FILE" "$ROOT_TOKEN_FILE"
+
 echo "✅ Vault is unsealed!"
 exit 0
 

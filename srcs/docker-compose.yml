@@ -16,6 +16,11 @@ services:
       - ft_transcendence
     volumes:
       - vault_certs:/etc/apache2/ssl
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/server-status?auto"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: custom-postgresql
@@ -32,7 +37,8 @@ services:
     networks:
       - database_network
     depends_on:
-      - vault-agent
+      vault-agent:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
@@ -46,20 +52,20 @@ services:
       context: ./requirements/backend
       dockerfile: Dockerfile
     restart: always
-    env_file:
-      - ./requirements/backend/.env.production
+    secrets:
+      - backend_env_file
     networks:
       - ft_transcendence
       - database_network
-    ports:
-      - "8000:8000"
-      - "8001:8001"
+    expose:
+      - "8000"
+      - "8001"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - vault_backend_env:/usr/src/app/vault/secrets/backend
-      - vault_postgre_env:/usr/src/app/vault/secrets/postgres
+      - vault_postgre_backend:/usr/src/app/vault/secrets/postgres
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 1m
@@ -72,6 +78,9 @@ services:
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: https://localhost:8443
+        VITE_WS_URL: wss://localhost:8443
     restart: "no"
     networks:
       - ft_transcendence
@@ -169,10 +178,13 @@ services:
       - vault_agent_auth:/vault/auth
       - vault_certs:/vault/certs
       - vault_postgre_env:/vault/postgres
+      - vault_postgre_backend:/vault/postgres_backend
       - vault_backend_env:/vault/backend
       - vault_grafana_env:/vault/grafana
+      - vault_postgre_exporter:/vault/postgres_exporter
     depends_on:
-      - vault
+      vault:
+        condition: service_healthy
     expose:
       - "8201"
     networks:
@@ -202,7 +214,8 @@ services:
       - grafana_data:/var/lib/grafana
       - vault_grafana_env:/vault/grafana:ro
     depends_on:
-      - vault-agent
+      vault-agent:
+        condition: service_healthy
     networks:
       - ft_transcendence
       - monitoring_network
@@ -249,10 +262,31 @@ services:
     expose:
       - "9117"
     command:
-      - --scrape_uri=http://apache:80/server-status?auto
+      - --scrape_uri=http://apache:8080/server-status?auto
     networks:
       - monitoring_network
       - ft_transcendence
+    depends_on:
+      apache:
+        condition: service_healthy
+
+  postgres_exporter:
+    image: custom-postgre-exporter
+    container_name: postgres_exporter
+    build:
+      context: ./requirements/postgres_exporter
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "9187"
+    networks:
+      - monitoring_network
+      - database_network
+    volumes:
+      - vault_postgre_exporter:/run/secrets/postgres_exporter
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 networks:
   vault_network:
@@ -282,7 +316,13 @@ volumes:
   vault_certs:
   vault_agent_auth:
   vault_postgre_env:
+  vault_postgre_backend:
+  vault_postgre_exporter:
   vault_backend_env:
   vault_grafana_env:
   grafana_data:
   prometheus_data:
+
+secrets:
+  backend_env_file:
+    file: ../secrets/backend/.env.production

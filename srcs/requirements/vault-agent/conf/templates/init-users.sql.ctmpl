@@ -1,0 +1,36 @@
+{{ with secret "secret/postgres/backend" }}
+CREATE USER {{ .Data.data.BACKEND_USER }} WITH PASSWORD '{{ .Data.data.BACKEND_PASSWORD }}';
+{{ end }}
+
+{{ with secret "secret/postgres/exporter" }}
+CREATE USER {{ .Data.data.EXPORTER_USER }} WITH PASSWORD '{{ .Data.data.EXPORTER_PASSWORD }}';
+{{ end }}
+
+{{ with secret "secret/postgres/admin" }}
+    {{ $db := .Data.data.POSTGRES_DB }}
+    {{ with secret "secret/postgres/backend" }}
+        {{ $user := .Data.data.BACKEND_USER}}
+        GRANT CONNECT ON DATABASE {{ $db }} TO {{ $user }};
+        GRANT USAGE ON SCHEMA public TO {{ $user }};
+
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {{ $user }};
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO {{ $user }};
+        GRANT CREATE ON SCHEMA public TO {{ $user }};
+        GRANT REFERENCES ON ALL TABLES IN SCHEMA public TO {{ $user }};
+
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT REFERENCES ON TABLES TO {{ $user }};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {{ $user }};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {{ $user }};
+    {{ end }}
+
+    {{ with secret "secret/postgres/exporter" }}
+        {{ $exporter := .Data.data.EXPORTER_USER }}
+        GRANT CONNECT ON DATABASE {{ $db }} TO {{ $exporter }};
+        GRANT USAGE ON SCHEMA public TO {{ $exporter }};
+        GRANT SELECT ON pg_stat_database TO {{ $exporter }};
+        GRANT SELECT ON pg_stat_user_tables TO {{ $exporter }};
+        GRANT SELECT ON pg_stat_activity TO {{ $exporter }};
+        GRANT SELECT ON pg_stat_bgwriter TO {{ $exporter }};
+        GRANT EXECUTE ON FUNCTION pg_catalog.pg_ls_waldir() TO {{ $exporter }};
+    {{ end }}
+{{ end }}

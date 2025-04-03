@@ -1,0 +1,8 @@
+{{ with secret "secret/data/postgres/admin" }}
+POSTGRES_DB={{ .Data.data.POSTGRES_DB }}
+{{ end }}
+
+{{ with secret "secret/postgres/exporter" }}
+EXPORTER_USER={{ .Data.data.EXPORTER_USER }}
+EXPORTER_PASSWORD={{ .Data.data.EXPORTER_PASSWORD }}
+{{ end }}
