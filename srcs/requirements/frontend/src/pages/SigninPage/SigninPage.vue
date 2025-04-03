@@ -65,7 +65,7 @@ const showErrorModal = inject('showErrorModal');
 
 const isLoadingIntraAuthPage = ref(false);
 
-const { setErrors, handleSubmit } = useForm({
+const { handleSubmit } = useForm({
   validationSchema: signinSchema(t, { strictPassword: false }),
 });
 
@@ -74,19 +74,7 @@ const { mutate: getOtp, isLoading: isFetchingOtp } = useMutation({
   options: {
     onSuccess: () => router.push('/otp'),
     onError: (error) => {
-      if (error.status === 400) {
-        const serverValidationErrors = parseValidationErrors(error.response?.data) || {};
-
-        if (serverValidationErrors && isPlainObject(serverValidationErrors)) {
-          // noinspection JSCheckFunctionSignatures
-          setErrors(serverValidationErrors);
-        } else {
-          showErrorModal(error.status, tryParseAnyError(error));
-        }
-      } else {
-        showErrorModal(error.status, tryParseAnyError(error));
-      }
-
+      showErrorModal(error.status, tryParseAnyError(error));
       sessionStorage.removeItem(EMAIL_STORAGE_KEY);
     },
   },

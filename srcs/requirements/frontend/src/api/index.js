@@ -31,7 +31,9 @@ let refreshPromise = null;
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true;
+
       if (!isRefreshing) {
         isRefreshing = true;
         refreshPromise = axios
