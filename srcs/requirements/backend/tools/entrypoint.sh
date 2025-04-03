@@ -25,4 +25,8 @@ pipenv run python manage.py migrate --noinput || {
 }
 echo "✓ Migrations are successfully applied!"
 
+echo "Collecting static files..."
+pipenv run python manage.py collectstatic --noinput
+echo "✓ Static files collected!"
+
 exec "$@"
