@@ -83,6 +83,7 @@ template {
 RESEND_API_KEY={{ .Data.data.RESEND_API_KEY }}
 CLIENT_ID={{ .Data.data.CLIENT_ID }}
 CLIENT_SECRET={{ .Data.data.CLIENT_SECRET }}
+SECRET_KEY={{ .Data.data.SECRET_KEY }}
 {{ end }}
 EOF
 }

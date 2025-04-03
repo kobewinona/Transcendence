@@ -40,11 +40,21 @@ USE_I18N = True
 USE_TZ = True
 
 # -----------------------------------------------
+# 🔑 CREDENTIAL FROM VAULT
+# -----------------------------------------------
+
+BACKEND_ENV_PATH = "/usr/src/app/vault/secrets/backend/.env.key"
+POSTGRES_ENV_PATH = "/usr/src/app/vault/secrets/postgres/.env.db"
+
+secrets_backend = load_env_file(BACKEND_ENV_PATH)
+secrets_postgres = load_env_file(POSTGRES_ENV_PATH)
+
+# -----------------------------------------------
 # 🔒 SECURITY SETTINGS
 # -----------------------------------------------
 
 # Secret Key (⚠️ Should be set in a secure way in production)
-SECRET_KEY = "django-insecure-k1!svx5pna71t3&y#w!9iie&5p2)7)0acb9%@k788a@2y=9r54"
+SECRET_KEY = secrets_backend.get("SECRET_KEY")
 
 # Debug mode (ON in development, OFF in production)
 DEBUG = APP_ENV_MODE == "development"
@@ -186,15 +196,6 @@ TEMPLATES = [
 ASGI_APPLICATION = "project.asgi.application"
 WSGI_APPLICATION = "project.wsgi.application"
 
-# -----------------------------------------------
-# 🔑 CREDENTIAL FROM VAULT
-# -----------------------------------------------
-
-BACKEND_ENV_PATH = "/usr/src/app/vault/secrets/backend/.env.key"
-POSTGRES_ENV_PATH = "/usr/src/app/vault/secrets/postgres/.env.db"
-
-secrets_backend = load_env_file(BACKEND_ENV_PATH)
-secrets_postgres = load_env_file(POSTGRES_ENV_PATH)
 
 # -----------------------------------------------
 # 🛢️ DATABASE CONFIGURATION

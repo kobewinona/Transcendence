@@ -63,6 +63,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      vault-agent:
+        condition: service_healthy
     volumes:
       - vault_backend_env:/usr/src/app/vault/secrets/backend
       - vault_postgre_backend:/usr/src/app/vault/secrets/postgres

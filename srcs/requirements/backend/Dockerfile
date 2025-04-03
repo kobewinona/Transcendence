@@ -32,7 +32,6 @@ COPY . .
 
 # STATIC FILES CONFIGURATION
 RUN mkdir -p /usr/src/app/staticfiles
-RUN pipenv run python manage.py collectstatic --noinput
 
 # SET EXECUTION PERMISSIONS FOR ENTRYPOINT
 RUN chmod +x /usr/src/app/tools/entrypoint.sh
