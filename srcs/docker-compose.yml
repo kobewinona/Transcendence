@@ -16,6 +16,11 @@ services:
       - ft_transcendence
     volumes:
       - vault_certs:/etc/apache2/ssl
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/server-status?auto"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: custom-postgresql
@@ -174,7 +179,8 @@ services:
       - vault_backend_env:/vault/backend
       - vault_grafana_env:/vault/grafana
     depends_on:
-      - vault
+      vault:
+        condition: service_healthy
     expose:
       - "8201"
     networks:
@@ -204,7 +210,8 @@ services:
       - grafana_data:/var/lib/grafana
       - vault_grafana_env:/vault/grafana:ro
     depends_on:
-      - vault-agent
+      vault-agent:
+        condition: service_healthy
     networks:
       - ft_transcendence
       - monitoring_network
@@ -251,10 +258,13 @@ services:
     expose:
       - "9117"
     command:
-      - --scrape_uri=http://apache:80/server-status?auto
+      - --scrape_uri=http://apache:8080/server-status?auto
     networks:
       - monitoring_network
       - ft_transcendence
+    depends_on:
+      apache:
+        condition: service_healthy
 
 networks:
   vault_network:

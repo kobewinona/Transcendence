@@ -4,6 +4,9 @@ FROM nginx:alpine-slim
 # Set metadata for the image (authors)
 LABEL org.opencontainers.image.authors="Dima, Wolf, Jeremy"
 
+# For healthcheck in docker compose
+RUN apk add --no-cache curl
+
 # Ensure necessary directories exist and set proper permissions for the nginx user
 RUN mkdir -p /tmp && chown -R nginx:nginx /tmp /var/cache/nginx /var/log/nginx
 

@@ -206,9 +206,6 @@ DATABASES = {
         "NAME": secrets_postgres.get("POSTGRES_DB"),
         "USER": secrets_postgres.get("POSTGRES_USER"),
         "PASSWORD": secrets_postgres.get("POSTGRES_PASSWORD"),
-        # "NAME": os.getenv("POSTGRES_DB"),
-        # "USER": os.getenv("POSTGRES_USER"),
-        # "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": "postgres",
         "PORT": "5432",
     }

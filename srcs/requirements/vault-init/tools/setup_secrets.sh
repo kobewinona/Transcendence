@@ -85,10 +85,14 @@ if [ ! -d "$SSL_DIR" ]; then
   exit 1
 fi
 
-if ! vault secrets list | grep -q "^secret/"; then
-    vault secrets enable -path=secret kv-v2
+current_type=$(vault secrets list -format=json | jq -r '."secret/".options.version')
+
+if [ "$current_type" != "2" ]; then
+  echo "⚠️ Vault 'secret/' mount is not kv-v2. Reconfiguring..."
+  vault secrets disable secret/
+  vault secrets enable -path=secret kv-v2
 else
-    echo "ℹ️ Secrets engine 'kv' already enabled."
+  echo "ℹ️ Secrets engine 'secret/' is already kv-v2"
 fi
 
 for cert_file in "$SSL_DIR"/*; do

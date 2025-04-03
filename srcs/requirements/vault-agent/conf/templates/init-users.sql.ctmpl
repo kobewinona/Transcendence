@@ -12,10 +12,13 @@ CREATE USER {{ .Data.data.EXPORTER_USER }} WITH PASSWORD '{{ .Data.data.EXPORTER
         {{ $user := .Data.data.BACKEND_USER}}
         GRANT CONNECT ON DATABASE {{ $db }} TO {{ $user }};
         GRANT USAGE ON SCHEMA public TO {{ $user }};
-        GRANT CREATE ON SCHEMA public TO {{ $user }};
+
         GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {{ $user }};
         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO {{ $user }};
+        GRANT CREATE ON SCHEMA public TO {{ $user }};
+        GRANT REFERENCES ON ALL TABLES IN SCHEMA public TO {{ $user }};
 
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT REFERENCES ON TABLES TO {{ $user }};
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {{ $user }};
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {{ $user }};
     {{ end }}
