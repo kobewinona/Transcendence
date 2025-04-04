@@ -139,7 +139,7 @@ class SignIn(APIView):
 
         response.set_cookie(
             key="refresh_token",
-            value=refresh_token,
+            value=str(refresh),
             httponly=True,
             secure=True,
             max_age=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds(),

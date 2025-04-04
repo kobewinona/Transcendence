@@ -238,7 +238,7 @@ watch(
   row-gap: var(--smaller-space);
 
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   height: 100%;
   margin: 0 auto;
 }
@@ -250,7 +250,7 @@ watch(
   row-gap: var(--smaller-space);
 
   width: 100%;
-  max-width: 300px;
+  max-width: 400px;
   margin: 0 auto;
 
   border-radius: 12px;

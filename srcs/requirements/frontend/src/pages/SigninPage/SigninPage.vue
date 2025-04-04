@@ -49,10 +49,9 @@ import { MyButton, MyInput } from 'components';
 import { AUTH_NAMES } from 'config/AuthForm/constants.js';
 import { EMAIL_STORAGE_KEY } from 'config/constants.js';
 import { AuthLayout, MainBodyLayout } from 'layouts';
-import { isPlainObject } from 'lodash';
 import api from 'shared/api/Auth';
 import { useMutation } from 'shared/composables';
-import { parseValidationErrors, tryParseAnyError } from 'shared/lib';
+import { tryParseAnyError } from 'shared/lib';
 import { signinSchema } from 'shared/validation';
 import { useForm } from 'vee-validate';
 import { inject, ref } from 'vue';
@@ -124,31 +123,5 @@ const handleIntraSignClick = () => {
   font-size: 0.85rem;
   color: var(--light-color-opacity-90);
   text-align: center;
-}
-
-.signin-form__intra-link {
-  display: flex;
-  flex-direction: row;
-  column-gap: var(--small-space);
-  align-items: center;
-  justify-content: center;
-
-  height: 44px;
-  padding: var(--smaller-space);
-
-  color: var(--dark-color);
-
-  background-color: var(--light-color);
-  border-radius: 12px;
-}
-
-.signin-form__intra-link:hover {
-  filter: brightness(85%);
-  transition: filter 0.2s ease-in-out;
-}
-
-.signin-form__intra-logo {
-  width: 20px;
-  height: 20px;
 }
 </style>
