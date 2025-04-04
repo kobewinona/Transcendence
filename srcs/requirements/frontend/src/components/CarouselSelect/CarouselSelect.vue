@@ -12,7 +12,7 @@
         <template v-if="slots.renderOption">
           <slot name="renderOption" :option="activeOption" />
         </template>
-        <span v-else>
+        <span v-else class="carousel-select__item-text">
           {{ t(activeOption?.label || '') }}
         </span>
       </div>
@@ -129,6 +129,10 @@ watch(
   justify-content: center;
 
   width: 100%;
+}
+
+.carousel-select__item-text {
+  text-align: center;
 }
 
 .carousel-select__arrow {

@@ -33,8 +33,8 @@ const { fields } = defineProps({
 }
 
 .settings-section__list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   row-gap: var(--smaller-space);
 
   padding: 0;
@@ -43,16 +43,7 @@ const { fields } = defineProps({
 }
 
 .settings-section__list-item {
-  display: flex;
-  flex-direction: row;
-  column-gap: var(--regular-space);
-  align-items: center;
-  justify-content: space-between;
-
+  display: contents;
   width: 100%;
-}
-
-::v-deep(.settings-section__option) {
-  width: 120px;
 }
 </style>

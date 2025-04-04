@@ -31,6 +31,7 @@
         </button>
         <MyButton
           class-name="controller__complementary-button"
+          icon-class-name="controller__complementary-button-icon"
           type="button"
           variant="ghost"
           :icon="svgComponents['DeclineIcon']"
@@ -39,6 +40,7 @@
         />
         <MyButton
           class-name="controller__complementary-button"
+          icon-class-name="controller__complementary-button-icon"
           type="button"
           variant="ghost"
           disabled
@@ -244,6 +246,11 @@ const removeController = () => {
 }
 
 ::v-deep(.controller__side-button-icon) {
+  width: 24px;
+  height: 24px;
+}
+
+::v-deep(.controller__complementary-button-icon) {
   width: 24px;
   height: 24px;
 }

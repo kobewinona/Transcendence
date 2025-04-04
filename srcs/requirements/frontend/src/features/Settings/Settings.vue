@@ -73,8 +73,8 @@ const options = computed(() => LANG_OPTIONS(t));
 }
 
 .settings__item {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   column-gap: var(--big-space);
   align-items: center;
   justify-content: space-between;
@@ -101,7 +101,13 @@ const options = computed(() => LANG_OPTIONS(t));
 }
 
 .settings__item-lang-option-text {
+  overflow: hidden;
+
+  width: 100%;
+
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .select {

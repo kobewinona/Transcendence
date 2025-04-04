@@ -3,7 +3,6 @@
   <CarouselSelect
     :name="name"
     :value="value"
-    option-class-name="settings-section__option"
     :options="options"
     @on-change="handleChange"
   />

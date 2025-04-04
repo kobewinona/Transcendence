@@ -230,9 +230,11 @@ button:disabled .icon {
 }
 
 .button__icon {
-  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 44px;
   height: 100%;
   margin-right: var(--smaller-space);
+
   fill: currentcolor;
 }
 
